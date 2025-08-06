@@ -1,0 +1,68 @@
+@model IEnumerable<LibraryApp.Models.Project>
+
+@{
+    ViewData["Title"] = "Projects";
+}
+
+<h1>Projects</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New Project</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Student)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Supervisor)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Status)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SubmissionDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DefenseDate)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Title)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Student.FirstName) @Html.DisplayFor(modelItem => item.Student.LastName)
+                <br /><small class="text-muted">@Html.DisplayFor(modelItem => item.Student.StudentNumber)</small>
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Supervisor.Title) @Html.DisplayFor(modelItem => item.Supervisor.FirstName) @Html.DisplayFor(modelItem => item.Supervisor.LastName)
+            </td>
+            <td>
+                <span class="badge badge-@(item.Status == ProjectStatus.Completed ? "success" : item.Status == ProjectStatus.InProgress ? "primary" : item.Status == ProjectStatus.Approved ? "info" : "secondary")">
+                    @Html.DisplayFor(modelItem => item.Status)
+                </span>
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SubmissionDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DefenseDate)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

@@ -1,0 +1,89 @@
+@model LibraryApp.Models.Supervisor
+
+@{
+    ViewData["Title"] = "Supervisor Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Supervisor</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Title)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Title)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.FirstName)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.FirstName)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LastName)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.LastName)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Email)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Email)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Phone)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Phone)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Department)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Department.Name)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Specialization)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Specialization)
+        </dd>
+    </dl>
+</div>
+
+@if (Model.Projects.Any())
+{
+    <div class="mt-4">
+        <h5>Supervised Projects</h5>
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Student</th>
+                    <th>Status</th>
+                    <th>Submission Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var project in Model.Projects)
+                {
+                    <tr>
+                        <td>@project.Title</td>
+                        <td>@project.Student.FirstName @project.Student.LastName</td>
+                        <td>@project.Status</td>
+                        <td>@project.SubmissionDate.ToShortDateString()</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
