@@ -1,0 +1,135 @@
+@model LibraryApp.Models.Project
+
+@{
+    ViewData["Title"] = "Project Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Project</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Title)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Title)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Abstract)
+        </dt>
+        <dd class="col-sm-10">
+            @if (!string.IsNullOrEmpty(Model.Abstract))
+            {
+                <p>@Html.DisplayFor(model => model.Abstract)</p>
+            }
+            else
+            {
+                <em>No abstract provided</em>
+            }
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Keywords)
+        </dt>
+        <dd class="col-sm-10">
+            @if (!string.IsNullOrEmpty(Model.Keywords))
+            {
+                @Html.DisplayFor(model => model.Keywords)
+            }
+            else
+            {
+                <em>No keywords provided</em>
+            }
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Status)
+        </dt>
+        <dd class="col-sm-10">
+            <span class="badge badge-@(Model.Status == LibraryApp.Models.ProjectStatus.Completed ? "success" : 
+                                      Model.Status == LibraryApp.Models.ProjectStatus.InProgress ? "primary" : 
+                                      Model.Status == LibraryApp.Models.ProjectStatus.Approved ? "info" : 
+                                      Model.Status == LibraryApp.Models.ProjectStatus.Defended ? "success" :
+                                      Model.Status == LibraryApp.Models.ProjectStatus.Published ? "success" : "secondary")">
+                @Html.DisplayFor(model => model.Status)
+            </span>
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Student)
+        </dt>
+        <dd class="col-sm-10">
+            <strong>@Html.DisplayFor(model => model.Student.FirstName) @Html.DisplayFor(model => model.Student.LastName)</strong><br />
+            <small class="text-muted">
+                Student Number: @Html.DisplayFor(model => model.Student.StudentNumber)<br />
+                Email: <a href="mailto:@Model.Student.Email">@Html.DisplayFor(model => model.Student.Email)</a><br />
+                Department: @Html.DisplayFor(model => model.Student.Department.Name)
+            </small>
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Supervisor)
+        </dt>
+        <dd class="col-sm-10">
+            <strong>@Html.DisplayFor(model => model.Supervisor.Title) @Html.DisplayFor(model => model.Supervisor.FirstName) @Html.DisplayFor(model => model.Supervisor.LastName)</strong><br />
+            <small class="text-muted">
+                Email: <a href="mailto:@Model.Supervisor.Email">@Html.DisplayFor(model => model.Supervisor.Email)</a><br />
+                Department: @Html.DisplayFor(model => model.Supervisor.Department.Name)<br />
+                @if (!string.IsNullOrEmpty(Model.Supervisor.Specialization))
+                {
+                    <span>Specialization: @Html.DisplayFor(model => model.Supervisor.Specialization)</span>
+                }
+            </small>
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.SubmissionDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.SubmissionDate)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.DefenseDate)
+        </dt>
+        <dd class="col-sm-10">
+            @if (Model.DefenseDate.HasValue)
+            {
+                @Html.DisplayFor(model => model.DefenseDate)
+            }
+            else
+            {
+                <em>Not scheduled</em>
+            }
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Grade)
+        </dt>
+        <dd class="col-sm-10">
+            @if (!string.IsNullOrEmpty(Model.Grade))
+            {
+                @Html.DisplayFor(model => model.Grade)
+            }
+            else
+            {
+                <em>Not graded</em>
+            }
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.DocumentPath)
+        </dt>
+        <dd class="col-sm-10">
+            @if (!string.IsNullOrEmpty(Model.DocumentPath))
+            {
+                <a href="@Model.DocumentPath" class="btn btn-sm btn-outline-primary" target="_blank">
+                    <i class="fas fa-file-pdf"></i> View Document
+                </a>
+            }
+            else
+            {
+                <em>No document uploaded</em>
+            }
+        </dd>
+    </dl>
+</div>
+
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
