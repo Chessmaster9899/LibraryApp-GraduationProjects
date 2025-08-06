@@ -1,8 +1,231 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model LibraryApp.Models.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-4">@Model.UniversitySettings.Name @Model.UniversitySettings.ApplicationTitle</h1>
+        <p class="lead">@Model.UniversitySettings.TagLine</p>
+    </div>
 </div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card bg-primary text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">@Model.TotalProjects</h4>
+                        <p class="card-text">Total Projects</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-project-diagram fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a asp-controller="Projects" asp-action="Index" class="text-white">
+                    <small>View all projects <i class="fas fa-arrow-right"></i></small>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card bg-success text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">@Model.TotalStudents</h4>
+                        <p class="card-text">Students</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-user-graduate fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a asp-controller="Students" asp-action="Index" class="text-white">
+                    <small>View all students <i class="fas fa-arrow-right"></i></small>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card bg-info text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">@Model.TotalSupervisors</h4>
+                        <p class="card-text">Supervisors</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-chalkboard-teacher fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a asp-controller="Supervisors" asp-action="Index" class="text-white">
+                    <small>View all supervisors <i class="fas fa-arrow-right"></i></small>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card bg-warning text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">@Model.TotalDepartments</h4>
+                        <p class="card-text">Departments</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-building fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <small class="text-white">Academic departments</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Project Status Overview -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Projects by Status</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.ProjectsByStatus.Any())
+                {
+                    <div class="row">
+                        @foreach (var statusGroup in Model.ProjectsByStatus)
+                        {
+                            var badgeClass = statusGroup.Status switch
+                            {
+                                LibraryApp.Models.ProjectStatus.Completed => "success",
+                                LibraryApp.Models.ProjectStatus.Defended => "success",
+                                LibraryApp.Models.ProjectStatus.Published => "success",
+                                LibraryApp.Models.ProjectStatus.InProgress => "primary",
+                                LibraryApp.Models.ProjectStatus.Approved => "info",
+                                _ => "secondary"
+                            };
+                            
+                            <div class="col-sm-6 mb-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge badge-@badgeClass">@statusGroup.Status</span>
+                                    <strong>@statusGroup.Count</strong>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No projects found.</p>
+                }
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12 mb-2">
+                        <a asp-controller="Projects" asp-action="Create" class="btn btn-primary btn-block">
+                            <i class="fas fa-plus"></i> Add New Project
+                        </a>
+                    </div>
+                    <div class="col-12 mb-2">
+                        <a asp-controller="Students" asp-action="Create" class="btn btn-success btn-block">
+                            <i class="fas fa-user-plus"></i> Add New Student
+                        </a>
+                    </div>
+                    <div class="col-12 mb-2">
+                        <a asp-controller="Supervisors" asp-action="Create" class="btn btn-info btn-block">
+                            <i class="fas fa-user-tie"></i> Add New Supervisor
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Projects -->
+@if (Model.RecentProjects.Any())
+{
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Recent Projects</h5>
+                    <a asp-controller="Projects" asp-action="Index" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Student</th>
+                                    <th>Supervisor</th>
+                                    <th>Status</th>
+                                    <th>Submission Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var project in Model.RecentProjects)
+                                {
+                                    <tr>
+                                        <td>
+                                            <strong>@project.Title</strong>
+                                            @if (!string.IsNullOrEmpty(project.Keywords))
+                                            {
+                                                <br><small class="text-muted">@project.Keywords</small>
+                                            }
+                                        </td>
+                                        <td>
+                                            @project.Student.FirstName @project.Student.LastName
+                                            <br><small class="text-muted">@project.Student.StudentNumber</small>
+                                        </td>
+                                        <td>
+                                            @project.Supervisor.Title @project.Supervisor.FirstName @project.Supervisor.LastName
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-@(project.Status == LibraryApp.Models.ProjectStatus.Completed ? "success" : 
+                                                                      project.Status == LibraryApp.Models.ProjectStatus.InProgress ? "primary" : 
+                                                                      project.Status == LibraryApp.Models.ProjectStatus.Approved ? "info" : 
+                                                                      project.Status == LibraryApp.Models.ProjectStatus.Defended ? "success" :
+                                                                      project.Status == LibraryApp.Models.ProjectStatus.Published ? "success" : "secondary")">
+                                                @project.Status
+                                            </span>
+                                        </td>
+                                        <td>@project.SubmissionDate.ToShortDateString()</td>
+                                        <td>
+                                            <a asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id" 
+                                               class="btn btn-sm btn-outline-info">Details</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

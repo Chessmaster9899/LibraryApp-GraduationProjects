@@ -4,65 +4,174 @@
     ViewData["Title"] = "Projects";
 }
 
-<h1>Projects</h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Projects</h1>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Create New Project
+    </a>
+</div>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Create New Project</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Student)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Supervisor)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Status)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.SubmissionDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DefenseDate)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Student.FirstName) @Html.DisplayFor(modelItem => item.Student.LastName)
-                <br /><small class="text-muted">@Html.DisplayFor(modelItem => item.Student.StudentNumber)</small>
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Supervisor.Title) @Html.DisplayFor(modelItem => item.Supervisor.FirstName) @Html.DisplayFor(modelItem => item.Supervisor.LastName)
-            </td>
-            <td>
-                <span class="badge badge-@(item.Status == ProjectStatus.Completed ? "success" : item.Status == ProjectStatus.InProgress ? "primary" : item.Status == ProjectStatus.Approved ? "info" : "secondary")">
-                    @Html.DisplayFor(modelItem => item.Status)
-                </span>
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.SubmissionDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DefenseDate)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Delete</a>
-            </td>
-        </tr>
+<!-- Search and Filter Section -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="searchTitle">Search by Title</label>
+                        <input type="text" class="form-control" id="searchTitle" name="searchTitle" 
+                               placeholder="Enter project title..." value="@ViewData["SearchTitle"]">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="statusFilter">Filter by Status</label>
+                        <select class="form-control" id="statusFilter" name="statusFilter">
+                            <option value="">All Statuses</option>
+                            @foreach (var status in Enum.GetValues<LibraryApp.Models.ProjectStatus>())
+                            {
+                                <option value="@status" selected="@(ViewData["StatusFilter"]?.ToString() == status.ToString())">
+                                    @status
+                                </option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="supervisorFilter">Filter by Supervisor</label>
+                        <select class="form-control" id="supervisorFilter" name="supervisorFilter">
+                            <option value="">All Supervisors</option>
+                            @if (ViewData["Supervisors"] is IEnumerable<dynamic> supervisors)
+                            {
+                                @foreach (var supervisor in supervisors)
+                                {
+                                    <option value="@supervisor.Id" selected="@(ViewData["SupervisorFilter"]?.ToString() == supervisor.Id.ToString())">
+                                        @supervisor.DisplayText
+                                    </option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <div>
+                            <button type="submit" class="btn btn-outline-primary btn-block">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model.Any())
+{
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Title)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Student)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Supervisor)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Status)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.SubmissionDate)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.DefenseDate)
+                            </th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model) {
+                            <tr>
+                                <td>
+                                    <strong>@Html.DisplayFor(modelItem => item.Title)</strong>
+                                    @if (!string.IsNullOrEmpty(item.Keywords))
+                                    {
+                                        <br><small class="text-muted">@item.Keywords</small>
+                                    }
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Student.FirstName) @Html.DisplayFor(modelItem => item.Student.LastName)
+                                    <br /><small class="text-muted">@Html.DisplayFor(modelItem => item.Student.StudentNumber)</small>
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Supervisor.Title) @Html.DisplayFor(modelItem => item.Supervisor.FirstName) @Html.DisplayFor(modelItem => item.Supervisor.LastName)
+                                    @if (!string.IsNullOrEmpty(item.Supervisor.Specialization))
+                                    {
+                                        <br><small class="text-muted">@item.Supervisor.Specialization</small>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge badge-@(item.Status == LibraryApp.Models.ProjectStatus.Completed ? "success" : 
+                                                              item.Status == LibraryApp.Models.ProjectStatus.InProgress ? "primary" : 
+                                                              item.Status == LibraryApp.Models.ProjectStatus.Approved ? "info" : 
+                                                              item.Status == LibraryApp.Models.ProjectStatus.Defended ? "success" :
+                                                              item.Status == LibraryApp.Models.ProjectStatus.Published ? "success" : "secondary")">
+                                        @Html.DisplayFor(modelItem => item.Status)
+                                    </span>
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.SubmissionDate)
+                                </td>
+                                <td>
+                                    @if (item.DefenseDate.HasValue)
+                                    {
+                                        @Html.DisplayFor(modelItem => item.DefenseDate)
+                                    }
+                                    else
+                                    {
+                                        <em class="text-muted">Not scheduled</em>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 }
-    </tbody>
-</table>
+else
+{
+    <div class="card">
+        <div class="card-body text-center">
+            <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+            <h4>No Projects Found</h4>
+            <p class="text-muted">Get started by creating your first graduation project.</p>
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create New Project
+            </a>
+        </div>
+    </div>
+}

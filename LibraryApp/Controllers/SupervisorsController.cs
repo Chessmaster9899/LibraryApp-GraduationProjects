@@ -3,14 +3,15 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using LibraryApp.Data;
 using LibraryApp.Models;
+using LibraryApp.Services;
 
 namespace LibraryApp.Controllers
 {
-    public class SupervisorsController : Controller
+    public class SupervisorsController : BaseController
     {
         private readonly LibraryContext _context;
 
-        public SupervisorsController(LibraryContext context)
+        public SupervisorsController(LibraryContext context, IUniversitySettingsService universitySettings) : base(universitySettings)
         {
             _context = context;
         }

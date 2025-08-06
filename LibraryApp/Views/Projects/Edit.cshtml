@@ -1,0 +1,114 @@
+@model LibraryApp.Models.Project
+
+@{
+    ViewData["Title"] = "Edit Project";
+}
+
+<h1>Edit</h1>
+
+<h4>Project</h4>
+<hr />
+<div class="row">
+    <div class="col-md-8">
+        <form asp-action="Edit" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            
+            <div class="form-group">
+                <label asp-for="Title" class="control-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="Abstract" class="control-label"></label>
+                <textarea asp-for="Abstract" class="form-control" rows="5" placeholder="Enter project abstract..."></textarea>
+                <span asp-validation-for="Abstract" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="Keywords" class="control-label"></label>
+                <input asp-for="Keywords" class="form-control" placeholder="Enter keywords separated by commas" />
+                <span asp-validation-for="Keywords" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="Status" class="control-label"></label>
+                <select asp-for="Status" class="form-control" asp-items="Html.GetEnumSelectList<LibraryApp.Models.ProjectStatus>()"></select>
+                <span asp-validation-for="Status" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="StudentId" class="control-label">Student</label>
+                <select asp-for="StudentId" class="form-control" asp-items="ViewBag.StudentId"></select>
+                <span asp-validation-for="StudentId" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="SupervisorId" class="control-label">Supervisor</label>
+                <select asp-for="SupervisorId" class="form-control" asp-items="ViewBag.SupervisorId"></select>
+                <span asp-validation-for="SupervisorId" class="text-danger"></span>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="SubmissionDate" class="control-label"></label>
+                        <input asp-for="SubmissionDate" class="form-control" type="date" />
+                        <span asp-validation-for="SubmissionDate" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="DefenseDate" class="control-label"></label>
+                        <input asp-for="DefenseDate" class="form-control" type="date" />
+                        <span asp-validation-for="DefenseDate" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="Grade" class="control-label"></label>
+                <input asp-for="Grade" class="form-control" placeholder="e.g., A, B+, 85%, etc." />
+                <span asp-validation-for="Grade" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label class="control-label">Current Document</label>
+                @if (!string.IsNullOrEmpty(Model.DocumentPath))
+                {
+                    <div class="alert alert-info">
+                        <i class="fas fa-file-pdf"></i>
+                        <a href="@Model.DocumentPath" target="_blank">View Current Document</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        No document currently uploaded
+                    </div>
+                }
+            </div>
+            
+            <div class="form-group">
+                <label for="documentFile" class="control-label">Upload New Document</label>
+                <input type="file" name="documentFile" class="form-control" accept=".pdf,.doc,.docx,.txt" />
+                <small class="form-text text-muted">Upload a new PDF, Word document, or text file (optional - leave empty to keep current document)</small>
+            </div>
+            
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
