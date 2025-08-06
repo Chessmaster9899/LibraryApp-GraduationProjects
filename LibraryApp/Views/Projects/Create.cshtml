@@ -10,7 +10,7 @@
 <hr />
 <div class="row">
     <div class="col-md-6">
-        <form asp-action="Create">
+        <form asp-action="Create" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Title" class="control-label"></label>
@@ -48,9 +48,9 @@
                 <span asp-validation-for="Grade" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="DocumentPath" class="control-label"></label>
-                <input asp-for="DocumentPath" class="form-control" placeholder="/documents/project.pdf" />
-                <span asp-validation-for="DocumentPath" class="text-danger"></span>
+                <label for="documentFile" class="control-label">Document File</label>
+                <input type="file" name="documentFile" class="form-control" accept=".pdf,.doc,.docx,.txt" />
+                <small class="form-text text-muted">Upload a PDF, Word document, or text file (optional)</small>
             </div>
             <div class="form-group">
                 <label asp-for="StudentId" class="control-label">Student</label>

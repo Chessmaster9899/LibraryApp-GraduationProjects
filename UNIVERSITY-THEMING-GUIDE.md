@@ -33,13 +33,16 @@ Edit `appsettings.json` in the LibraryApp directory:
 Place your files in `wwwroot/images/university/`:
 
 **Required Files:**
-- `logo.png` - University logo (recommended: 200x60px, PNG with transparent background)
-- `favicon.ico` - Browser favicon (16x16px or 32x32px)
+- `logo.png` or `logo.svg` - University logo (recommended: SVG for scalability or 200x60px PNG with transparent background)
+- `favicon.ico` or `favicon.svg` - Browser favicon (16x16px or 32x32px)
 
 **Optional Files:**
 - `hero-image.jpg` - Dashboard background image
 - `university-building.jpg` - University building photo
 - `seal.png` - University seal/emblem
+
+**📁 Default Fallbacks:**
+If your logo files are missing, the system automatically falls back to default placeholder logos located in `/images/defaults/`. This ensures the application always works even if university assets aren't available yet.
 
 ### 3. Restart the Application
 After making changes to `appsettings.json`, restart the application to see your changes.
@@ -222,6 +225,34 @@ Here's a complete configuration for "Greenfield University":
   }
 }
 ```
+
+## 📄 File Upload System
+
+### Project Document Management
+The application now includes a comprehensive file upload system for project documents:
+
+**Supported File Types:**
+- PDF documents (`.pdf`)
+- Microsoft Word documents (`.doc`, `.docx`)
+- Text files (`.txt`)
+
+**Features:**
+- ✅ **Secure Upload**: Files are automatically renamed with unique identifiers to prevent conflicts
+- ✅ **Storage Management**: Documents are stored in `/wwwroot/documents/` with proper organization
+- ✅ **Update Handling**: When editing projects, old files are automatically removed when new ones are uploaded
+- ✅ **Download Links**: Direct links to view/download documents from project details
+- ✅ **Fallback Display**: Shows "No document uploaded" message when no file is present
+
+**Usage:**
+1. **Creating Projects**: Use the file upload field in the "Create Project" form
+2. **Editing Projects**: Upload new documents or keep existing ones in the "Edit Project" form
+3. **Viewing Documents**: Click the "View Document" button in project details
+
+**Technical Details:**
+- Files are stored in: `/wwwroot/documents/`
+- Naming convention: `{GUID}_{original-filename}`
+- Maximum file size: Controlled by ASP.NET Core settings
+- Direct web access via: `/documents/{filename}`
 
 ## 🔧 Troubleshooting
 

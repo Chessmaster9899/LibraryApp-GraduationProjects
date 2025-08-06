@@ -10,7 +10,7 @@
 <hr />
 <div class="row">
     <div class="col-md-8">
-        <form asp-action="Edit">
+        <form asp-action="Edit" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
             
@@ -74,10 +74,27 @@
             </div>
             
             <div class="form-group">
-                <label asp-for="DocumentPath" class="control-label"></label>
-                <input asp-for="DocumentPath" class="form-control" placeholder="Enter document URL or file path" />
-                <span asp-validation-for="DocumentPath" class="text-danger"></span>
-                <small class="form-text text-muted">Enter a URL or file path to the project document</small>
+                <label class="control-label">Current Document</label>
+                @if (!string.IsNullOrEmpty(Model.DocumentPath))
+                {
+                    <div class="alert alert-info">
+                        <i class="fas fa-file-pdf"></i>
+                        <a href="@Model.DocumentPath" target="_blank">View Current Document</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        No document currently uploaded
+                    </div>
+                }
+            </div>
+            
+            <div class="form-group">
+                <label for="documentFile" class="control-label">Upload New Document</label>
+                <input type="file" name="documentFile" class="form-control" accept=".pdf,.doc,.docx,.txt" />
+                <small class="form-text text-muted">Upload a new PDF, Word document, or text file (optional - leave empty to keep current document)</small>
             </div>
             
             <div class="form-group">

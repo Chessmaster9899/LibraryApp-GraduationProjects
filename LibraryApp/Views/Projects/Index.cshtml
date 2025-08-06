@@ -42,7 +42,15 @@
                         <label for="supervisorFilter">Filter by Supervisor</label>
                         <select class="form-control" id="supervisorFilter" name="supervisorFilter">
                             <option value="">All Supervisors</option>
-                            <!-- This would be populated by the controller -->
+                            @if (ViewData["Supervisors"] is IEnumerable<dynamic> supervisors)
+                            {
+                                @foreach (var supervisor in supervisors)
+                                {
+                                    <option value="@supervisor.Id" selected="@(ViewData["SupervisorFilter"]?.ToString() == supervisor.Id.ToString())">
+                                        @supervisor.DisplayText
+                                    </option>
+                                }
+                            }
                         </select>
                     </div>
                 </div>

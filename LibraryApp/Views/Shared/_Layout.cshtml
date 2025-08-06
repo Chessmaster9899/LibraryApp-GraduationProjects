@@ -51,6 +51,41 @@
             height: 40px;
             margin-right: 10px;
         }
+        
+        /* Mobile optimizations */
+        @@media (max-width: 768px) {
+            .navbar-brand span {
+                font-size: 0.9rem;
+            }
+            
+            .navbar-brand-logo {
+                height: 35px;
+            }
+            
+            .table-responsive {
+                font-size: 0.85rem;
+            }
+            
+            .btn-group .btn {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.8rem;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+        }
+        
+        @@media (max-width: 576px) {
+            .navbar-brand-logo {
+                height: 30px;
+                margin-right: 5px;
+            }
+            
+            .navbar-brand span {
+                font-size: 0.8rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -58,7 +93,8 @@
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
-                    <img src="@ViewBag.UniversitySettings.LogoPath" alt="@ViewBag.UniversitySettings.Name Logo" class="navbar-brand-logo" onerror="this.style.display='none'" />
+                    <img id="universityLogo" src="@ViewBag.UniversitySettings.LogoPath" alt="@ViewBag.UniversitySettings.Name Logo" class="navbar-brand-logo" 
+                         onerror="this.src='/images/defaults/logo.svg'" />
                     <span>@ViewBag.UniversitySettings.ShortName @ViewBag.UniversitySettings.ApplicationTitle</span>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
