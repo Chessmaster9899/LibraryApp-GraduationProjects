@@ -16,12 +16,39 @@ namespace LibraryApp.Controllers
         }
 
         // GET: Projects
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchTitle, string statusFilter, string supervisorFilter)
         {
-            var projects = _context.Projects
+            var projectsQuery = _context.Projects
                 .Include(p => p.Student)
-                .Include(p => p.Supervisor);
-            return View(await projects.ToListAsync());
+                .Include(p => p.Supervisor)
+                .AsQueryable();
+
+            // Apply search filters
+            if (!string.IsNullOrEmpty(searchTitle))
+            {
+                projectsQuery = projectsQuery.Where(p => p.Title.Contains(searchTitle) || 
+                                                   p.Abstract.Contains(searchTitle) ||
+                                                   p.Keywords.Contains(searchTitle));
+                ViewData["SearchTitle"] = searchTitle;
+            }
+
+            if (!string.IsNullOrEmpty(statusFilter) && Enum.TryParse<ProjectStatus>(statusFilter, out var status))
+            {
+                projectsQuery = projectsQuery.Where(p => p.Status == status);
+                ViewData["StatusFilter"] = statusFilter;
+            }
+
+            if (!string.IsNullOrEmpty(supervisorFilter) && int.TryParse(supervisorFilter, out var supervisorId))
+            {
+                projectsQuery = projectsQuery.Where(p => p.SupervisorId == supervisorId);
+                ViewData["SupervisorFilter"] = supervisorFilter;
+            }
+
+            var projects = await projectsQuery
+                .OrderByDescending(p => p.SubmissionDate)
+                .ToListAsync();
+
+            return View(projects);
         }
 
         // GET: Projects/Details/5
