@@ -9,6 +9,7 @@ public class DashboardViewModel
     
     public List<ProjectStatusSummary> ProjectsByStatus { get; set; } = new List<ProjectStatusSummary>();
     public List<Project> RecentProjects { get; set; } = new List<Project>();
+    public UniversitySettings UniversitySettings { get; set; } = new UniversitySettings();
 }
 
 public class ProjectStatusSummary

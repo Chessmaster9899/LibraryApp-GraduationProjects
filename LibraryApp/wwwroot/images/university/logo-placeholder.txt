@@ -1,0 +1,11 @@
+# Sample University Logo
+
+This is a placeholder for your university logo. Replace this file with your actual university logo.
+
+## Requirements:
+- Format: PNG (recommended for transparency)
+- Size: Approximately 200x60px for best navbar display
+- Background: Transparent preferred
+- File name: logo.png
+
+Place your university logo here and it will automatically appear in the navigation bar.

@@ -3,14 +3,15 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using LibraryApp.Data;
 using LibraryApp.Models;
+using LibraryApp.Services;
 
 namespace LibraryApp.Controllers
 {
-    public class ProjectsController : Controller
+    public class ProjectsController : BaseController
     {
         private readonly LibraryContext _context;
 
-        public ProjectsController(LibraryContext context)
+        public ProjectsController(LibraryContext context, IUniversitySettingsService universitySettings) : base(universitySettings)
         {
             _context = context;
         }

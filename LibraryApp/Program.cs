@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using LibraryApp.Data;
+using LibraryApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,9 @@ builder.Services.AddControllersWithViews();
 // Add Entity Framework
 builder.Services.AddDbContext<LibraryContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Add University Settings Service
+builder.Services.AddScoped<IUniversitySettingsService, UniversitySettingsService>();
 
 var app = builder.Build();
 

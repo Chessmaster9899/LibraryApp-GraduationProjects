@@ -3,15 +3,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using LibraryApp.Models;
 using LibraryApp.Data;
+using LibraryApp.Services;
 
 namespace LibraryApp.Controllers;
 
-public class HomeController : Controller
+public class HomeController : BaseController
 {
     private readonly ILogger<HomeController> _logger;
     private readonly LibraryContext _context;
 
-    public HomeController(ILogger<HomeController> logger, LibraryContext context)
+    public HomeController(ILogger<HomeController> logger, LibraryContext context, IUniversitySettingsService universitySettings) : base(universitySettings)
     {
         _logger = logger;
         _context = context;
@@ -40,7 +41,8 @@ public class HomeController : Controller
                 .Include(p => p.Supervisor)
                 .OrderByDescending(p => p.SubmissionDate)
                 .Take(5)
-                .ToListAsync()
+                .ToListAsync(),
+                UniversitySettings = _universitySettings.GetSettings()
         };
 
         return View(dashboardData);
