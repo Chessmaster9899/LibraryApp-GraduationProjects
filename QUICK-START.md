@@ -62,11 +62,20 @@ Once running, access the application at:
 
 ## 🎯 What You'll See
 
-The application comes pre-loaded with sample data:
+The application comes pre-loaded with sample data and enhanced features:
 - **1 Sample Project**: AI-Based Student Performance Prediction System
 - **1 Sample Student**: John Smith
 - **3 Sample Supervisors**: Dr. Sarah Johnson, Prof. Michael Brown, Dr. Emily Davis
 - **Ready-to-use Features**: File upload, search, CRUD operations
+- **Role-based Authentication**: Secure login with personalized dashboards
+- **Enhanced Navigation**: User dropdown with sign-out functionality
+- **Complete Dashboard System**: Different interfaces for Students, Professors, and Admins
+
+### Test the Authentication System
+- **Student Login**: Use student ID and default password (first 2 letters of name + last 4 digits of ID)
+- **Professor Login**: Use professor ID and default password
+- **Admin Access**: Contact system administrator for credentials
+- **Sign-Out**: Available from the user dropdown on any page
 
 ## 🎨 Customize for Your University
 
@@ -146,9 +155,9 @@ dotnet run --urls="https://localhost:7106;http://localhost:5106"
 
 **Database Issues?**
 ```bash
-# Reset database
+# Reset database (also resets authentication data)
 rm library.db library.db-shm library.db-wal
-dotnet run  # Database will be recreated
+dotnet run  # Database will be recreated with default users
 ```
 
 **Build Errors?**
@@ -176,4 +185,4 @@ For complete deployment instructions, see [UNIVERSITY-THEMING-GUIDE.md](UNIVERSI
 
 ---
 
-**🎓 That's it! You now have a fully functional university graduation projects management system running locally.**
+**🎓 That's it! You now have a fully functional university graduation projects management system with enhanced authentication, role-based dashboards, and complete user management running locally.**
