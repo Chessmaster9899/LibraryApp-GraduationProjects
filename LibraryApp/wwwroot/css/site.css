@@ -48,7 +48,7 @@ body::before {
 
 /* Fallback for when background image is not available */
 body {
-  background-color: #f8f9fa;
+  background-color: #add8e6; /* Light blue background */
 }
 
 /* University Theming Support */

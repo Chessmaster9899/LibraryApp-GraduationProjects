@@ -28,6 +28,12 @@ builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 // Add Session Service
 builder.Services.AddScoped<ISessionService, SessionService>();
 
+// Add Notification Service
+builder.Services.AddScoped<LibraryApp.Controllers.INotificationService, LibraryApp.Controllers.NotificationService>();
+
+// Add File Upload Service
+builder.Services.AddScoped<IFileUploadService, FileUploadService>();
+
 var app = builder.Build();
 
 // Migrate database and seed sample data
