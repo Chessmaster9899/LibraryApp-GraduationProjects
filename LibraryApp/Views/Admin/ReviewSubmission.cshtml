@@ -1,0 +1,362 @@
+@model ProjectSubmissionReviewViewModel
+@{
+    ViewBag.Title = "Review Project Submission";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <!-- Breadcrumb -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="Dashboard">Admin Dashboard</a></li>
+                    <li class="breadcrumb-item"><a asp-action="PendingSubmissions">Pending Submissions</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Review Submission</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1><i class="fas fa-clipboard-check"></i> Review Project Submission</h1>
+            <p class="lead">Evaluate and decide on project publication approval</p>
+        </div>
+    </div>
+
+    <!-- Submission Status Alert -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-@(Model.Submission.Status switch {
+                SubmissionStatus.Pending => "warning",
+                SubmissionStatus.UnderReview => "info",
+                SubmissionStatus.Approved => "success",
+                SubmissionStatus.Rejected => "danger",
+                _ => "secondary"
+            })">
+                <h4><i class="fas fa-info-circle"></i> Current Status: @Model.Submission.Status</h4>
+                <p class="mb-0">Submitted on @Model.Submission.SubmissionDate.ToString("MMMM dd, yyyy 'at' HH:mm")</p>
+                @if (Model.Submission.ReviewDate.HasValue)
+                {
+                    <p class="mb-0">Reviewed on @Model.Submission.ReviewDate.Value.ToString("MMMM dd, yyyy 'at' HH:mm") by @Model.Submission.ReviewedBy</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Project Information Panel -->
+        <div class="col-lg-8">
+            <!-- Project Details -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3><i class="fas fa-project-diagram"></i> Project Information</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4>@Model.Submission.Project.Title</h4>
+                            <div class="mb-3">
+                                <strong>Student:</strong> @Model.Submission.Project.Student.FullName<br>
+                                <strong>Student ID:</strong> @Model.Submission.Project.Student.StudentNumber<br>
+                                <strong>Department:</strong> @Model.Submission.Project.Student.Department.Name<br>
+                                <strong>Email:</strong> @Model.Submission.Project.Student.Email
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <strong>Supervisor:</strong> @Model.Submission.Project.Supervisor.DisplayName<br>
+                                @if (Model.Submission.Project.Evaluator != null)
+                                {
+                                    <text><strong>Evaluator:</strong> @Model.Submission.Project.Evaluator.DisplayName<br></text>
+                                }
+                                <strong>Project Status:</strong> <span class="badge bg-info">@Model.Submission.Project.Status</span><br>
+                                <strong>Defense Date:</strong> @(Model.Submission.Project.DefenseDate?.ToString("MMMM dd, yyyy") ?? "Not scheduled")<br>
+                                @if (!string.IsNullOrEmpty(Model.Submission.Project.Grade))
+                                {
+                                    <text><strong>Grade:</strong> @Model.Submission.Project.Grade</text>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    
+                    @if (!string.IsNullOrEmpty(Model.Submission.Project.Abstract))
+                    {
+                        <div class="mt-3">
+                            <h5>Abstract</h5>
+                            <p class="text-muted">@Model.Submission.Project.Abstract</p>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.Submission.Project.Keywords))
+                    {
+                        <div class="mt-3">
+                            <h5>Keywords</h5>
+                            @foreach (var keyword in Model.Submission.Project.Keywords.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                <span class="badge bg-secondary me-1">@keyword.Trim()</span>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Submission Comments -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3><i class="fas fa-comment"></i> Submission Comments</h3>
+                </div>
+                <div class="card-body">
+                    <blockquote class="blockquote">
+                        <p>"@Model.Submission.SubmissionComments"</p>
+                        <footer class="blockquote-footer">
+                            Submitted by project team on 
+                            <cite title="Submission Date">@Model.Submission.SubmissionDate.ToString("MMMM dd, yyyy")</cite>
+                        </footer>
+                    </blockquote>
+                </div>
+            </div>
+
+            <!-- Previous Review Comments -->
+            @if (!string.IsNullOrEmpty(Model.Submission.ReviewComments))
+            {
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3><i class="fas fa-history"></i> Previous Review Comments</h3>
+                    </div>
+                    <div class="card-body">
+                        <blockquote class="blockquote">
+                            <p>"@Model.Submission.ReviewComments"</p>
+                            <footer class="blockquote-footer">
+                                Reviewed by @Model.Submission.ReviewedBy on 
+                                <cite title="Review Date">@Model.Submission.ReviewDate?.ToString("MMMM dd, yyyy")</cite>
+                            </footer>
+                        </blockquote>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Files and Actions Panel -->
+        <div class="col-lg-4">
+            <!-- Submitted Files -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3><i class="fas fa-files"></i> Submitted Files</h3>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Model.Submission.PosterFilePath))
+                    {
+                        <div class="mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-image fa-2x text-info mb-2"></i>
+                                    <h6>Project Poster</h6>
+                                    <a href="@Model.Submission.PosterFilePath" target="_blank" class="btn btn-info btn-sm">
+                                        <i class="fas fa-external-link-alt"></i> View Poster
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.Submission.ReportFilePath))
+                    {
+                        <div class="mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-file-pdf fa-2x text-danger mb-2"></i>
+                                    <h6>Final Report</h6>
+                                    <a href="@Model.Submission.ReportFilePath" target="_blank" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-download"></i> Download PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.Submission.CodeFilesPath))
+                    {
+                        <div class="mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-code fa-2x text-warning mb-2"></i>
+                                    <h6>Source Code</h6>
+                                    <a href="@Model.Submission.CodeFilesPath" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-download"></i> Download Code
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (string.IsNullOrEmpty(Model.Submission.PosterFilePath) && 
+                         string.IsNullOrEmpty(Model.Submission.ReportFilePath) && 
+                         string.IsNullOrEmpty(Model.Submission.CodeFilesPath))
+                    {
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            No files were submitted with this request.
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Review Action -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-gavel"></i> Review Decision</h3>
+                </div>
+                <div class="card-body">
+                    <form asp-action="ReviewSubmission" method="post">
+                        <input type="hidden" asp-for="Submission.Id" />
+                        
+                        <div class="mb-3">
+                            <label asp-for="NewStatus" class="form-label">Review Decision</label>
+                            <select asp-for="NewStatus" class="form-select" required>
+                                <option value="">Select a decision...</option>
+                                <option value="@SubmissionStatus.Approved">Approve & Publish</option>
+                                <option value="@SubmissionStatus.Rejected">Reject</option>
+                                <option value="@SubmissionStatus.NeedsRevision">Needs Revision</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ReviewComments" class="form-label">Review Comments</label>
+                            <textarea asp-for="ReviewComments" class="form-control" rows="4" 
+                                      placeholder="Provide detailed feedback about your decision..."
+                                      required></textarea>
+                            <div class="form-text">
+                                These comments will be shared with the project team.
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-check"></i> Submit Review
+                            </button>
+                            <a asp-action="PendingSubmissions" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Submissions
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Dynamic feedback based on selected status
+            $('#NewStatus').on('change', function() {
+                const status = $(this).val();
+                const commentsField = $('#ReviewComments');
+                const commentsLabel = $('label[for="ReviewComments"]');
+                
+                switch(status) {
+                    case '@SubmissionStatus.Approved':
+                        commentsField.attr('placeholder', 'Congratulations! Provide any final comments or suggestions for improvement...');
+                        commentsLabel.text('Approval Comments');
+                        break;
+                    case '@SubmissionStatus.Rejected':
+                        commentsField.attr('placeholder', 'Explain clearly why this submission cannot be approved and what needs to be addressed...');
+                        commentsLabel.text('Rejection Reason (Required)');
+                        break;
+                    case '@SubmissionStatus.NeedsRevision':
+                        commentsField.attr('placeholder', 'Specify what changes are needed before this submission can be approved...');
+                        commentsLabel.text('Revision Requirements');
+                        break;
+                    default:
+                        commentsField.attr('placeholder', 'Provide detailed feedback about your decision...');
+                        commentsLabel.text('Review Comments');
+                }
+            });
+
+            // Form validation
+            $('form').on('submit', function(e) {
+                const status = $('#NewStatus').val();
+                const comments = $('#ReviewComments').val().trim();
+                
+                if (!status) {
+                    e.preventDefault();
+                    alert('Please select a review decision.');
+                    return false;
+                }
+                
+                if (!comments) {
+                    e.preventDefault();
+                    alert('Please provide review comments.');
+                    return false;
+                }
+                
+                if (status === '@SubmissionStatus.Rejected' && comments.length < 20) {
+                    e.preventDefault();
+                    alert('Please provide a detailed explanation for rejection (at least 20 characters).');
+                    return false;
+                }
+
+                // Confirm the decision
+                const confirmMessage = status === '@SubmissionStatus.Approved' 
+                    ? 'Are you sure you want to approve this submission? It will be published in the public gallery.'
+                    : 'Are you sure you want to ' + status.toLowerCase() + ' this submission?';
+                
+                if (!confirm(confirmMessage)) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            // Auto-save draft comments
+            let saveTimeout;
+            $('#ReviewComments').on('input', function() {
+                clearTimeout(saveTimeout);
+                saveTimeout = setTimeout(function() {
+                    const comments = $('#ReviewComments').val();
+                    if (comments.length > 10) {
+                        localStorage.setItem('review_draft_@Model.Submission.Id', comments);
+                    }
+                }, 2000);
+            });
+
+            // Load draft comments
+            const draftComments = localStorage.getItem('review_draft_@Model.Submission.Id');
+            if (draftComments && !$('#ReviewComments').val()) {
+                $('#ReviewComments').val(draftComments);
+            }
+
+            // Clear draft on successful submission
+            $('form').on('submit', function() {
+                localStorage.removeItem('review_draft_@Model.Submission.Id');
+            });
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: 1px solid rgba(0, 0, 0, 0.125);
+        }
+        
+        .card:hover {
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .blockquote {
+            border-left: 4px solid #007bff;
+            padding-left: 1rem;
+            font-style: italic;
+        }
+        
+        .form-select:focus,
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+    </style>
+}

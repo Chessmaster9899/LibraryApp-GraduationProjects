@@ -1,0 +1,461 @@
+@model List<SystemAuditLog>
+@{
+    ViewBag.Title = "System Audit Trail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1><i class="fas fa-history"></i> System Audit Trail</h1>
+            <p class="lead">Complete log of all system activities and user actions</p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-filter"></i> Filter Audit Logs</h4>
+                </div>
+                <div class="card-body">
+                    <form method="get" id="filterForm">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <label for="userRole" class="form-label">User Role</label>
+                                <select name="userRole" id="userRole" class="form-select">
+                                    <option value="">All Roles</option>
+                                    <option value="Admin">Admin</option>
+                                    <option value="Student">Student</option>
+                                    <option value="Professor">Professor</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="action" class="form-label">Action</label>
+                                <select name="action" id="action" class="form-select">
+                                    <option value="">All Actions</option>
+                                    <option value="Login">Login</option>
+                                    <option value="Logout">Logout</option>
+                                    <option value="Create">Create</option>
+                                    <option value="Update">Update</option>
+                                    <option value="Delete">Delete</option>
+                                    <option value="ReviewProjectSubmission">Review Submission</option>
+                                    <option value="SubmitProject">Submit Project</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="entityType" class="form-label">Entity Type</label>
+                                <select name="entityType" id="entityType" class="form-select">
+                                    <option value="">All Types</option>
+                                    <option value="Project">Project</option>
+                                    <option value="Student">Student</option>
+                                    <option value="Professor">Professor</option>
+                                    <option value="ProjectSubmission">Project Submission</option>
+                                    <option value="Announcement">Announcement</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="dateFrom" class="form-label">From Date</label>
+                                <input type="date" name="dateFrom" id="dateFrom" class="form-control" value="@DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd")">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="dateTo" class="form-label">To Date</label>
+                                <input type="date" name="dateTo" id="dateTo" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")">
+                            </div>
+                            <div class="col-md-2">
+                                <label>&nbsp;</label>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-search"></i> Apply Filters
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-8">
+                                <label for="search" class="form-label">Search</label>
+                                <input type="text" name="search" id="search" class="form-control" 
+                                       placeholder="Search by user ID, details, or IP address...">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="pageSize" class="form-label">Show</label>
+                                <select name="pageSize" id="pageSize" class="form-select">
+                                    <option value="25">25 entries</option>
+                                    <option value="50" selected>50 entries</option>
+                                    <option value="100">100 entries</option>
+                                    <option value="200">200 entries</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label>&nbsp;</label>
+                                <div class="d-grid">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="clearFilters()">
+                                        <i class="fas fa-times"></i> Clear
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Tools -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted">
+                        Showing @Model.Count audit entries
+                        @if (Model.Any())
+                        {
+                            <text>from @Model.Min(a => a.Timestamp).ToString("MMM dd") to @Model.Max(a => a.Timestamp).ToString("MMM dd, yyyy")</text>
+                        }
+                    </span>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-primary" onclick="exportAuditLog('csv')">
+                        <i class="fas fa-file-csv"></i> Export CSV
+                    </button>
+                    <button type="button" class="btn btn-outline-success" onclick="exportAuditLog('excel')">
+                        <i class="fas fa-file-excel"></i> Export Excel
+                    </button>
+                    <button type="button" class="btn btn-outline-info" onclick="printAuditLog()">
+                        <i class="fas fa-print"></i> Print
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audit Log Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-list"></i> Audit Log Entries</h4>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0" id="auditTable">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>User</th>
+                                        <th>Role</th>
+                                        <th>Action</th>
+                                        <th>Entity</th>
+                                        <th>Details</th>
+                                        <th>IP Address</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var log in Model.OrderByDescending(a => a.Timestamp))
+                                    {
+                                        <tr data-log-id="@log.Id">
+                                            <td>
+                                                <strong>@log.Timestamp.ToString("MMM dd, yyyy")</strong><br>
+                                                <small class="text-muted">@log.Timestamp.ToString("HH:mm:ss")</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">@log.UserId</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-@(log.UserRole switch {
+                                                    UserRole.Admin => "danger",
+                                                    UserRole.Professor => "info", 
+                                                    UserRole.Student => "success",
+                                                    _ => "secondary"
+                                                })">
+                                                    @log.UserRole
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-@(log.Action switch {
+                                                    "Login" => "success",
+                                                    "Logout" => "warning",
+                                                    "Create" => "primary",
+                                                    "Update" => "info",
+                                                    "Delete" => "danger",
+                                                    _ => "secondary"
+                                                })">
+                                                    @log.Action
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <strong>@log.EntityType</strong>
+                                                @if (log.EntityId.HasValue)
+                                                {
+                                                    <br><small class="text-muted">ID: @log.EntityId</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(log.Details))
+                                                {
+                                                    <span class="text-truncate d-inline-block" style="max-width: 200px;" 
+                                                          title="@log.Details">@log.Details</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(log.IPAddress))
+                                                {
+                                                    <code>@log.IPAddress</code>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <button type="button" class="btn btn-outline-primary" 
+                                                            onclick="viewLogDetails(@log.Id)" title="View Details">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-outline-info" 
+                                                            onclick="viewRelatedLogs('@log.UserId', '@log.EntityType', @(log.EntityId?.ToString() ?? "null"))" 
+                                                            title="View Related">
+                                                        <i class="fas fa-link"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center p-5">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <h4>No Audit Entries Found</h4>
+                            <p class="text-muted">No audit entries match your current filter criteria.</p>
+                            <button type="button" class="btn btn-primary" onclick="clearFilters()">
+                                <i class="fas fa-refresh"></i> Show All Entries
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Log Details Modal -->
+<div class="modal fade" id="logDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Audit Log Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="logDetailsContent">
+                    <!-- Details will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- DataTables CSS and JS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTable
+            if ($('#auditTable tbody tr').length > 0) {
+                $('#auditTable').DataTable({
+                    pageLength: 25,
+                    order: [[0, 'desc']], // Sort by timestamp descending
+                    columnDefs: [
+                        { targets: [7], orderable: false }, // Actions column
+                        { targets: [5], width: '200px' }    // Details column
+                    ],
+                    language: {
+                        search: "Quick Search:",
+                        lengthMenu: "Show _MENU_ entries",
+                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                        paginate: {
+                            first: "First",
+                            last: "Last",
+                            next: "Next",
+                            previous: "Previous"
+                        }
+                    }
+                });
+            }
+
+            // Auto-submit form on filter changes
+            $('#pageSize').on('change', function() {
+                $('#filterForm').submit();
+            });
+
+            // Live search
+            let searchTimeout;
+            $('#search').on('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function() {
+                    $('#filterForm').submit();
+                }, 1000);
+            });
+        });
+
+        function clearFilters() {
+            $('#filterForm')[0].reset();
+            $('#dateFrom').val('@DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd")');
+            $('#dateTo').val('@DateTime.Now.ToString("yyyy-MM-dd")');
+            $('#filterForm').submit();
+        }
+
+        function exportAuditLog(format) {
+            const params = new URLSearchParams(new FormData($('#filterForm')[0]));
+            params.append('export', format);
+            window.open('/Admin/ExportAuditLog?' + params.toString(), '_blank');
+        }
+
+        function printAuditLog() {
+            window.print();
+        }
+
+        function viewLogDetails(logId) {
+            // Find the log entry in the current data
+            const logRow = $(`tr[data-log-id="${logId}"]`);
+            const timestamp = logRow.find('td:eq(0)').text().trim();
+            const userId = logRow.find('td:eq(1) .badge').text();
+            const userRole = logRow.find('td:eq(2) .badge').text();
+            const action = logRow.find('td:eq(3) .badge').text();
+            const entityType = logRow.find('td:eq(4) strong').text();
+            const entityId = logRow.find('td:eq(4) small').text().replace('ID: ', '');
+            const details = logRow.find('td:eq(5) span').attr('title') || logRow.find('td:eq(5)').text();
+            const ipAddress = logRow.find('td:eq(6) code').text() || 'N/A';
+            const userAgent = 'Not available'; // Would need to be passed from server
+
+            const detailsHtml = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>User Information</h6>
+                        <p><strong>User ID:</strong> ${userId}</p>
+                        <p><strong>Role:</strong> ${userRole}</p>
+                        <p><strong>IP Address:</strong> ${ipAddress}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Action Details</h6>
+                        <p><strong>Action:</strong> ${action}</p>
+                        <p><strong>Entity Type:</strong> ${entityType}</p>
+                        <p><strong>Entity ID:</strong> ${entityId || 'N/A'}</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <h6>Timestamp</h6>
+                        <p>${timestamp}</p>
+                        
+                        <h6>Additional Details</h6>
+                        <div class="bg-light p-3 rounded">
+                            <pre>${details || 'No additional details available'}</pre>
+                        </div>
+                        
+                        <h6>User Agent</h6>
+                        <div class="bg-light p-2 rounded">
+                            <small class="font-monospace">${userAgent}</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            $('#logDetailsContent').html(detailsHtml);
+            new bootstrap.Modal(document.getElementById('logDetailsModal')).show();
+        }
+
+        function viewRelatedLogs(userId, entityType, entityId) {
+            // Build filter parameters for related logs
+            const params = new URLSearchParams();
+            params.append('search', userId);
+            if (entityType) params.append('entityType', entityType);
+            if (entityId && entityId !== 'null') {
+                params.append('search', `${userId} ${entityType} ${entityId}`);
+            }
+            
+            // Apply filters and reload page
+            window.location.href = '/Admin/AuditTrail?' + params.toString();
+        }
+
+        // Print styles
+        window.addEventListener('beforeprint', function() {
+            // Hide action buttons when printing
+            $('.btn-group').hide();
+            $('.card-header').addClass('d-print-none');
+        });
+
+        window.addEventListener('afterprint', function() {
+            // Show action buttons after printing
+            $('.btn-group').show();
+            $('.card-header').removeClass('d-print-none');
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .table td {
+            vertical-align: middle;
+        }
+        
+        .text-truncate {
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .badge {
+            font-size: 0.75em;
+        }
+        
+        code {
+            font-size: 0.8em;
+            background-color: #f8f9fa;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        
+        @@media print {
+            .btn-group, .card-header, .row.mb-4, .row.mb-3 {
+                display: none !important;
+            }
+            
+            .table {
+                font-size: 0.8em;
+            }
+            
+            .card-body {
+                padding: 0 !important;
+            }
+        }
+        
+        .modal-body pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+}
