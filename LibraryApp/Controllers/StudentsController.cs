@@ -65,11 +65,7 @@ namespace LibraryApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
             
-            // Debug: Log validation errors
-            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-            {
-                Console.WriteLine($"Validation Error: {error.ErrorMessage}");
-            }
+
             
             ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "Name", student.DepartmentId);
             return View(student);

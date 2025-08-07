@@ -1,0 +1,166 @@
+@model List<LibraryApp.Models.ProjectSubmission>
+@{
+    ViewData["Title"] = "Submission Status";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2><i class="fas fa-file-alt"></i> @ViewData["Title"]</h2>
+            <hr>
+        </div>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-history"></i> Submission History</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Submission Date</th>
+                                        <th>Status</th>
+                                        <th>Comments</th>
+                                        <th>Review Date</th>
+                                        <th>Review Comments</th>
+                                        <th>Files</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var submission in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <i class="fas fa-clock text-muted"></i>
+                                                @submission.SubmissionDate.ToString("MMM dd, yyyy hh:mm tt")
+                                            </td>
+                                            <td>
+                                                @{
+                                                    string statusClass = submission.Status switch
+                                                    {
+                                                        LibraryApp.Models.SubmissionStatus.Pending => "warning",
+                                                        LibraryApp.Models.SubmissionStatus.UnderReview => "info",
+                                                        LibraryApp.Models.SubmissionStatus.Approved => "success",
+                                                        LibraryApp.Models.SubmissionStatus.Rejected => "danger",
+                                                        LibraryApp.Models.SubmissionStatus.NeedsRevision => "warning",
+                                                        _ => "secondary"
+                                                    };
+                                                    string statusIcon = submission.Status switch
+                                                    {
+                                                        LibraryApp.Models.SubmissionStatus.Pending => "fas fa-hourglass-half",
+                                                        LibraryApp.Models.SubmissionStatus.UnderReview => "fas fa-search",
+                                                        LibraryApp.Models.SubmissionStatus.Approved => "fas fa-check-circle",
+                                                        LibraryApp.Models.SubmissionStatus.Rejected => "fas fa-times-circle",
+                                                        LibraryApp.Models.SubmissionStatus.NeedsRevision => "fas fa-edit",
+                                                        _ => "fas fa-question-circle"
+                                                    };
+                                                }
+                                                <span class="badge bg-@statusClass">
+                                                    <i class="@statusIcon"></i> @submission.Status
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="text-wrap" style="max-width: 200px;">
+                                                    @submission.SubmissionComments
+                                                </div>
+                                            </td>
+                                            <td>
+                                                @if (submission.ReviewDate.HasValue)
+                                                {
+                                                    <i class="fas fa-calendar text-muted"></i>
+                                                    @submission.ReviewDate.Value.ToString("MMM dd, yyyy")
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Not reviewed</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(submission.ReviewComments))
+                                                {
+                                                    <div class="text-wrap" style="max-width: 200px;">
+                                                        @submission.ReviewComments
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">No comments</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group-vertical btn-group-sm">
+                                                    @if (!string.IsNullOrEmpty(submission.PosterFilePath))
+                                                    {
+                                                        <a href="@submission.PosterFilePath" target="_blank" class="btn btn-outline-primary btn-sm">
+                                                            <i class="fas fa-image"></i> Poster
+                                                        </a>
+                                                    }
+                                                    @if (!string.IsNullOrEmpty(submission.ReportFilePath))
+                                                    {
+                                                        <a href="@submission.ReportFilePath" target="_blank" class="btn btn-outline-success btn-sm">
+                                                            <i class="fas fa-file-pdf"></i> Report
+                                                        </a>
+                                                    }
+                                                    @if (!string.IsNullOrEmpty(submission.CodeFilesPath))
+                                                    {
+                                                        <a href="@submission.CodeFilesPath" target="_blank" class="btn btn-outline-info btn-sm">
+                                                            <i class="fas fa-code"></i> Code
+                                                        </a>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>No submissions found</strong>
+                    <br>
+                    This project has no submission history yet.
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row mt-3">
+        <div class="col-12">
+            <a href="javascript:history.back()" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Go Back
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .text-wrap {
+            word-wrap: break-word;
+            word-break: break-word;
+        }
+        
+        .btn-group-vertical .btn {
+            margin-bottom: 2px;
+        }
+        
+        .table td {
+            vertical-align: middle;
+        }
+    </style>
+}

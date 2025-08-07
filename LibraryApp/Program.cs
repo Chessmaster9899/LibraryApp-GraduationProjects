@@ -28,6 +28,9 @@ builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 // Add Session Service
 builder.Services.AddScoped<ISessionService, SessionService>();
 
+// Add Notification Service
+builder.Services.AddScoped<INotificationService, NotificationService>();
+
 var app = builder.Build();
 
 // Migrate database and seed sample data
