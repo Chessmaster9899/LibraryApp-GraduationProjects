@@ -12,7 +12,7 @@ namespace LibraryApp.Controllers
     {
         private readonly LibraryContext _context;
 
-        public ProfessorController(LibraryContext context, IUniversitySettingsService universitySettings) : base(universitySettings)
+        public ProfessorController(LibraryContext context, IUniversitySettingsService universitySettings, ISessionService sessionService) : base(universitySettings, sessionService)
         {
             _context = context;
         }
@@ -172,6 +172,169 @@ namespace LibraryApp.Controllers
             }
 
             return RedirectToAction("Profile");
+        }
+
+        // Workflow Actions
+        [HttpPost]
+        public async Task<IActionResult> ApproveProject(int projectId, string? comments = null)
+        {
+            var project = await _context.Projects
+                .Include(p => p.Student)
+                .FirstOrDefaultAsync(p => p.Id == projectId);
+
+            if (project == null)
+            {
+                this.AddError("Error", "Project not found");
+                return RedirectToAction("Index");
+            }
+
+            // Check permission - only supervisor can approve
+            var professorId = int.Parse(CurrentUserId!);
+            if (project.SupervisorId != professorId)
+            {
+                this.AddError("Permission Denied", "You can only approve projects you supervise");
+                return RedirectToAction("Index");
+            }
+
+            if (project.Status == ProjectStatus.Proposed)
+            {
+                project.Status = ProjectStatus.Approved;
+                project.ReviewComments = comments;
+                project.ReviewDate = DateTime.Now;
+                project.ReviewedBy = CurrentUser?.UserId;
+
+                await _context.SaveChangesAsync();
+                this.AddSuccess("Project Approved", $"Project '{project.Title}' has been approved successfully");
+            }
+            else
+            {
+                this.AddWarning("Invalid Status", "Only proposed projects can be approved");
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RejectProject(int projectId, string comments)
+        {
+            if (string.IsNullOrWhiteSpace(comments))
+            {
+                this.AddError("Comments Required", "Please provide rejection comments");
+                return RedirectToAction("Index");
+            }
+
+            var project = await _context.Projects
+                .Include(p => p.Student)
+                .FirstOrDefaultAsync(p => p.Id == projectId);
+
+            if (project == null)
+            {
+                this.AddError("Error", "Project not found");
+                return RedirectToAction("Index");
+            }
+
+            // Check permission - only supervisor can reject
+            var professorId = int.Parse(CurrentUserId!);
+            if (project.SupervisorId != professorId)
+            {
+                this.AddError("Permission Denied", "You can only reject projects you supervise");
+                return RedirectToAction("Index");
+            }
+
+            if (project.Status == ProjectStatus.Proposed)
+            {
+                project.Status = ProjectStatus.ReviewRejected;
+                project.ReviewComments = comments;
+                project.ReviewDate = DateTime.Now;
+                project.ReviewedBy = CurrentUser?.UserId;
+
+                await _context.SaveChangesAsync();
+                this.AddInfo("Project Rejected", $"Project '{project.Title}' has been rejected");
+            }
+            else
+            {
+                this.AddWarning("Invalid Status", "Only proposed projects can be rejected");
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> MarkCompleted(int projectId, string? comments = null)
+        {
+            var project = await _context.Projects
+                .Include(p => p.Student)
+                .FirstOrDefaultAsync(p => p.Id == projectId);
+
+            if (project == null)
+            {
+                this.AddError("Error", "Project not found");
+                return RedirectToAction("Index");
+            }
+
+            // Check permission - supervisor or evaluator can mark as completed
+            var professorId = int.Parse(CurrentUserId!);
+            if (project.SupervisorId != professorId && project.EvaluatorId != professorId)
+            {
+                this.AddError("Permission Denied", "You can only mark projects you supervise or evaluate as completed");
+                return RedirectToAction("Index");
+            }
+
+            if (project.Status == ProjectStatus.InProgress)
+            {
+                project.Status = ProjectStatus.Completed;
+                project.ReviewComments = comments;
+                project.ReviewDate = DateTime.Now;
+                project.ReviewedBy = CurrentUser?.UserId;
+
+                await _context.SaveChangesAsync();
+                this.AddSuccess("Project Completed", $"Project '{project.Title}' has been marked as completed");
+            }
+            else
+            {
+                this.AddWarning("Invalid Status", "Only in-progress projects can be marked as completed");
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ScheduleDefense(int projectId, DateTime defenseDate, string? comments = null)
+        {
+            var project = await _context.Projects
+                .Include(p => p.Student)
+                .FirstOrDefaultAsync(p => p.Id == projectId);
+
+            if (project == null)
+            {
+                this.AddError("Error", "Project not found");
+                return RedirectToAction("Index");
+            }
+
+            // Check permission - supervisor can schedule defense
+            var professorId = int.Parse(CurrentUserId!);
+            if (project.SupervisorId != professorId)
+            {
+                this.AddError("Permission Denied", "You can only schedule defense for projects you supervise");
+                return RedirectToAction("Index");
+            }
+
+            if (project.Status == ProjectStatus.Completed || project.Status == ProjectStatus.ReviewApproved)
+            {
+                project.DefenseDate = defenseDate;
+                project.ReviewComments = comments;
+                project.ReviewDate = DateTime.Now;
+                project.ReviewedBy = CurrentUser?.UserId;
+
+                await _context.SaveChangesAsync();
+                this.AddSuccess("Defense Scheduled", $"Defense for '{project.Title}' scheduled for {defenseDate:MMM dd, yyyy}");
+            }
+            else
+            {
+                this.AddWarning("Invalid Status", "Only completed or review-approved projects can have defense scheduled");
+            }
+
+            return RedirectToAction("Index");
         }
     }
 

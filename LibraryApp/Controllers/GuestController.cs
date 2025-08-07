@@ -11,7 +11,7 @@ public class GuestController : BaseController
 {
     private readonly LibraryContext _context;
 
-    public GuestController(LibraryContext context, IUniversitySettingsService universitySettings) : base(universitySettings)
+    public GuestController(LibraryContext context, IUniversitySettingsService universitySettings, ISessionService sessionService) : base(universitySettings, sessionService)
     {
         _context = context;
     }

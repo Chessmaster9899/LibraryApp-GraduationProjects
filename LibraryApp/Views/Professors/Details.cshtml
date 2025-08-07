@@ -42,7 +42,7 @@
                     
                     <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Email)</dt>
                     <dd class="col-sm-9">
-                        @if (!string.IsNullOrEmpty(Model.Email))
+                        @if (!string.IsNullOrEmpty(Model?.Email))
                         {
                             <a href="mailto:@Model.Email">@Html.DisplayFor(model => model.Email)</a>
                         }
@@ -56,7 +56,7 @@
                     <dd class="col-sm-9">@Html.DisplayFor(model => model.Phone)</dd>
                     
                     <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Department)</dt>
-                    <dd class="col-sm-9">@Html.DisplayFor(model => model.Department.Name)</dd>
+                    <dd class="col-sm-9">@Html.DisplayFor(model => model.Department!.Name)</dd>
                     
                     <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Role)</dt>
                     <dd class="col-sm-9">@Html.DisplayFor(model => model.Role)</dd>
@@ -66,7 +66,7 @@
                     
                     <dt class="col-sm-3">@Html.DisplayNameFor(model => model.LastLogin)</dt>
                     <dd class="col-sm-9">
-                        @if (Model.LastLogin.HasValue)
+                        @if (Model?.LastLogin.HasValue == true)
                         {
                             @Model.LastLogin.Value.ToString("yyyy-MM-dd HH:mm")
                         }
@@ -88,11 +88,11 @@
             <div class="card-body">
                 <div class="row text-center">
                     <div class="col-6">
-                        <h4 class="text-primary">@Model.SupervisedProjects.Count</h4>
+                        <h4 class="text-primary">@(Model?.SupervisedProjects?.Count ?? 0)</h4>
                         <small class="text-muted">Supervised</small>
                     </div>
                     <div class="col-6">
-                        <h4 class="text-info">@Model.EvaluatedProjects.Count</h4>
+                        <h4 class="text-info">@(Model?.EvaluatedProjects?.Count ?? 0)</h4>
                         <small class="text-muted">Evaluated</small>
                     </div>
                 </div>
@@ -101,7 +101,7 @@
     </div>
 </div>
 
-@if (Model.SupervisedProjects.Any())
+@if (Model?.SupervisedProjects?.Any() == true)
 {
     <div class="row mt-4">
         <div class="col-md-12">
@@ -147,7 +147,7 @@
     </div>
 }
 
-@if (Model.EvaluatedProjects.Any())
+@if (Model?.EvaluatedProjects?.Any() == true)
 {
     <div class="row mt-4">
         <div class="col-md-12">

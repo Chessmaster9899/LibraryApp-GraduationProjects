@@ -8,18 +8,24 @@ namespace LibraryApp.Controllers
     public class BaseController : Controller
     {
         protected readonly IUniversitySettingsService _universitySettings;
+        protected readonly ISessionService _sessionService;
 
-        public BaseController(IUniversitySettingsService universitySettings)
+        public BaseController(IUniversitySettingsService universitySettings, ISessionService sessionService)
         {
             _universitySettings = universitySettings;
+            _sessionService = sessionService;
         }
 
-        // Helper properties for session-based user information
-        protected string? CurrentUserId => HttpContext.Session.GetString("UserId");
-        protected string? CurrentUserName => HttpContext.Session.GetString("UserName");
-        protected UserRole? CurrentUserRole => Enum.TryParse<UserRole>(HttpContext.Session.GetString("UserRole"), out var role) ? role : null;
+        // Simplified session-based user information using SessionService
+        protected string? CurrentUserId => _sessionService.GetUserId(HttpContext);
+        protected string? CurrentUserRole => _sessionService.GetUserRole(HttpContext);
+        protected UserRole? CurrentUserRoleEnum => Enum.TryParse<UserRole>(CurrentUserRole, out var role) ? role : null;
         protected int? CurrentEntityId => int.TryParse(HttpContext.Session.GetString("EntityId"), out var id) ? id : null;
-        protected bool IsAuthenticated => !string.IsNullOrEmpty(CurrentUserId);
+        protected bool IsAuthenticated => _sessionService.IsAuthenticated(HttpContext);
+        protected bool IsStudent => _sessionService.IsStudent(HttpContext);
+        protected bool IsProfessor => _sessionService.IsProfessor(HttpContext);
+        protected bool IsAdmin => _sessionService.IsAdmin(HttpContext);
+        protected SessionUserInfo? CurrentUser => _sessionService.GetCurrentUser(HttpContext);
 
         public override void OnActionExecuting(ActionExecutingContext context)
         {

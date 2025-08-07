@@ -12,7 +12,7 @@ namespace LibraryApp.Controllers
     {
         private readonly LibraryContext _context;
 
-        public StudentController(LibraryContext context, IUniversitySettingsService universitySettings) : base(universitySettings)
+        public StudentController(LibraryContext context, IUniversitySettingsService universitySettings, ISessionService sessionService) : base(universitySettings, sessionService)
         {
             _context = context;
         }
@@ -139,6 +139,95 @@ namespace LibraryApp.Controllers
             }
 
             return RedirectToAction("Profile");
+        }
+
+        // Workflow Actions for Students
+        [HttpPost]
+        public async Task<IActionResult> SubmitProject(int projectId, string? comments = null)
+        {
+            var project = await _context.Projects
+                .Include(p => p.Supervisor)
+                .FirstOrDefaultAsync(p => p.Id == projectId);
+
+            if (project == null)
+            {
+                this.AddError("Error", "Project not found");
+                return RedirectToAction("Index");
+            }
+
+            // Check permission - only the assigned student can submit
+            var studentId = int.Parse(CurrentUserId!);
+            if (project.StudentId != studentId)
+            {
+                this.AddError("Permission Denied", "You can only submit your own projects");
+                return RedirectToAction("Index");
+            }
+
+            if (project.Status == ProjectStatus.Approved || project.Status == ProjectStatus.InProgress)
+            {
+                project.Status = ProjectStatus.SubmittedForReview;
+                project.SubmissionForReviewDate = DateTime.Now;
+                project.ReviewComments = comments;
+
+                await _context.SaveChangesAsync();
+                this.AddSuccess("Project Submitted", $"Project '{project.Title}' has been submitted for review");
+            }
+            else
+            {
+                this.AddWarning("Invalid Status", "Only approved or in-progress projects can be submitted for review");
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> StartProject(int projectId)
+        {
+            var project = await _context.Projects
+                .Include(p => p.Supervisor)
+                .FirstOrDefaultAsync(p => p.Id == projectId);
+
+            if (project == null)
+            {
+                this.AddError("Error", "Project not found");
+                return RedirectToAction("Index");
+            }
+
+            // Check permission - only the assigned student can start
+            var studentId = int.Parse(CurrentUserId!);
+            if (project.StudentId != studentId)
+            {
+                this.AddError("Permission Denied", "You can only start your own projects");
+                return RedirectToAction("Index");
+            }
+
+            if (project.Status == ProjectStatus.Approved)
+            {
+                project.Status = ProjectStatus.InProgress;
+                await _context.SaveChangesAsync();
+                this.AddSuccess("Project Started", $"You have started working on '{project.Title}'");
+            }
+            else
+            {
+                this.AddWarning("Invalid Status", "Only approved projects can be started");
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        public async Task<IActionResult> Projects()
+        {
+            var studentId = int.Parse(CurrentUserId!);
+            var projects = await _context.Projects
+                .Include(p => p.Supervisor)
+                .Include(p => p.Evaluator)
+                .Include(p => p.Student)
+                .ThenInclude(s => s.Department)
+                .Where(p => p.StudentId == studentId)
+                .OrderByDescending(p => p.SubmissionDate)
+                .ToListAsync();
+
+            return View(projects);
         }
     }
 

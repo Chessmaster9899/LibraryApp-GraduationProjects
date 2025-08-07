@@ -12,7 +12,7 @@ public class ProjectSubmissionController : BaseController
 {
     private readonly LibraryContext _context;
 
-    public ProjectSubmissionController(LibraryContext context, IUniversitySettingsService universitySettings) : base(universitySettings)
+    public ProjectSubmissionController(LibraryContext context, IUniversitySettingsService universitySettings, ISessionService sessionService) : base(universitySettings, sessionService)
     {
         _context = context;
     }
@@ -33,11 +33,11 @@ public class ProjectSubmissionController : BaseController
 
         // Check if user has permission to submit for this project
         var hasPermission = false;
-        if (CurrentUserRole == UserRole.Student && CurrentEntityId == project.StudentId)
+        if (CurrentUserRoleEnum == UserRole.Student && CurrentEntityId == project.StudentId)
         {
             hasPermission = true;
         }
-        else if (CurrentUserRole == UserRole.Professor && 
+        else if (CurrentUserRoleEnum == UserRole.Professor && 
                 (CurrentEntityId == project.SupervisorId || CurrentEntityId == project.EvaluatorId))
         {
             hasPermission = true;

@@ -12,7 +12,7 @@ public class HomeController : BaseController
     private readonly ILogger<HomeController> _logger;
     private readonly LibraryContext _context;
 
-    public HomeController(ILogger<HomeController> logger, LibraryContext context, IUniversitySettingsService universitySettings) : base(universitySettings)
+    public HomeController(ILogger<HomeController> logger, LibraryContext context, IUniversitySettingsService universitySettings, ISessionService sessionService) : base(universitySettings, sessionService)
     {
         _logger = logger;
         _context = context;

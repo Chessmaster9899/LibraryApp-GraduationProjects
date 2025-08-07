@@ -25,6 +25,9 @@ builder.Services.AddScoped<IUniversitySettingsService, UniversitySettingsService
 // Add Authentication Service
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
+// Add Session Service
+builder.Services.AddScoped<ISessionService, SessionService>();
+
 var app = builder.Build();
 
 // Migrate database and seed sample data

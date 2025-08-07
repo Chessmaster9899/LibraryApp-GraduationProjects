@@ -12,7 +12,7 @@ public class AdminController : BaseController
 {
     private readonly LibraryContext _context;
 
-    public AdminController(LibraryContext context, IUniversitySettingsService universitySettings) : base(universitySettings)
+    public AdminController(LibraryContext context, IUniversitySettingsService universitySettings, ISessionService sessionService) : base(universitySettings, sessionService)
     {
         _context = context;
     }
@@ -195,7 +195,7 @@ public class AdminController : BaseController
         var auditLog = new SystemAuditLog
         {
             UserId = CurrentUserId!,
-            UserRole = CurrentUserRole!.Value,
+            UserRole = CurrentUserRoleEnum!.Value,
             Action = "ReviewProjectSubmission",
             EntityType = "ProjectSubmission",
             EntityId = submission.Id,
