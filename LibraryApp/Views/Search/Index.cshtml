@@ -1,0 +1,466 @@
+@model LibraryApp.Controllers.SearchResultsViewModel
+@{
+    ViewData["Title"] = string.IsNullOrEmpty(Model.Query) ? "Search" : $"Search results for '{Model.Query}'";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2><i class="fas fa-search"></i> @ViewData["Title"]</h2>
+            @if (!string.IsNullOrEmpty(Model.Query))
+            {
+                <p class="text-muted">Found @Model.TotalResults results</p>
+            }
+            <hr>
+        </div>
+    </div>
+
+    <!-- Search Form -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="get" asp-action="Index" id="searchForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="query" class="form-label">Search Query</label>
+                                    <div class="position-relative">
+                                        <input type="text" class="form-control" id="query" name="query" 
+                                               value="@Model.Query" placeholder="Enter keywords..." autocomplete="off">
+                                        <div id="searchSuggestions" class="dropdown-menu w-100" style="max-height: 300px; overflow-y: auto;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="type" class="form-label">Search Type</label>
+                                    <select class="form-select" id="type" name="type">
+                                        <option value="all" selected="@(Model.SearchType == "all")">All</option>
+                                        <option value="projects" selected="@(Model.SearchType == "projects")">Projects</option>
+                                        @if (ViewBag.CurrentUserRole == "Admin" || ViewBag.CurrentUserRole == "Professor")
+                                        {
+                                            <option value="students" selected="@(Model.SearchType == "students")">Students</option>
+                                        }
+                                        @if (ViewBag.CurrentUserRole == "Admin")
+                                        {
+                                            <option value="professors" selected="@(Model.SearchType == "professors")">Professors</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">&nbsp;</label>
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-search"></i> Search
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Advanced Filters -->
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" 
+                                        data-bs-target="#advancedFilters" aria-expanded="false">
+                                    <i class="fas fa-filter"></i> Advanced Filters
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="collapse mt-3" id="advancedFilters">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="department" class="form-label">Department</label>
+                                        <select class="form-select" id="department" name="department">
+                                            <option value="">All Departments</option>
+                                            @foreach (var dept in Model.Departments)
+                                            {
+                                                <option value="@dept.Name" selected="@(Model.Department == dept.Name)">@dept.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="status" class="form-label">Project Status</label>
+                                        <select class="form-select" id="status" name="status">
+                                            <option value="">All Statuses</option>
+                                            @foreach (var status in Model.ProjectStatuses)
+                                            {
+                                                <option value="@status.GetType().GetProperty("Value")?.GetValue(status)" 
+                                                        selected="@(Model.Status == status.GetType().GetProperty("Value")?.GetValue(status)?.ToString())">
+                                                    @status.GetType().GetProperty("Text")?.GetValue(status)
+                                                </option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.Query))
+    {
+        <!-- Search Results -->
+        <div class="row">
+            <div class="col-12">
+                <!-- Projects Results -->
+                @if (Model.Projects.Any() || Model.SearchType == "projects" || Model.SearchType == "all")
+                {
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-project-diagram"></i> Projects
+                                @if (Model.TotalProjects > 0)
+                                {
+                                    <span class="badge bg-light text-primary ms-2">@Model.TotalProjects</span>
+                                }
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            @if (Model.Projects.Any())
+                            {
+                                <div class="row">
+                                    @foreach (var project in Model.Projects)
+                                    {
+                                        <div class="col-md-6 col-lg-4 mb-3">
+                                            <div class="card h-100 border-0 shadow-sm">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">
+                                                        <a href="@Url.Action("Details", "Projects", new { id = project.Id })" 
+                                                           class="text-decoration-none">
+                                                            @project.Title
+                                                        </a>
+                                                    </h6>
+                                                    <p class="card-text text-muted small">
+                                                        <i class="fas fa-user"></i> @project.Student.FullName<br>
+                                                        <i class="fas fa-chalkboard-teacher"></i> @project.Supervisor.DisplayName<br>
+                                                        <i class="fas fa-building"></i> @project.Student.Department.Name
+                                                    </p>
+                                                    @if (!string.IsNullOrEmpty(project.Abstract))
+                                                    {
+                                                        <p class="card-text small">
+                                                            @(project.Abstract.Length > 100 ? project.Abstract.Substring(0, 100) + "..." : project.Abstract)
+                                                        </p>
+                                                    }
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="badge bg-@(project.Status == LibraryApp.Models.ProjectStatus.Completed ? "success" : "primary")">
+                                                            @project.Status
+                                                        </span>
+                                                        <small class="text-muted">@project.SubmissionDate.ToString("MMM yyyy")</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                                
+                                @if (Model.TotalProjects > Model.Projects.Count)
+                                {
+                                    <div class="text-center">
+                                        <a href="@Url.Action("Index", new { query = Model.Query, type = "projects", department = Model.Department, status = Model.Status })" 
+                                           class="btn btn-outline-primary">
+                                            View All @Model.TotalProjects Projects
+                                        </a>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="text-center text-muted py-4">
+                                    <i class="fas fa-project-diagram fa-2x mb-2"></i>
+                                    <p>No projects found matching your search criteria.</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <!-- Students Results -->
+                @if ((Model.Students.Any() || Model.SearchType == "students" || Model.SearchType == "all") && 
+                     (ViewBag.CurrentUserRole == "Admin" || ViewBag.CurrentUserRole == "Professor"))
+                {
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-user-graduate"></i> Students
+                                @if (Model.TotalStudents > 0)
+                                {
+                                    <span class="badge bg-light text-success ms-2">@Model.TotalStudents</span>
+                                }
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            @if (Model.Students.Any())
+                            {
+                                <div class="row">
+                                    @foreach (var student in Model.Students)
+                                    {
+                                        <div class="col-md-6 col-lg-4 mb-3">
+                                            <div class="card h-100 border-0 shadow-sm">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">
+                                                        <a href="@Url.Action("Details", "Students", new { id = student.Id })" 
+                                                           class="text-decoration-none">
+                                                            @student.FullName
+                                                        </a>
+                                                    </h6>
+                                                    <p class="card-text text-muted small">
+                                                        <i class="fas fa-id-card"></i> @student.StudentNumber<br>
+                                                        <i class="fas fa-building"></i> @student.Department.Name<br>
+                                                        <i class="fas fa-envelope"></i> @student.Email
+                                                    </p>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="badge bg-info">
+                                                            @student.Projects.Count Project@(student.Projects.Count != 1 ? "s" : "")
+                                                        </span>
+                                                        <small class="text-muted">@student.EnrollmentDate.ToString("MMM yyyy")</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                                
+                                @if (Model.TotalStudents > Model.Students.Count)
+                                {
+                                    <div class="text-center">
+                                        <a href="@Url.Action("Index", new { query = Model.Query, type = "students", department = Model.Department })" 
+                                           class="btn btn-outline-success">
+                                            View All @Model.TotalStudents Students
+                                        </a>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="text-center text-muted py-4">
+                                    <i class="fas fa-user-graduate fa-2x mb-2"></i>
+                                    <p>No students found matching your search criteria.</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <!-- Professors Results -->
+                @if ((Model.Professors.Any() || Model.SearchType == "professors" || Model.SearchType == "all") && 
+                     ViewBag.CurrentUserRole == "Admin")
+                {
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chalkboard-teacher"></i> Professors
+                                @if (Model.TotalProfessors > 0)
+                                {
+                                    <span class="badge bg-dark text-warning ms-2">@Model.TotalProfessors</span>
+                                }
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            @if (Model.Professors.Any())
+                            {
+                                <div class="row">
+                                    @foreach (var professor in Model.Professors)
+                                    {
+                                        <div class="col-md-6 col-lg-4 mb-3">
+                                            <div class="card h-100 border-0 shadow-sm">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">
+                                                        <a href="@Url.Action("Details", "Professors", new { id = professor.Id })" 
+                                                           class="text-decoration-none">
+                                                            @professor.DisplayName
+                                                        </a>
+                                                    </h6>
+                                                    <p class="card-text text-muted small">
+                                                        <i class="fas fa-id-card"></i> @professor.ProfessorId<br>
+                                                        <i class="fas fa-building"></i> @professor.Department.Name<br>
+                                                        <i class="fas fa-envelope"></i> @professor.Email
+                                                    </p>
+                                                    @if (!string.IsNullOrEmpty(professor.Specialization))
+                                                    {
+                                                        <p class="card-text small">
+                                                            <i class="fas fa-star"></i> @professor.Specialization
+                                                        </p>
+                                                    }
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="badge bg-warning text-dark">
+                                                            @professor.SupervisedProjects.Count Supervised
+                                                        </span>
+                                                        <span class="badge bg-info">
+                                                            @professor.EvaluatedProjects.Count Evaluated
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                                
+                                @if (Model.TotalProfessors > Model.Professors.Count)
+                                {
+                                    <div class="text-center">
+                                        <a href="@Url.Action("Index", new { query = Model.Query, type = "professors", department = Model.Department })" 
+                                           class="btn btn-outline-warning">
+                                            View All @Model.TotalProfessors Professors
+                                        </a>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="text-center text-muted py-4">
+                                    <i class="fas fa-chalkboard-teacher fa-2x mb-2"></i>
+                                    <p>No professors found matching your search criteria.</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                @if (Model.TotalResults == 0)
+                {
+                    <div class="card shadow-sm">
+                        <div class="card-body text-center py-5">
+                            <i class="fas fa-search-minus text-muted" style="font-size: 4rem;"></i>
+                            <h4 class="mt-3 text-muted">No results found</h4>
+                            <p class="text-muted">Try adjusting your search terms or filters.</p>
+                            <a href="@Url.Action("Index")" class="btn btn-primary">Start New Search</a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Welcome Message -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-search text-primary" style="font-size: 4rem;"></i>
+                        <h4 class="mt-3">Search the Library</h4>
+                        <p class="text-muted">Find projects, students, and professors using the search form above.</p>
+                        <p class="text-muted small">
+                            <strong>Tips:</strong> Use keywords from project titles, abstracts, or author names. 
+                            Try using filters to narrow down your results.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            let searchTimeout;
+            const $query = $('#query');
+            const $suggestions = $('#searchSuggestions');
+
+            // Real-time search suggestions
+            $query.on('input', function() {
+                const query = $(this).val().trim();
+                
+                clearTimeout(searchTimeout);
+                
+                if (query.length < 2) {
+                    $suggestions.removeClass('show');
+                    return;
+                }
+
+                searchTimeout = setTimeout(() => {
+                    $.get('@Url.Action("GetSuggestions")', { query: query }, function(data) {
+                        $suggestions.empty();
+                        
+                        if (data.length > 0) {
+                            data.forEach(item => {
+                                const $item = $(`
+                                    <a href="${item.url}" class="dropdown-item">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-${getIconForType(item.type)} me-2"></i>
+                                            <div>
+                                                <div class="fw-bold">${item.title}</div>
+                                                <small class="text-muted">${item.subtitle}</small>
+                                            </div>
+                                        </div>
+                                    </a>
+                                `);
+                                $suggestions.append($item);
+                            });
+                            
+                            $suggestions.addClass('show');
+                        } else {
+                            $suggestions.removeClass('show');
+                        }
+                    });
+                }, 300);
+            });
+
+            // Hide suggestions when clicking outside
+            $(document).on('click', function(e) {
+                if (!$query.is(e.target) && !$suggestions.is(e.target) && $suggestions.has(e.target).length === 0) {
+                    $suggestions.removeClass('show');
+                }
+            });
+
+            // Show suggestions when focusing on input
+            $query.on('focus', function() {
+                if ($suggestions.children().length > 0) {
+                    $suggestions.addClass('show');
+                }
+            });
+
+            function getIconForType(type) {
+                switch (type) {
+                    case 'project': return 'project-diagram';
+                    case 'student': return 'user-graduate';
+                    case 'professor': return 'chalkboard-teacher';
+                    default: return 'search';
+                }
+            }
+
+            // Auto-submit on filter change
+            $('#type, #department, #status').on('change', function() {
+                if ($('#query').val().trim() !== '') {
+                    $('#searchForm').submit();
+                }
+            });
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .dropdown-menu {
+            z-index: 1050;
+        }
+        
+        .card {
+            transition: transform 0.2s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .card-title a {
+            color: inherit;
+        }
+        
+        .card-title a:hover {
+            color: var(--bs-primary);
+        }
+    </style>
+}

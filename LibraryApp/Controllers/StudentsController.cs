@@ -60,12 +60,16 @@ namespace LibraryApp.Controllers
         {
             if (ModelState.IsValid)
             {
+                // Generate default password
+                var authService = new AuthenticationService(_context);
+                var defaultPassword = authService.GenerateDefaultPassword(student.FirstName, student.StudentNumber);
+                student.Password = authService.HashPassword(defaultPassword);
+                student.MustChangePassword = true;
+                
                 _context.Add(student);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            
-
             
             ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "Name", student.DepartmentId);
             return View(student);
@@ -102,6 +106,11 @@ namespace LibraryApp.Controllers
             {
                 try
                 {
+                    var existingStudent = await _context.Students.AsNoTracking().FirstAsync(s => s.Id == id);
+                    student.Password = existingStudent.Password; // Keep existing password
+                    student.MustChangePassword = existingStudent.MustChangePassword;
+                    student.LastLogin = existingStudent.LastLogin;
+                    
                     _context.Update(student);
                     await _context.SaveChangesAsync();
                 }

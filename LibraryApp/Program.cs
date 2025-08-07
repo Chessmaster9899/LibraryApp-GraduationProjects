@@ -29,7 +29,10 @@ builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<ISessionService, SessionService>();
 
 // Add Notification Service
-builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<LibraryApp.Controllers.INotificationService, LibraryApp.Controllers.NotificationService>();
+
+// Add File Upload Service
+builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 
 var app = builder.Build();
 

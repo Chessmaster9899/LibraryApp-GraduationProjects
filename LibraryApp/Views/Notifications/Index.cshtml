@@ -19,10 +19,10 @@
                     </p>
                 </div>
                 <div class="btn-group">
-                    <a href="@Url.Action("Index")" class="btn btn-outline-primary @(Request.Query.ContainsKey("unread") ? "" : "active")">
+                    <a href="@Url.Action("Index")" class="btn btn-outline-primary @(Context.Request.Query.ContainsKey("unread") ? "" : "active")">
                         <i class="fas fa-list"></i> All
                     </a>
-                    <a href="@Url.Action("Unread")" class="btn btn-outline-warning @(Request.Query.ContainsKey("unread") ? "active" : "")">
+                    <a href="@Url.Action("Unread")" class="btn btn-outline-warning @(Context.Request.Query.ContainsKey("unread") ? "active" : "")">
                         <i class="fas fa-exclamation-circle"></i> Unread (@unreadCount)
                     </a>
                 </div>

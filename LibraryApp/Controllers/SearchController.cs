@@ -79,6 +79,7 @@ public class SearchController : BaseController
 
         searchResults.ProjectStatuses = Enum.GetValues<ProjectStatus>()
             .Select(s => new { Value = s.ToString(), Text = s.ToString().Replace("_", " ") })
+            .Cast<object>()
             .ToList();
 
         return View(searchResults);
