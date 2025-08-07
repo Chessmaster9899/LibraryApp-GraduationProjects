@@ -4,7 +4,7 @@ public class DashboardViewModel
 {
     public int TotalProjects { get; set; }
     public int TotalStudents { get; set; }
-    public int TotalSupervisors { get; set; }
+    public int TotalProfessors { get; set; }
     public int TotalDepartments { get; set; }
     
     public List<ProjectStatusSummary> ProjectsByStatus { get; set; } = new List<ProjectStatusSummary>();

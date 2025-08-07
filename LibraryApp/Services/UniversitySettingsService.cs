@@ -40,7 +40,7 @@ namespace LibraryApp.Services
                 settings.ApplicationTitle = "Graduation Projects Library";
                 
             if (string.IsNullOrWhiteSpace(settings.TagLine))
-                settings.TagLine = "Manage and track graduation projects, students, and supervisors";
+                settings.TagLine = "Manage and track graduation projects, students, and professors";
                 
             if (string.IsNullOrWhiteSpace(settings.LogoPath))
                 settings.LogoPath = "/images/defaults/logo.svg";

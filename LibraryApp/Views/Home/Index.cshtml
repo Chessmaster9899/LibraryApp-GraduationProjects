@@ -60,8 +60,8 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <div>
-                        <h4 class="card-title">@Model.TotalSupervisors</h4>
-                        <p class="card-text">Supervisors</p>
+                        <h4 class="card-title">@Model.TotalProfessors</h4>
+                        <p class="card-text">Professors</p>
                     </div>
                     <div class="align-self-center">
                         <i class="fas fa-chalkboard-teacher fa-2x"></i>
@@ -69,8 +69,8 @@
                 </div>
             </div>
             <div class="card-footer">
-                <a asp-controller="Supervisors" asp-action="Index" class="text-white">
-                    <small>View all supervisors <i class="fas fa-arrow-right"></i></small>
+                <a asp-controller="Professors" asp-action="Index" class="text-white">
+                    <small>View all professors <i class="fas fa-arrow-right"></i></small>
                 </a>
             </div>
         </div>
@@ -90,7 +90,9 @@
                 </div>
             </div>
             <div class="card-footer">
-                <small class="text-white">Academic departments</small>
+                <a asp-controller="Departments" asp-action="Index" class="text-white">
+                    <small>View all departments <i class="fas fa-arrow-right"></i></small>
+                </a>
             </div>
         </div>
     </div>
@@ -154,8 +156,8 @@
                         </a>
                     </div>
                     <div class="col-12 mb-2">
-                        <a asp-controller="Supervisors" asp-action="Create" class="btn btn-info btn-block">
-                            <i class="fas fa-user-tie"></i> Add New Supervisor
+                        <a asp-controller="Professors" asp-action="Create" class="btn btn-info btn-block">
+                            <i class="fas fa-user-tie"></i> Add New Professor
                         </a>
                     </div>
                 </div>

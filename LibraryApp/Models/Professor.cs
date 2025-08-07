@@ -2,13 +2,20 @@ using System.ComponentModel.DataAnnotations;
 
 namespace LibraryApp.Models;
 
-public class Student
+public enum ProfessorRole
+{
+    Supervisor,
+    Evaluator,
+    Both
+}
+
+public class Professor
 {
     public int Id { get; set; }
     
-    [Display(Name = "Student Number")]
+    [Display(Name = "Professor ID")]
     [Required]
-    public required string StudentNumber { get; set; }
+    public required string ProfessorId { get; set; }
     
     [Display(Name = "First Name")]
     [Required]
@@ -25,14 +32,17 @@ public class Student
     [Phone]
     public string? Phone { get; set; }
     
+    [Required]
+    public required string Title { get; set; } // Dr., Prof., etc.
+    
     [Display(Name = "Department")]
     [Required]
     public int DepartmentId { get; set; }
     
-    [Display(Name = "Enrollment Date")]
-    [Required]
-    [DataType(DataType.Date)]
-    public DateTime EnrollmentDate { get; set; }
+    public string? Specialization { get; set; }
+    
+    [Display(Name = "Role")]
+    public ProfessorRole Role { get; set; } = ProfessorRole.Both;
     
     // Authentication properties
     public string? Password { get; set; } // Hashed password
@@ -45,9 +55,10 @@ public class Student
     
     // Navigation properties
     public Department Department { get; set; } = null!;
-    public ICollection<Project> Projects { get; set; } = new List<Project>();
+    public ICollection<Project> SupervisedProjects { get; set; } = new List<Project>();
+    public ICollection<Project> EvaluatedProjects { get; set; } = new List<Project>();
     
     // Computed properties
     public string FullName => $"{FirstName} {LastName}";
-    public string DisplayName => $"{FullName} ({StudentNumber})";
+    public string DisplayName => $"{Title} {FullName}";
 }

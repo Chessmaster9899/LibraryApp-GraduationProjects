@@ -5,9 +5,10 @@ namespace LibraryApp.Models
         public string Name { get; set; } = "University";
         public string ShortName { get; set; } = "UNI";
         public string ApplicationTitle { get; set; } = "Graduation Projects Library";
-        public string TagLine { get; set; } = "Manage and track graduation projects, students, and supervisors";
+        public string TagLine { get; set; } = "Manage and track graduation projects, students, and professors";
         public string LogoPath { get; set; } = "/images/university/logo.png";
         public string FaviconPath { get; set; } = "/images/university/favicon.ico";
+        public string BackgroundImagePath { get; set; } = "/images/university/background.jpg";
         public string FooterText { get; set; } = "University Library System";
         public string ContactEmail { get; set; } = "library@university.edu";
         public string ContactPhone { get; set; } = "+1-555-123-4567";

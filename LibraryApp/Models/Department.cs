@@ -8,5 +8,5 @@ public class Department
     
     // Navigation properties
     public ICollection<Student> Students { get; set; } = new List<Student>();
-    public ICollection<Supervisor> Supervisors { get; set; } = new List<Supervisor>();
+    public ICollection<Professor> Professors { get; set; } = new List<Professor>();
 }

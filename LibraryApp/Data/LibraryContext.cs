@@ -11,8 +11,10 @@ public class LibraryContext : DbContext
 
     public DbSet<Department> Departments { get; set; }
     public DbSet<Student> Students { get; set; }
-    public DbSet<Supervisor> Supervisors { get; set; }
+    public DbSet<Professor> Professors { get; set; }
     public DbSet<Project> Projects { get; set; }
+    public DbSet<User> Users { get; set; }
+    public DbSet<Admin> Admins { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -27,8 +29,20 @@ public class LibraryContext : DbContext
             .HasIndex(s => s.Email)
             .IsUnique();
 
-        modelBuilder.Entity<Supervisor>()
+        modelBuilder.Entity<Professor>()
+            .HasIndex(s => s.ProfessorId)
+            .IsUnique();
+
+        modelBuilder.Entity<Professor>()
             .HasIndex(s => s.Email)
+            .IsUnique();
+
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.UserId)
+            .IsUnique();
+
+        modelBuilder.Entity<Admin>()
+            .HasIndex(a => a.Username)
             .IsUnique();
 
         // Configure foreign key relationships
@@ -38,9 +52,9 @@ public class LibraryContext : DbContext
             .HasForeignKey(s => s.DepartmentId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        modelBuilder.Entity<Supervisor>()
+        modelBuilder.Entity<Professor>()
             .HasOne(s => s.Department)
-            .WithMany(d => d.Supervisors)
+            .WithMany(d => d.Professors)
             .HasForeignKey(s => s.DepartmentId)
             .OnDelete(DeleteBehavior.Restrict);
 
@@ -52,15 +66,48 @@ public class LibraryContext : DbContext
 
         modelBuilder.Entity<Project>()
             .HasOne(p => p.Supervisor)
-            .WithMany(s => s.Projects)
+            .WithMany(s => s.SupervisedProjects)
             .HasForeignKey(p => p.SupervisorId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Project>()
+            .HasOne(p => p.Evaluator)
+            .WithMany(s => s.EvaluatedProjects)
+            .HasForeignKey(p => p.EvaluatorId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // Configure User relationships
+        modelBuilder.Entity<User>()
+            .HasOne(u => u.Student)
+            .WithOne()
+            .HasForeignKey<User>(u => u.StudentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<User>()
+            .HasOne(u => u.Professor)
+            .WithOne()
+            .HasForeignKey<User>(u => u.ProfessorId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         // Seed some initial data
         modelBuilder.Entity<Department>().HasData(
             new Department { Id = 1, Name = "Computer Science", Description = "Department of Computer Science and Engineering" },
             new Department { Id = 2, Name = "Electrical Engineering", Description = "Department of Electrical and Electronics Engineering" },
             new Department { Id = 3, Name = "Mechanical Engineering", Description = "Department of Mechanical Engineering" }
+        );
+
+        // Seed default admin
+        modelBuilder.Entity<Admin>().HasData(
+            new Admin 
+            { 
+                Id = 1, 
+                Username = "admin", 
+                Password = "$2a$11$5G2wV.8gK8y0xGmcKCU0qO8hYcFq1UYc.H6fV7.zOuVT5WiA.zGFi", // Default: "admin123"
+                FirstName = "System",
+                LastName = "Administrator",
+                Email = "admin@university.edu",
+                IsActive = true
+            }
         );
     }
 }

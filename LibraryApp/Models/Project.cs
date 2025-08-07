@@ -50,7 +50,11 @@ public class Project
     [Required]
     public int SupervisorId { get; set; }
     
+    [Display(Name = "Evaluator")]
+    public int? EvaluatorId { get; set; }
+    
     // Navigation properties
     public Student Student { get; set; } = null!;
-    public Supervisor Supervisor { get; set; } = null!;
+    public Professor Supervisor { get; set; } = null!;
+    public Professor? Evaluator { get; set; }
 }

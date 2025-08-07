@@ -41,9 +41,9 @@ namespace LibraryApp.Controllers
                 ViewData["StatusFilter"] = statusFilter;
             }
 
-            if (!string.IsNullOrEmpty(supervisorFilter) && int.TryParse(supervisorFilter, out var supervisorId))
+            if (!string.IsNullOrEmpty(supervisorFilter) && int.TryParse(supervisorFilter, out var professorId))
             {
-                projectsQuery = projectsQuery.Where(p => p.SupervisorId == supervisorId);
+                projectsQuery = projectsQuery.Where(p => p.SupervisorId == professorId);
                 ViewData["SupervisorFilter"] = supervisorFilter;
             }
 
@@ -52,7 +52,7 @@ namespace LibraryApp.Controllers
                 .ToListAsync();
 
             // Populate supervisor dropdown
-            var supervisors = await _context.Supervisors
+            var professors = await _context.Professors
                 .OrderBy(s => s.FirstName)
                 .ThenBy(s => s.LastName)
                 .Select(s => new { 
@@ -60,7 +60,7 @@ namespace LibraryApp.Controllers
                     DisplayText = s.Title + " " + s.FirstName + " " + s.LastName 
                 })
                 .ToListAsync();
-            ViewData["Supervisors"] = supervisors;
+            ViewData["Professors"] = professors;
 
             return View(projects);
         }
@@ -96,14 +96,14 @@ namespace LibraryApp.Controllers
                     DisplayText = s.FirstName + " " + s.LastName + " (" + s.StudentNumber + ")"
                 }).ToList();
                 
-            var supervisors = _context.Supervisors.Include(s => s.Department)
+            var professors = _context.Professors.Include(s => s.Department)
                 .Select(s => new { 
                     Id = s.Id, 
                     DisplayText = s.Title + " " + s.FirstName + " " + s.LastName + " - " + s.Department.Name
                 }).ToList();
                 
             ViewData["StudentId"] = new SelectList(students, "Id", "DisplayText");
-            ViewData["SupervisorId"] = new SelectList(supervisors, "Id", "DisplayText");
+            ViewData["SupervisorId"] = new SelectList(professors, "Id", "DisplayText");
             return View();
         }
 
@@ -142,14 +142,14 @@ namespace LibraryApp.Controllers
                     DisplayText = s.FirstName + " " + s.LastName + " (" + s.StudentNumber + ")"
                 }).ToList();
                 
-            var supervisors = _context.Supervisors.Include(s => s.Department)
+            var professors = _context.Professors.Include(s => s.Department)
                 .Select(s => new { 
                     Id = s.Id, 
                     DisplayText = s.Title + " " + s.FirstName + " " + s.LastName + " - " + s.Department.Name
                 }).ToList();
                 
             ViewData["StudentId"] = new SelectList(students, "Id", "DisplayText", project.StudentId);
-            ViewData["SupervisorId"] = new SelectList(supervisors, "Id", "DisplayText", project.SupervisorId);
+            ViewData["SupervisorId"] = new SelectList(professors, "Id", "DisplayText", project.SupervisorId);
             return View(project);
         }
 
@@ -173,14 +173,14 @@ namespace LibraryApp.Controllers
                     DisplayText = s.FirstName + " " + s.LastName + " (" + s.StudentNumber + ")"
                 }).ToList();
                 
-            var supervisors = _context.Supervisors.Include(s => s.Department)
+            var professors = _context.Professors.Include(s => s.Department)
                 .Select(s => new { 
                     Id = s.Id, 
                     DisplayText = s.Title + " " + s.FirstName + " " + s.LastName + " - " + s.Department.Name
                 }).ToList();
                 
             ViewData["StudentId"] = new SelectList(students, "Id", "DisplayText", project.StudentId);
-            ViewData["SupervisorId"] = new SelectList(supervisors, "Id", "DisplayText", project.SupervisorId);
+            ViewData["SupervisorId"] = new SelectList(professors, "Id", "DisplayText", project.SupervisorId);
             return View(project);
         }
 
@@ -242,7 +242,7 @@ namespace LibraryApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["StudentId"] = new SelectList(_context.Students.Include(s => s.Department), "Id", "FirstName", project.StudentId);
-            ViewData["SupervisorId"] = new SelectList(_context.Supervisors.Include(s => s.Department), "Id", "FirstName", project.SupervisorId);
+            ViewData["SupervisorId"] = new SelectList(_context.Professors.Include(s => s.Department), "Id", "FirstName", project.SupervisorId);
             return View(project);
         }
 
