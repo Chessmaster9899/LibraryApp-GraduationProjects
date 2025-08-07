@@ -14,6 +14,9 @@ builder.Services.AddDbContext<LibraryContext>(options =>
 // Add University Settings Service
 builder.Services.AddScoped<IUniversitySettingsService, UniversitySettingsService>();
 
+// Add Authentication Service
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -24,7 +24,7 @@ public class HomeController : BaseController
         {
             TotalProjects = await _context.Projects.CountAsync(),
             TotalStudents = await _context.Students.CountAsync(),
-            TotalSupervisors = await _context.Supervisors.CountAsync(),
+            TotalSupervisors = await _context.Professors.CountAsync(),
             TotalDepartments = await _context.Departments.CountAsync(),
             
             ProjectsByStatus = await _context.Projects

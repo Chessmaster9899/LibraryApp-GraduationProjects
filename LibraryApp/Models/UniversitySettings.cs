@@ -5,7 +5,7 @@ namespace LibraryApp.Models
         public string Name { get; set; } = "University";
         public string ShortName { get; set; } = "UNI";
         public string ApplicationTitle { get; set; } = "Graduation Projects Library";
-        public string TagLine { get; set; } = "Manage and track graduation projects, students, and supervisors";
+        public string TagLine { get; set; } = "Manage and track graduation projects, students, and professors";
         public string LogoPath { get; set; } = "/images/university/logo.png";
         public string FaviconPath { get; set; } = "/images/university/favicon.ico";
         public string FooterText { get; set; } = "University Library System";
