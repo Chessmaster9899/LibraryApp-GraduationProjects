@@ -13,7 +13,7 @@ namespace LibraryApp.Controllers
         private readonly LibraryContext _context;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public ProjectsController(LibraryContext context, IUniversitySettingsService universitySettings, IWebHostEnvironment webHostEnvironment) : base(universitySettings)
+        public ProjectsController(LibraryContext context, IUniversitySettingsService universitySettings, IWebHostEnvironment webHostEnvironment, ISessionService sessionService) : base(universitySettings, sessionService)
         {
             _context = context;
             _webHostEnvironment = webHostEnvironment;
@@ -113,9 +113,9 @@ namespace LibraryApp.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AdminOnly]
-        public async Task<IActionResult> Create([Bind("Id,Title,Abstract,Keywords,Status,SubmissionDate,DefenseDate,Grade,StudentId,SupervisorId")] Project project, IFormFile? documentFile)
+        public async Task<IActionResult> Create([Bind("Id,Title,Abstract,Keywords,Status,SubmissionDate,DefenseDate,Grade,StudentId,SupervisorId")] Project project, IFormFile? documentFile, IFormFile? posterFile)
         {
-            // Handle file upload
+            // Handle document file upload
             if (documentFile != null && documentFile.Length > 0)
             {
                 var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "documents");
@@ -130,6 +130,23 @@ namespace LibraryApp.Controllers
                 }
                 
                 project.DocumentPath = "/documents/" + uniqueFileName;
+            }
+
+            // Handle poster file upload
+            if (posterFile != null && posterFile.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "posters");
+                Directory.CreateDirectory(uploadsFolder);
+                
+                var uniqueFileName = Guid.NewGuid().ToString() + "_" + posterFile.FileName;
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await posterFile.CopyToAsync(fileStream);
+                }
+                
+                project.PosterPath = "/posters/" + uniqueFileName;
             }
             
             if (ModelState.IsValid)
@@ -192,14 +209,14 @@ namespace LibraryApp.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AdminOnly]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Abstract,Keywords,Status,SubmissionDate,DefenseDate,Grade,DocumentPath,StudentId,SupervisorId")] Project project, IFormFile? documentFile)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Abstract,Keywords,Status,SubmissionDate,DefenseDate,Grade,DocumentPath,PosterPath,StudentId,SupervisorId")] Project project, IFormFile? documentFile, IFormFile? posterFile)
         {
             if (id != project.Id)
             {
                 return NotFound();
             }
 
-            // Handle file upload
+            // Handle document file upload
             if (documentFile != null && documentFile.Length > 0)
             {
                 var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "documents");
@@ -224,6 +241,33 @@ namespace LibraryApp.Controllers
                 }
                 
                 project.DocumentPath = "/documents/" + uniqueFileName;
+            }
+
+            // Handle poster file upload
+            if (posterFile != null && posterFile.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "posters");
+                Directory.CreateDirectory(uploadsFolder);
+                
+                // Delete old poster if it exists
+                if (!string.IsNullOrEmpty(project.PosterPath))
+                {
+                    var oldFilePath = Path.Combine(_webHostEnvironment.WebRootPath, project.PosterPath.TrimStart('/'));
+                    if (System.IO.File.Exists(oldFilePath))
+                    {
+                        System.IO.File.Delete(oldFilePath);
+                    }
+                }
+                
+                var uniqueFileName = Guid.NewGuid().ToString() + "_" + posterFile.FileName;
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await posterFile.CopyToAsync(fileStream);
+                }
+                
+                project.PosterPath = "/posters/" + uniqueFileName;
             }
 
             if (ModelState.IsValid)

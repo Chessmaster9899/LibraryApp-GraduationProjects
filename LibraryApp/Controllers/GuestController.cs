@@ -2,15 +2,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using LibraryApp.Data;
 using LibraryApp.Models;
+using LibraryApp.Services;
 
 namespace LibraryApp.Controllers;
 
 [Route("Guest")]
-public class GuestController : Controller
+public class GuestController : BaseController
 {
     private readonly LibraryContext _context;
 
-    public GuestController(LibraryContext context)
+    public GuestController(LibraryContext context, IUniversitySettingsService universitySettings, ISessionService sessionService) : base(universitySettings, sessionService)
     {
         _context = context;
     }

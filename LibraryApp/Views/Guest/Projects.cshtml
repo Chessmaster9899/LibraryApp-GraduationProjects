@@ -4,19 +4,43 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container-fluid mt-4">
-    <!-- Page Header -->
+<div class="container-fluid">
+    <!-- Enhanced Page Header -->
     <div class="row mb-4">
         <div class="col-12">
-            <h1>Browse Graduation Projects</h1>
-            <p class="lead">Explore completed projects from our academic community</p>
+            <div class="card border-0 bg-primary text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="h2 mb-2">🎓 Graduation Projects Gallery</h1>
+                            <p class="mb-0 opacity-75">Explore innovative projects completed by our talented students. Discover cutting-edge research, creative solutions, and academic excellence from across all departments.</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="d-flex flex-column align-items-end">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-graduation-cap fa-2x me-2 opacity-75"></i>
+                                    <div>
+                                        <div class="h5 mb-0">@Model.Count</div>
+                                        <small class="opacity-75">Projects Available</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Filters -->
+    <!-- Enhanced Filters -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom-0 py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-filter text-primary me-2"></i>Filter Projects
+                    </h5>
+                </div>
                 <div class="card-body">
                     <form method="get" asp-action="Projects">
                         <div class="row">
@@ -24,7 +48,7 @@
                                 <label for="department" class="form-label">Department</label>
                                 <select name="department" id="department" class="form-select">
                                     <option value="">All Departments</option>
-                                    @foreach (var dept in ViewBag.Departments as List<Department>)
+                                    @foreach (var dept in (ViewBag.Departments as List<Department>) ?? new List<Department>())
                                     {
                                         <option value="@dept.Name" selected="@(ViewBag.Department == dept.Name)">@dept.Name</option>
                                     }

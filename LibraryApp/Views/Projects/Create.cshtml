@@ -53,6 +53,11 @@
                 <small class="form-text text-muted">Upload a PDF, Word document, or text file (optional)</small>
             </div>
             <div class="form-group">
+                <label for="posterFile" class="control-label">Project Poster</label>
+                <input type="file" name="posterFile" class="form-control" accept=".jpg,.jpeg,.png,.pdf,.svg" />
+                <small class="form-text text-muted">Upload project poster (JPG, PNG, PDF, or SVG format, optional)</small>
+            </div>
+            <div class="form-group">
                 <label asp-for="StudentId" class="control-label">Student</label>
                 <select asp-for="StudentId" class ="form-control" asp-items="ViewBag.StudentId">
                     <option value="">Please select a student</option>

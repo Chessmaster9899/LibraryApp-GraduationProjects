@@ -13,7 +13,7 @@ namespace LibraryApp.Controllers
     {
         private readonly LibraryContext _context;
 
-        public ProfessorsController(LibraryContext context, IUniversitySettingsService universitySettings) : base(universitySettings)
+        public ProfessorsController(LibraryContext context, IUniversitySettingsService universitySettings, ISessionService sessionService) : base(universitySettings, sessionService)
         {
             _context = context;
         }

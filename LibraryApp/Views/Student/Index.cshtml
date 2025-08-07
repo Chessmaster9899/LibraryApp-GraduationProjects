@@ -3,147 +3,311 @@
     ViewData["Title"] = "Student Dashboard";
 }
 
-<div class="row">
-    <div class="col-md-8">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>Student Dashboard</h1>
-            <div>
-                <span class="text-muted">Welcome back, </span>
-                <strong>@Model.Student.FullName</strong>
+<div class="container-fluid">
+    <!-- Welcome Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 bg-primary text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="h3 mb-1">Welcome back, @Model.Student.FirstName! 👋</h1>
+                            <p class="mb-0 opacity-75">Here's your academic progress overview</p>
+                        </div>
+                        <div class="text-end">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-user-graduate fa-2x me-3 opacity-75"></i>
+                                <div>
+                                    <div class="fw-bold">@Model.Student.FullName</div>
+                                    <small class="opacity-75">@Model.Student.StudentNumber</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
         
-        <!-- Statistics Cards -->
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="card border-primary">
-                    <div class="card-body text-center">
-                        <h4 class="text-primary">@Model.TotalProjects</h4>
-                        <p class="card-text">Total Projects</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card border-success">
-                    <div class="card-body text-center">
-                        <h4 class="text-success">@Model.CompletedProjects</h4>
-                        <p class="card-text">Completed</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card border-warning">
-                    <div class="card-body text-center">
-                        <h4 class="text-warning">@Model.InProgressProjects</h4>
-                        <p class="card-text">In Progress</p>
+    <!-- Enhanced Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-shape bg-primary bg-opacity-10 text-primary rounded-circle p-3 me-3">
+                            <i class="fas fa-project-diagram fa-lg"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-1 text-primary">@Model.TotalProjects</h4>
+                            <p class="text-muted mb-0 small">Total Projects</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Recent Projects -->
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Recent Projects</h5>
-                <a href="@Url.Action("Projects")" class="btn btn-sm btn-outline-primary">View All</a>
-            </div>
-            <div class="card-body">
-                @if (Model.RecentProjects.Any())
-                {
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Title</th>
-                                    <th>Supervisor</th>
-                                    <th>Status</th>
-                                    <th>Submission Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var project in Model.RecentProjects)
-                                {
-                                    <tr>
-                                        <td>
-                                            <strong>@project.Title</strong>
-                                            @if (!string.IsNullOrEmpty(project.Keywords))
-                                            {
-                                                <br>
-                                                <small class="text-muted">@project.Keywords</small>
-                                            }
-                                        </td>
-                                        <td>@project.Supervisor.DisplayName</td>
-                                        <td>
-                                            <span class="badge bg-@(project.Status switch {
-                                                ProjectStatus.Completed => "success",
-                                                ProjectStatus.Defended => "success",
-                                                ProjectStatus.InProgress => "warning",
-                                                ProjectStatus.Approved => "info",
-                                                _ => "secondary"
-                                            })">
-                                                @project.Status
-                                            </span>
-                                        </td>
-                                        <td>@project.SubmissionDate.ToString("MMM dd, yyyy")</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-shape bg-success bg-opacity-10 text-success rounded-circle p-3 me-3">
+                            <i class="fas fa-check-circle fa-lg"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-1 text-success">@Model.CompletedProjects</h4>
+                            <p class="text-muted mb-0 small">Completed</p>
+                        </div>
                     </div>
-                }
-                else
-                {
-                    <p class="text-muted text-center py-4">No projects found. Contact your advisor to get started!</p>
-                }
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-shape bg-warning bg-opacity-10 text-warning rounded-circle p-3 me-3">
+                            <i class="fas fa-clock fa-lg"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-1 text-warning">@Model.InProgressProjects</h4>
+                            <p class="text-muted mb-0 small">In Progress</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-shape bg-info bg-opacity-10 text-info rounded-circle p-3 me-3">
+                            <i class="fas fa-percentage fa-lg"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-1 text-info">@(Model.TotalProjects > 0 ? Math.Round((double)Model.CompletedProjects / Model.TotalProjects * 100, 1) : 0)%</h4>
+                            <p class="text-muted mb-0 small">Success Rate</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Sidebar -->
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Student Information</h5>
-            </div>
-            <div class="card-body">
-                <dl class="row">
-                    <dt class="col-5">Student ID:</dt>
-                    <dd class="col-7">@Model.Student.StudentNumber</dd>
-                    
-                    <dt class="col-5">Name:</dt>
-                    <dd class="col-7">@Model.Student.FullName</dd>
-                    
-                    <dt class="col-5">Email:</dt>
-                    <dd class="col-7">@Model.Student.Email</dd>
-                    
-                    <dt class="col-5">Department:</dt>
-                    <dd class="col-7">@Model.Student.Department.Name</dd>
-                    
-                    <dt class="col-5">Enrolled:</dt>
-                    <dd class="col-7">@Model.Student.EnrollmentDate.ToString("MMM yyyy")</dd>
-                    
-                    @if (Model.Student.LastLogin.HasValue)
+    <!-- Main Content Row -->
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <!-- Recent Projects with Enhanced Design -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="fas fa-clock text-primary me-2"></i>Recent Projects
+                        </h5>
+                        <a href="@Url.Action("Projects")" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-arrow-right me-1"></i>View All
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.RecentProjects.Any())
                     {
-                        <dt class="col-5">Last Login:</dt>
-                        <dd class="col-7">@Model.Student.LastLogin.Value.ToString("MMM dd, yyyy")</dd>
+                        @foreach (var project in Model.RecentProjects)
+                        {
+                            <div class="border-bottom p-3 hover-bg-light">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1 fw-bold">@project.Title</h6>
+                                        <div class="d-flex align-items-center text-muted small mb-2">
+                                            <i class="fas fa-user-tie me-1"></i>
+                                            <span class="me-3">@project.Supervisor.DisplayName</span>
+                                            <i class="fas fa-calendar me-1"></i>
+                                            <span>@project.SubmissionDate.ToString("MMM dd, yyyy")</span>
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(project.Keywords))
+                                        {
+                                            <div class="mb-2">
+                                                @foreach (var keyword in project.Keywords.Split(',', StringSplitOptions.RemoveEmptyEntries).Take(3))
+                                                {
+                                                    <span class="badge bg-light text-dark me-1">@keyword.Trim()</span>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge badge-status bg-@(project.Status switch {
+                                            ProjectStatus.Completed => "success",
+                                            ProjectStatus.Defended => "success",
+                                            ProjectStatus.InProgress => "warning",
+                                            ProjectStatus.Approved => "info",
+                                            ProjectStatus.Proposed => "secondary",
+                                            ProjectStatus.SubmittedForReview => "primary",
+                                            ProjectStatus.ReviewApproved => "success",
+                                            ProjectStatus.ReviewRejected => "danger",
+                                            ProjectStatus.Published => "dark",
+                                            _ => "secondary"
+                                        })">
+                                            @project.Status.ToString().Replace("Status", "")
+                                        </span>
+                                        <div class="mt-2">
+                                            @if (project.Status == ProjectStatus.Approved)
+                                            {
+                                                <button class="btn btn-success btn-xs" onclick="startProject(@project.Id)">
+                                                    <i class="fas fa-play me-1"></i>Start
+                                                </button>
+                                            }
+                                            else if (project.Status == ProjectStatus.InProgress)
+                                            {
+                                                <button class="btn btn-primary btn-xs" onclick="submitProject(@project.Id)">
+                                                    <i class="fas fa-paper-plane me-1"></i>Submit
+                                                </button>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
                     }
-                </dl>
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">No projects yet</h6>
+                            <p class="text-muted">Your projects will appear here once assigned</p>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
 
-        <div class="card mt-3">
-            <div class="card-header">
-                <h5 class="mb-0">Quick Actions</h5>
+        <div class="col-lg-4">
+            <!-- Student Profile Card -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-bottom-0 py-3">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="fas fa-user text-primary me-2"></i>Profile Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-5 small text-muted">Student ID:</dt>
+                        <dd class="col-7 small">@Model.Student.StudentNumber</dd>
+                        
+                        <dt class="col-5 small text-muted">Name:</dt>
+                        <dd class="col-7 small">@Model.Student.FullName</dd>
+                        
+                        <dt class="col-5 small text-muted">Email:</dt>
+                        <dd class="col-7 small">@Model.Student.Email</dd>
+                        
+                        <dt class="col-5 small text-muted">Department:</dt>
+                        <dd class="col-7 small">@Model.Student.Department?.Name</dd>
+                        
+                        <dt class="col-5 small text-muted">Enrolled:</dt>
+                        <dd class="col-7 small">@Model.Student.EnrollmentDate.ToString("MMM yyyy")</dd>
+                        
+                        <dt class="col-5 small text-muted">Last Login:</dt>
+                        <dd class="col-7 small">@(Model.Student.LastLogin?.ToString("MMM dd, yyyy") ?? "Never")</dd>
+                    </dl>
+                </div>
+                <div class="card-footer bg-light border-top-0">
+                    <div class="d-grid gap-2">
+                        <a href="@Url.Action("Profile")" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-edit me-1"></i>Edit Profile
+                        </a>
+                        <a href="@Url.Action("Projects")" class="btn btn-primary btn-sm">
+                            <i class="fas fa-list me-1"></i>All Projects
+                        </a>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="d-grid gap-2">
-                    <a href="@Url.Action("Projects")" class="btn btn-primary">View All Projects</a>
-                    <a href="@Url.Action("Profile")" class="btn btn-outline-secondary">Edit Profile</a>
-                    <a href="@Url.Action("ChangePassword", "Auth")" class="btn btn-outline-warning">Change Password</a>
-                    <hr>
-                    <a href="@Url.Action("Logout", "Auth")" class="btn btn-danger">Sign Out</a>
+
+            <!-- Quick Actions -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom-0 py-3">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="fas fa-bolt text-warning me-2"></i>Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="@Url.Action("Projects")" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye me-2"></i>View All Projects
+                        </a>
+                        <a href="@Url.Action("Profile")" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-user-edit me-2"></i>Update Profile
+                        </a>
+                        <a href="@Url.Action("Projects", "Guest")" class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-globe me-2"></i>Browse Gallery
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+@section Scripts {
+    <script>
+        function startProject(projectId) {
+            if (confirm('Start working on this project?')) {
+                fetch(`/Student/StartProject`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    body: JSON.stringify({ projectId: projectId })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    }
+                });
+            }
+        }
+
+        function submitProject(projectId) {
+            const comments = prompt('Add any comments for your submission (optional):');
+            if (comments !== null) {
+                fetch(`/Student/SubmitProject`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    body: JSON.stringify({ projectId: projectId, comments: comments })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    }
+                });
+            }
+        }
+    </script>
+}
+
+<style>
+    .badge-status {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.75rem;
+    }
+    
+    .btn-xs {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    .icon-shape {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .hover-bg-light:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+        transition: background-color 0.2s ease;
+    }
+</style>
 </div>
