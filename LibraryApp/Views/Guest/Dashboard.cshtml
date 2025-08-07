@@ -1,0 +1,241 @@
+@model GuestDashboardViewModel
+@{
+    ViewBag.Title = "Graduation Projects Gallery";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="jumbotron bg-primary text-white p-4 rounded">
+                <h1 class="display-4">Welcome to Our Graduation Projects Gallery</h1>
+                <p class="lead">Explore innovative projects completed by our talented students. Browse through cutting-edge research, creative solutions, and academic excellence.</p>
+                <a asp-action="Projects" class="btn btn-light btn-lg">Browse All Projects</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3 class="card-title">@Model.TotalCompletedProjects</h3>
+                            <p class="card-text">Completed Projects</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-graduation-cap fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3 class="card-title">@Model.Departments.Count</h3>
+                            <p class="card-text">Departments</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-building fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3 class="card-title">@Model.FeaturedProjects.Count</h3>
+                            <p class="card-text">Featured Projects</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-star fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3 class="card-title">@Model.ProjectsByDepartment.Count</h3>
+                            <p class="card-text">Active Departments</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-chart-bar fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Featured Projects Section -->
+    @if (Model.FeaturedProjects.Any())
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="mb-3">Featured Projects</h2>
+                <div class="row">
+                    @foreach (var project in Model.FeaturedProjects)
+                    {
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                @if (!string.IsNullOrEmpty(project.PosterPath))
+                                {
+                                    <img src="@project.PosterPath" class="card-img-top" alt="@project.Title" style="height: 200px; object-fit: cover;">
+                                }
+                                else
+                                {
+                                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                        <i class="fas fa-image fa-3x text-muted"></i>
+                                    </div>
+                                }
+                                <div class="card-body">
+                                    <h5 class="card-title">@project.Title</h5>
+                                    <p class="card-text">
+                                        <small class="text-muted">
+                                            By @project.Student.FullName<br>
+                                            Department: @project.Student.Department.Name<br>
+                                            Supervisor: @project.Supervisor.DisplayName
+                                        </small>
+                                    </p>
+                                    @if (!string.IsNullOrEmpty(project.Abstract))
+                                    {
+                                        <p class="card-text">@(project.Abstract.Length > 100 ? project.Abstract.Substring(0, 100) + "..." : project.Abstract)</p>
+                                    }
+                                </div>
+                                <div class="card-footer">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a asp-action="ProjectDetails" asp-route-id="@project.Id" class="btn btn-primary">
+                                            <i class="fas fa-eye"></i> View Details
+                                        </a>
+                                        @if (!string.IsNullOrEmpty(project.PosterPath))
+                                        {
+                                            <a asp-action="ViewPoster" asp-route-id="@project.Id" class="btn btn-info" target="_blank">
+                                                <i class="fas fa-image"></i> Poster
+                                            </a>
+                                        }
+                                        @if (!string.IsNullOrEmpty(project.ReportPath))
+                                        {
+                                            <a asp-action="DownloadReport" asp-route-id="@project.Id" class="btn btn-success">
+                                                <i class="fas fa-download"></i> Report
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Recent Projects Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2>Recent Projects</h2>
+                <a asp-action="Projects" class="btn btn-outline-primary">View All Projects</a>
+            </div>
+            
+            @if (Model.CompletedProjects.Any())
+            {
+                <div class="row">
+                    @foreach (var project in Model.CompletedProjects.Take(6))
+                    {
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">@project.Title</h5>
+                                    <p class="card-text">
+                                        <small class="text-muted">
+                                            By @project.Student.FullName<br>
+                                            @project.Student.Department.Name<br>
+                                            Completed: @(project.DefenseDate?.ToString("MMM yyyy") ?? project.SubmissionDate.ToString("MMM yyyy"))
+                                        </small>
+                                    </p>
+                                    @if (!string.IsNullOrEmpty(project.Abstract))
+                                    {
+                                        <p class="card-text">@(project.Abstract.Length > 80 ? project.Abstract.Substring(0, 80) + "..." : project.Abstract)</p>
+                                    }
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a asp-action="ProjectDetails" asp-route-id="@project.Id" class="btn btn-primary">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        @if (!string.IsNullOrEmpty(project.PosterPath))
+                                        {
+                                            <a asp-action="ViewPoster" asp-route-id="@project.Id" class="btn btn-info" target="_blank">
+                                                <i class="fas fa-image"></i> Poster
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> No completed projects are currently available for public viewing.
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Projects by Department Section -->
+    @if (Model.ProjectsByDepartment.Any())
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="mb-3">Projects by Department</h2>
+                <div class="row">
+                    @foreach (var dept in Model.ProjectsByDepartment)
+                    {
+                        <div class="col-md-4 mb-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">@dept.Key</h5>
+                                    <h3 class="text-primary">@dept.Value</h3>
+                                    <p class="card-text">Completed Projects</p>
+                                    <a asp-action="Projects" asp-route-department="@dept.Key" class="btn btn-outline-primary">
+                                        View Projects
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Add any interactive features for the guest dashboard
+        $(document).ready(function() {
+            // Fade in animation for cards
+            $('.card').hide().fadeIn(1000);
+            
+            // Add hover effects
+            $('.card').hover(
+                function() { $(this).addClass('shadow-lg'); },
+                function() { $(this).removeClass('shadow-lg'); }
+            );
+        });
+    </script>
+}

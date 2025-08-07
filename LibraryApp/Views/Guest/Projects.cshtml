@@ -1,0 +1,287 @@
+@model List<Project>
+@{
+    ViewBag.Title = "Browse Projects";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>Browse Graduation Projects</h1>
+            <p class="lead">Explore completed projects from our academic community</p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" asp-action="Projects">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="department" class="form-label">Department</label>
+                                <select name="department" id="department" class="form-select">
+                                    <option value="">All Departments</option>
+                                    @foreach (var dept in ViewBag.Departments as List<Department>)
+                                    {
+                                        <option value="@dept.Name" selected="@(ViewBag.Department == dept.Name)">@dept.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="keyword" class="form-label">Search Keywords</label>
+                                <input type="text" name="keyword" id="keyword" class="form-control" 
+                                       placeholder="Search in titles, abstracts, or keywords..." value="@ViewBag.Keyword">
+                            </div>
+                            <div class="col-md-2">
+                                <label>&nbsp;</label>
+                                <button type="submit" class="btn btn-primary d-block w-100">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Info -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted">
+                        Showing @Model.Count projects
+                        @if (!string.IsNullOrEmpty(ViewBag.Department as string))
+                        {
+                            <text>from @ViewBag.Department</text>
+                        }
+                        @if (!string.IsNullOrEmpty(ViewBag.Keyword as string))
+                        {
+                            <text>matching "@ViewBag.Keyword"</text>
+                        }
+                    </span>
+                </div>
+                <div>
+                    <a asp-action="Dashboard" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-home"></i> Back to Gallery
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Projects Grid -->
+    @if (Model.Any())
+    {
+        <div class="row">
+            @foreach (var project in Model)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        @if (!string.IsNullOrEmpty(project.PosterPath))
+                        {
+                            <img src="@project.PosterPath" class="card-img-top" alt="@project.Title" 
+                                 style="height: 200px; object-fit: cover; cursor: pointer;"
+                                 onclick="viewPoster(@project.Id)">
+                        }
+                        else
+                        {
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <i class="fas fa-image fa-3x text-muted"></i>
+                            </div>
+                        }
+                        
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <a asp-action="ProjectDetails" asp-route-id="@project.Id" class="text-decoration-none">
+                                    @project.Title
+                                </a>
+                            </h5>
+                            
+                            <div class="mb-2">
+                                <small class="text-muted">
+                                    <strong>Student:</strong> @project.Student.FullName<br>
+                                    <strong>Department:</strong> @project.Student.Department.Name<br>
+                                    <strong>Supervisor:</strong> @project.Supervisor.DisplayName<br>
+                                    <strong>Completed:</strong> @(project.DefenseDate?.ToString("MMM yyyy") ?? project.SubmissionDate.ToString("MMM yyyy"))
+                                </small>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(project.Abstract))
+                            {
+                                <p class="card-text">
+                                    @(project.Abstract.Length > 120 ? project.Abstract.Substring(0, 120) + "..." : project.Abstract)
+                                </p>
+                            }
+
+                            @if (!string.IsNullOrEmpty(project.Keywords))
+                            {
+                                <div class="mb-2">
+                                    @foreach (var keyword in project.Keywords.Split(',', StringSplitOptions.RemoveEmptyEntries).Take(3))
+                                    {
+                                        <span class="badge bg-secondary me-1">@keyword.Trim()</span>
+                                    }
+                                </div>
+                            }
+
+                            <div class="project-status">
+                                <span class="badge bg-success">@project.Status</span>
+                                @if (!string.IsNullOrEmpty(project.Grade))
+                                {
+                                    <span class="badge bg-info">Grade: @project.Grade</span>
+                                }
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer">
+                            <div class="btn-group w-100" role="group">
+                                <a asp-action="ProjectDetails" asp-route-id="@project.Id" class="btn btn-primary">
+                                    <i class="fas fa-eye"></i> Details
+                                </a>
+                                @if (!string.IsNullOrEmpty(project.PosterPath))
+                                {
+                                    <a asp-action="ViewPoster" asp-route-id="@project.Id" 
+                                       class="btn btn-info" target="_blank" title="View Poster">
+                                        <i class="fas fa-image"></i>
+                                    </a>
+                                }
+                                @if (!string.IsNullOrEmpty(project.ReportPath))
+                                {
+                                    <a asp-action="DownloadReport" asp-route-id="@project.Id" 
+                                       class="btn btn-success" title="Download Report">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </a>
+                                }
+                                @if (!string.IsNullOrEmpty(project.CodePath))
+                                {
+                                    <a asp-action="DownloadCode" asp-route-id="@project.Id" 
+                                       class="btn btn-warning" title="Download Code">
+                                        <i class="fas fa-code"></i>
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        @if (ViewBag.TotalPages > 1)
+        {
+            <nav aria-label="Projects pagination">
+                <ul class="pagination justify-content-center">
+                    @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == ViewBag.Page ? "active" : "")">
+                            <a class="page-link" 
+                               asp-action="Projects" 
+                               asp-route-page="@i" 
+                               asp-route-department="@ViewBag.Department" 
+                               asp-route-keyword="@ViewBag.Keyword">@i</a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-search fa-3x mb-3"></i>
+                    <h4>No Projects Found</h4>
+                    <p>No projects match your current search criteria. Try adjusting your filters or search terms.</p>
+                    <a asp-action="Projects" class="btn btn-primary">Show All Projects</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Poster Modal -->
+<div class="modal fade" id="posterModal" tabindex="-1" aria-labelledby="posterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="posterModalLabel">Project Poster</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="posterImage" src="" class="img-fluid" alt="Project Poster">
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function viewPoster(projectId) {
+            const posterUrl = '@Url.Action("ViewPoster", "Guest")/' + projectId;
+            document.getElementById('posterImage').src = posterUrl;
+            new bootstrap.Modal(document.getElementById('posterModal')).show();
+        }
+
+        $(document).ready(function() {
+            // Add loading animation for images
+            $('.card img').on('load', function() {
+                $(this).fadeIn();
+            });
+
+            // Add hover effects to cards
+            $('.card').hover(
+                function() { 
+                    $(this).addClass('shadow-lg').css('transform', 'translateY(-5px)');
+                },
+                function() { 
+                    $(this).removeClass('shadow-lg').css('transform', 'translateY(0)');
+                }
+            );
+
+            // Search form enhancement
+            $('#keyword').on('keypress', function(e) {
+                if (e.which === 13) {
+                    $(this).closest('form').submit();
+                }
+            });
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .card {
+            transition: all 0.3s ease;
+            border: 1px solid #dee2e6;
+        }
+        
+        .card:hover {
+            border-color: #007bff;
+        }
+        
+        .card-img-top {
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover .card-img-top {
+            transform: scale(1.05);
+        }
+        
+        .project-status .badge {
+            font-size: 0.7em;
+        }
+        
+        .btn-group .btn {
+            flex: 1;
+        }
+        
+        .pagination {
+            margin-top: 2rem;
+        }
+    </style>
+}

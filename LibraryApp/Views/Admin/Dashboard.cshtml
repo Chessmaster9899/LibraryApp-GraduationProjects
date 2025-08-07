@@ -1,0 +1,347 @@
+@model AdminDashboardEnhancedViewModel
+@{
+    ViewBag.Title = "Enhanced Admin Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <!-- Dashboard Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>Enhanced Admin Dashboard</h1>
+            <p class="lead">Complete system overview and management tools</p>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3 class="card-title">@Model.TotalProjects</h3>
+                            <p class="card-text">Total Projects</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-project-diagram fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a asp-controller="Projects" asp-action="Index" class="text-white">
+                        View all projects <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3 class="card-title">@Model.TotalStudents</h3>
+                            <p class="card-text">Total Students</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-user-graduate fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a asp-action="UserManagement" class="text-white">
+                        Manage users <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3 class="card-title">@Model.TotalProfessors</h3>
+                            <p class="card-text">Total Professors</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-chalkboard-teacher fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a asp-controller="Professors" asp-action="Index" class="text-white">
+                        View professors <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3 class="card-title">@Model.PendingSubmissions.Count</h3>
+                            <p class="card-text">Pending Reviews</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-hourglass-half fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a asp-action="PendingSubmissions" class="text-white">
+                        Review submissions <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-2 mb-3">
+                            <a asp-action="PendingSubmissions" class="btn btn-warning btn-lg w-100">
+                                <i class="fas fa-clipboard-check d-block mb-2"></i>
+                                Review Submissions
+                            </a>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <a asp-action="UserManagement" class="btn btn-success btn-lg w-100">
+                                <i class="fas fa-users-cog d-block mb-2"></i>
+                                User Management
+                            </a>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <a asp-action="Analytics" class="btn btn-info btn-lg w-100">
+                                <i class="fas fa-chart-line d-block mb-2"></i>
+                                Analytics
+                            </a>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <a asp-action="Communication" class="btn btn-primary btn-lg w-100">
+                                <i class="fas fa-bullhorn d-block mb-2"></i>
+                                Announcements
+                            </a>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <a asp-action="AuditTrail" class="btn btn-secondary btn-lg w-100">
+                                <i class="fas fa-history d-block mb-2"></i>
+                                Audit Trail
+                            </a>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <a asp-controller="Guest" asp-action="Dashboard" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="fas fa-eye d-block mb-2"></i>
+                                Public Gallery
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Submissions Alert -->
+    @if (Model.PendingSubmissions.Any())
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="alert alert-warning">
+                    <h4><i class="fas fa-exclamation-triangle"></i> Pending Project Reviews</h4>
+                    <p>You have <strong>@Model.PendingSubmissions.Count</strong> project submissions waiting for review.</p>
+                    <a asp-action="PendingSubmissions" class="btn btn-warning">
+                        <i class="fas fa-eye"></i> Review Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row">
+        <!-- Project Status Chart -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-chart-pie"></i> Project Status Distribution</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="projectStatusChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Activity Chart -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-chart-bar"></i> User Activity (Last 7 Days)</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="userActivityChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recent Submissions -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4><i class="fas fa-clock"></i> Recent Submissions</h4>
+                    <a asp-action="PendingSubmissions" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    @if (Model.PendingSubmissions.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var submission in Model.PendingSubmissions.Take(5))
+                            {
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">@submission.Project.Title</h6>
+                                        <small>@submission.SubmissionDate.ToString("MMM dd")</small>
+                                    </div>
+                                    <p class="mb-1">By: @submission.Project.Student.FullName</p>
+                                    <small>
+                                        <span class="badge bg-@(submission.Status == SubmissionStatus.Pending ? "warning" : "info")">
+                                            @submission.Status
+                                        </span>
+                                    </small>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No pending submissions</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4><i class="fas fa-activity"></i> Recent System Activity</h4>
+                    <a asp-action="AuditTrail" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentAuditLogs.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var log in Model.RecentAuditLogs.Take(5))
+                            {
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">@log.Action</h6>
+                                        <small>@log.Timestamp.ToString("MMM dd, HH:mm")</small>
+                                    </div>
+                                    <p class="mb-1">@log.UserId (@log.UserRole)</p>
+                                    <small class="text-muted">@log.EntityType @(log.EntityId?.ToString() ?? "")</small>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No recent activity</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Notifications -->
+    @if (Model.RecentNotifications.Any())
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-bell"></i> Recent Notifications</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            @foreach (var notification in Model.RecentNotifications.Take(3))
+                            {
+                                <div class="list-group-item @(notification.IsRead ? "" : "list-group-item-warning")">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">@notification.Title</h6>
+                                        <small>@notification.CreatedDate.ToString("MMM dd, yyyy")</small>
+                                    </div>
+                                    <p class="mb-1">@notification.Message</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Project Status Chart
+        const projectStatusCtx = document.getElementById('projectStatusChart').getContext('2d');
+        const projectStatusChart = new Chart(projectStatusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: [@Html.Raw(string.Join(",", Model.ProjectStatusCounts.Keys.Select(k => $"'{k}'")))],
+                datasets: [{
+                    data: [@string.Join(",", Model.ProjectStatusCounts.Values)],
+                    backgroundColor: [
+                        '#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#20c997', '#fd7e14'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // User Activity Chart
+        const userActivityCtx = document.getElementById('userActivityChart').getContext('2d');
+        const userActivityChart = new Chart(userActivityCtx, {
+            type: 'bar',
+            data: {
+                labels: [@Html.Raw(string.Join(",", Model.UserActivityCounts.Keys.Select(k => $"'{k}'")))],
+                datasets: [{
+                    label: 'Activities',
+                    data: [@string.Join(",", Model.UserActivityCounts.Values)],
+                    backgroundColor: '#007bff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+}

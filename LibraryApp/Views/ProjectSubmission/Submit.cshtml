@@ -1,0 +1,290 @@
+@model ProjectSubmissionViewModel
+@{
+    ViewBag.Title = "Submit Project for Review";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1>Submit Project for Review</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-controller="Projects" asp-action="Index">Projects</a></li>
+                    <li class="breadcrumb-item"><a asp-controller="Projects" asp-action="Details" asp-route-id="@Model.Project.Id">@Model.Project.Title</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Submit for Review</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <h4><i class="fas fa-info-circle"></i> Submission Requirements</h4>
+                <p>To submit your project for final review and publication in the public gallery, please provide the following:</p>
+                <ul>
+                    <li><strong>Project Poster:</strong> A high-quality poster summarizing your project (PDF, PNG, or JPG)</li>
+                    <li><strong>Final Report:</strong> Your complete project report (PDF format)</li>
+                    <li><strong>Source Code:</strong> Your project's source code files (ZIP archive)</li>
+                    <li><strong>Submission Comments:</strong> Brief description of what you're submitting</li>
+                </ul>
+                <p class="mb-0"><strong>Note:</strong> Once submitted, your project will be reviewed by administrators before being published in the public gallery.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Information -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-project-diagram"></i> Project Information</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Title:</strong> @Model.Project.Title</p>
+                            <p><strong>Student:</strong> @Model.Project.Student.FullName</p>
+                            <p><strong>Student ID:</strong> @Model.Project.Student.StudentNumber</p>
+                            <p><strong>Department:</strong> @Model.Project.Student.Department.Name</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Supervisor:</strong> @Model.Project.Supervisor.DisplayName</p>
+                            @if (Model.Project.Evaluator != null)
+                            {
+                                <p><strong>Evaluator:</strong> @Model.Project.Evaluator.DisplayName</p>
+                            }
+                            <p><strong>Current Status:</strong> <span class="badge bg-warning">@Model.Project.Status</span></p>
+                            <p><strong>Submission Date:</strong> @Model.Project.SubmissionDate.ToString("MMMM dd, yyyy")</p>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.Project.Abstract))
+                    {
+                        <div class="mt-3">
+                            <p><strong>Abstract:</strong></p>
+                            <p class="text-muted">@Model.Project.Abstract</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submission Form -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-upload"></i> Submit Files for Review</h3>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Submit" method="post" enctype="multipart/form-data" id="submissionForm">
+                        <input type="hidden" asp-for="Project.Id" />
+                        
+                        <!-- Submission Comments -->
+                        <div class="mb-4">
+                            <label asp-for="SubmissionComments" class="form-label required">Submission Comments</label>
+                            <textarea asp-for="SubmissionComments" class="form-control" rows="3" 
+                                      placeholder="Describe what you're submitting and any important notes for the reviewers..."
+                                      required></textarea>
+                            <span asp-validation-for="SubmissionComments" class="text-danger"></span>
+                            <div class="form-text">Provide a brief description of your submission for the review committee.</div>
+                        </div>
+
+                        <!-- File Uploads -->
+                        <div class="row">
+                            <!-- Poster Upload -->
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header bg-info text-white">
+                                        <h5><i class="fas fa-image"></i> Project Poster</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label asp-for="PosterFile" class="form-label">Upload Poster</label>
+                                            <input asp-for="PosterFile" type="file" class="form-control" 
+                                                   accept=".pdf,.png,.jpg,.jpeg" />
+                                            <div class="form-text">
+                                                Accepted formats: PDF, PNG, JPG<br>
+                                                Max size: 10MB
+                                            </div>
+                                        </div>
+                                        <div class="file-preview" id="posterPreview"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Report Upload -->
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header bg-success text-white">
+                                        <h5><i class="fas fa-file-pdf"></i> Final Report</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label asp-for="ReportFile" class="form-label">Upload Report</label>
+                                            <input asp-for="ReportFile" type="file" class="form-control" 
+                                                   accept=".pdf" />
+                                            <div class="form-text">
+                                                Accepted format: PDF only<br>
+                                                Max size: 50MB
+                                            </div>
+                                        </div>
+                                        <div class="file-preview" id="reportPreview"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Code Upload -->
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header bg-warning text-white">
+                                        <h5><i class="fas fa-code"></i> Source Code</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label asp-for="CodeFiles" class="form-label">Upload Code</label>
+                                            <input asp-for="CodeFiles" type="file" class="form-control" 
+                                                   accept=".zip,.rar,.7z" />
+                                            <div class="form-text">
+                                                Accepted formats: ZIP, RAR, 7Z<br>
+                                                Max size: 100MB
+                                            </div>
+                                        </div>
+                                        <div class="file-preview" id="codePreview"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submission Agreement -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="agreementCheck" required>
+                                <label class="form-check-label" for="agreementCheck">
+                                    I confirm that:
+                                    <ul class="mt-2">
+                                        <li>All submitted files are the original work of the project team</li>
+                                        <li>The project has been completed to the best of our ability</li>
+                                        <li>I give permission for this project to be published in the public gallery upon approval</li>
+                                        <li>All co-authors and supervisors have reviewed and approved this submission</li>
+                                    </ul>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="d-flex justify-content-between">
+                            <a asp-controller="Projects" asp-action="Details" asp-route-id="@Model.Project.Id" 
+                               class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                <i class="fas fa-paper-plane"></i> Submit for Review
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // File preview functionality
+            function setupFilePreview(inputId, previewId) {
+                $('#' + inputId).on('change', function() {
+                    const file = this.files[0];
+                    const preview = $('#' + previewId);
+                    
+                    if (file) {
+                        const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                        preview.html(`
+                            <div class="alert alert-success">
+                                <small>
+                                    <strong>Selected:</strong> ${file.name}<br>
+                                    <strong>Size:</strong> ${fileSize} MB<br>
+                                    <strong>Type:</strong> ${file.type}
+                                </small>
+                            </div>
+                        `);
+                    } else {
+                        preview.empty();
+                    }
+                });
+            }
+
+            setupFilePreview('PosterFile', 'posterPreview');
+            setupFilePreview('ReportFile', 'reportPreview');
+            setupFilePreview('CodeFiles', 'codePreview');
+
+            // Form validation
+            $('#submissionForm').on('submit', function(e) {
+                const poster = $('#PosterFile')[0].files[0];
+                const report = $('#ReportFile')[0].files[0];
+                const code = $('#CodeFiles')[0].files[0];
+                
+                if (!poster && !report && !code) {
+                    e.preventDefault();
+                    alert('Please upload at least one file (poster, report, or code) before submitting.');
+                    return false;
+                }
+
+                if (!$('#agreementCheck').is(':checked')) {
+                    e.preventDefault();
+                    alert('Please agree to the submission terms before submitting.');
+                    return false;
+                }
+
+                // Show loading state
+                $('#submitBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Submitting...');
+            });
+
+            // File size validation
+            $('input[type="file"]').on('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    let maxSize = 10; // Default 10MB
+                    
+                    if (this.id === 'ReportFile') maxSize = 50; // 50MB for reports
+                    if (this.id === 'CodeFiles') maxSize = 100; // 100MB for code
+                    
+                    if (file.size > maxSize * 1024 * 1024) {
+                        alert(`File size exceeds the maximum limit of ${maxSize}MB. Please choose a smaller file.`);
+                        this.value = '';
+                        $(this).next('.file-preview').empty();
+                    }
+                }
+            });
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .required::after {
+            content: " *";
+            color: red;
+        }
+        
+        .file-preview {
+            min-height: 60px;
+        }
+        
+        .card {
+            transition: transform 0.2s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .form-check-label ul {
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+    </style>
+}
