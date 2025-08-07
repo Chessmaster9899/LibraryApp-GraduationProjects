@@ -89,6 +89,7 @@ namespace LibraryApp.Controllers
 
             var student = await _context.Students
                 .Include(s => s.Department)
+                .Include(s => s.Projects)
                 .FirstOrDefaultAsync(s => s.StudentNumber == userId);
 
             if (student == null)
@@ -97,6 +98,47 @@ namespace LibraryApp.Controllers
             }
 
             return View(student);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateProfile(Student model)
+        {
+            var userId = HttpContext.Session.GetString("UserId");
+            var userRole = HttpContext.Session.GetString("UserRole");
+            
+            if (string.IsNullOrEmpty(userId) || userRole != "Student")
+            {
+                this.AddError("Access Denied", "Please log in to update your profile");
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var student = await _context.Students
+                .Include(s => s.Department)
+                .FirstOrDefaultAsync(s => s.StudentNumber == userId);
+
+            if (student == null)
+            {
+                this.AddError("Student Not Found", "Could not find your student record");
+                return RedirectToAction("Login", "Auth");
+            }
+
+            // Only allow updating certain fields
+            student.FirstName = model.FirstName;
+            student.LastName = model.LastName;
+            student.Email = model.Email;
+            student.Phone = model.Phone;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                this.AddSuccess("Profile Updated", "Your profile has been successfully updated");
+            }
+            catch (Exception)
+            {
+                this.AddError("Update Failed", "Failed to update your profile. Please try again");
+            }
+
+            return RedirectToAction("Profile");
         }
     }
 

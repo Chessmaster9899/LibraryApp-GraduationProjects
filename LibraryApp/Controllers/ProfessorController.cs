@@ -119,6 +119,8 @@ namespace LibraryApp.Controllers
 
             var professor = await _context.Professors
                 .Include(p => p.Department)
+                .Include(p => p.SupervisedProjects)
+                .Include(p => p.EvaluatedProjects)
                 .FirstOrDefaultAsync(p => p.ProfessorId == userId);
 
             if (professor == null)
@@ -127,6 +129,49 @@ namespace LibraryApp.Controllers
             }
 
             return View(professor);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateProfile(Professor model)
+        {
+            var userId = HttpContext.Session.GetString("UserId");
+            var userRole = HttpContext.Session.GetString("UserRole");
+            
+            if (string.IsNullOrEmpty(userId) || userRole != "Professor")
+            {
+                this.AddError("Access Denied", "Please log in to update your profile");
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var professor = await _context.Professors
+                .Include(p => p.Department)
+                .FirstOrDefaultAsync(p => p.ProfessorId == userId);
+
+            if (professor == null)
+            {
+                this.AddError("Professor Not Found", "Could not find your professor record");
+                return RedirectToAction("Login", "Auth");
+            }
+
+            // Only allow updating certain fields
+            professor.Title = model.Title;
+            professor.FirstName = model.FirstName;
+            professor.LastName = model.LastName;
+            professor.Email = model.Email;
+            professor.Phone = model.Phone;
+            professor.Specialization = model.Specialization;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                this.AddSuccess("Profile Updated", "Your profile has been successfully updated");
+            }
+            catch (Exception)
+            {
+                this.AddError("Update Failed", "Failed to update your profile. Please try again");
+            }
+
+            return RedirectToAction("Profile");
         }
     }
 

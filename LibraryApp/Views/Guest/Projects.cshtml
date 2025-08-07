@@ -24,7 +24,7 @@
                                 <label for="department" class="form-label">Department</label>
                                 <select name="department" id="department" class="form-select">
                                     <option value="">All Departments</option>
-                                    @foreach (var dept in ViewBag.Departments as List<Department>)
+                                    @foreach (var dept in (ViewBag.Departments as List<Department>) ?? new List<Department>())
                                     {
                                         <option value="@dept.Name" selected="@(ViewBag.Department == dept.Name)">@dept.Name</option>
                                     }

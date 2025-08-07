@@ -42,7 +42,14 @@
                     
                     <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Email)</dt>
                     <dd class="col-sm-9">
-                        <a href="mailto:@Model.Email">@Html.DisplayFor(model => model.Email)</a>
+                        @if (!string.IsNullOrEmpty(Model.Email))
+                        {
+                            <a href="mailto:@Model.Email">@Html.DisplayFor(model => model.Email)</a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">No email provided</span>
+                        }
                     </dd>
                     
                     <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Phone)</dt>
