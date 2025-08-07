@@ -3,9 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using LibraryApp.Data;
 using LibraryApp.Models;
 using LibraryApp.Services;
+using LibraryApp.Attributes;
 
 namespace LibraryApp.Controllers
 {
+    [AdminOnly]
     public class DepartmentsController : BaseController
     {
         private readonly LibraryContext _context;

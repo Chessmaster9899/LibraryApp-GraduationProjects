@@ -34,7 +34,7 @@ public class AuthenticationService : IAuthenticationService
     public async Task<AuthenticationResult> AuthenticateAsync(string userId, string password)
     {
         // Check admin first
-        if (userId.ToLower() == "admin")
+        if (userId == "Admin")
         {
             var admin = await _context.Admins.FirstOrDefaultAsync(a => a.Username == userId && a.IsActive);
             if (admin != null && VerifyPassword(password, admin.Password))
