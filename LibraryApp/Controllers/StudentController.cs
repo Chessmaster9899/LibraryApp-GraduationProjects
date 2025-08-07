@@ -214,21 +214,6 @@ namespace LibraryApp.Controllers
 
             return RedirectToAction("Index");
         }
-
-        public async Task<IActionResult> Projects()
-        {
-            var studentId = int.Parse(CurrentUserId!);
-            var projects = await _context.Projects
-                .Include(p => p.Supervisor)
-                .Include(p => p.Evaluator)
-                .Include(p => p.Student)
-                .ThenInclude(s => s.Department)
-                .Where(p => p.StudentId == studentId)
-                .OrderByDescending(p => p.SubmissionDate)
-                .ToListAsync();
-
-            return View(projects);
-        }
     }
 
     public class StudentDashboardViewModel
