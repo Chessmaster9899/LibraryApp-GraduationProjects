@@ -1,0 +1,215 @@
+@model LibraryApp.Controllers.ProfessorDashboardViewModel
+@{
+    ViewData["Title"] = "Professor Dashboard";
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Professor Dashboard</h1>
+            <div>
+                <span class="text-muted">Welcome back, </span>
+                <strong>@Model.Professor.DisplayName</strong>
+            </div>
+        </div>
+        
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card border-primary">
+                    <div class="card-body text-center">
+                        <h4 class="text-primary">@Model.TotalSupervisedProjects</h4>
+                        <p class="card-text">Projects I Supervise</p>
+                        <small class="text-muted">@Model.CompletedSupervisedProjects completed</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-success">
+                    <div class="card-body text-center">
+                        <h4 class="text-success">@Model.TotalEvaluatedProjects</h4>
+                        <p class="card-text">Projects I Evaluate</p>
+                        <small class="text-muted">@Model.CompletedEvaluatedProjects completed</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Supervised Projects -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Recent Projects I Supervise</h5>
+                <a href="@Url.Action("SupervisedProjects")" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                @if (Model.RecentSupervisedProjects.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Student</th>
+                                    <th>Status</th>
+                                    <th>Submission Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var project in Model.RecentSupervisedProjects)
+                                {
+                                    <tr>
+                                        <td>
+                                            <strong>@project.Title</strong>
+                                            @if (!string.IsNullOrEmpty(project.Keywords))
+                                            {
+                                                <br>
+                                                <small class="text-muted">@project.Keywords</small>
+                                            }
+                                        </td>
+                                        <td>@project.Student.DisplayName</td>
+                                        <td>
+                                            <span class="badge bg-@(project.Status switch {
+                                                ProjectStatus.Completed => "success",
+                                                ProjectStatus.Defended => "success",
+                                                ProjectStatus.InProgress => "warning",
+                                                ProjectStatus.Approved => "info",
+                                                _ => "secondary"
+                                            })">
+                                                @project.Status
+                                            </span>
+                                        </td>
+                                        <td>@project.SubmissionDate.ToString("MMM dd, yyyy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted text-center py-4">No supervised projects found.</p>
+                }
+            </div>
+        </div>
+
+        <!-- Recent Evaluated Projects -->
+        @if (Model.Professor.Role == ProfessorRole.Evaluator || Model.Professor.Role == ProfessorRole.Both)
+        {
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Projects I Evaluate</h5>
+                    <a href="@Url.Action("EvaluatedProjects")" class="btn btn-sm btn-outline-success">View All</a>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentEvaluatedProjects.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Student</th>
+                                        <th>Status</th>
+                                        <th>Submission Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var project in Model.RecentEvaluatedProjects)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@project.Title</strong>
+                                                @if (!string.IsNullOrEmpty(project.Keywords))
+                                                {
+                                                    <br>
+                                                    <small class="text-muted">@project.Keywords</small>
+                                                }
+                                            </td>
+                                            <td>@project.Student.DisplayName</td>
+                                            <td>
+                                                <span class="badge bg-@(project.Status switch {
+                                                    ProjectStatus.Completed => "success",
+                                                    ProjectStatus.Defended => "success",
+                                                    ProjectStatus.InProgress => "warning",
+                                                    ProjectStatus.Approved => "info",
+                                                    _ => "secondary"
+                                                })">
+                                                    @project.Status
+                                                </span>
+                                            </td>
+                                            <td>@project.SubmissionDate.ToString("MMM dd, yyyy")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center py-4">No evaluation projects found.</p>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Professor Information</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-5">Professor ID:</dt>
+                    <dd class="col-7">@Model.Professor.ProfessorId</dd>
+                    
+                    <dt class="col-5">Name:</dt>
+                    <dd class="col-7">@Model.Professor.DisplayName</dd>
+                    
+                    <dt class="col-5">Email:</dt>
+                    <dd class="col-7">@Model.Professor.Email</dd>
+                    
+                    <dt class="col-5">Department:</dt>
+                    <dd class="col-7">@Model.Professor.Department.Name</dd>
+                    
+                    <dt class="col-5">Role:</dt>
+                    <dd class="col-7">
+                        <span class="badge bg-info">@Model.Professor.Role</span>
+                    </dd>
+                    
+                    @if (!string.IsNullOrEmpty(Model.Professor.Specialization))
+                    {
+                        <dt class="col-5">Specialization:</dt>
+                        <dd class="col-7">@Model.Professor.Specialization</dd>
+                    }
+                    
+                    @if (Model.Professor.LastLogin.HasValue)
+                    {
+                        <dt class="col-5">Last Login:</dt>
+                        <dd class="col-7">@Model.Professor.LastLogin.Value.ToString("MMM dd, yyyy")</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="@Url.Action("SupervisedProjects")" class="btn btn-primary">Projects I Supervise</a>
+                    @if (Model.Professor.Role == ProfessorRole.Evaluator || Model.Professor.Role == ProfessorRole.Both)
+                    {
+                        <a href="@Url.Action("EvaluatedProjects")" class="btn btn-success">Projects I Evaluate</a>
+                    }
+                    <a href="@Url.Action("Profile")" class="btn btn-outline-secondary">Edit Profile</a>
+                    <a href="@Url.Action("ChangePassword", "Auth")" class="btn btn-outline-warning">Change Password</a>
+                    <hr>
+                    <a href="@Url.Action("Logout", "Auth")" class="btn btn-danger">Sign Out</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,170 @@
+@{
+    ViewData["Title"] = "Sign In";
+    var universitySettings = (LibraryApp.Models.UniversitySettings)ViewBag.UniversitySettings;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - @universitySettings.ApplicationTitle</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="icon" type="image/x-icon" href="@universitySettings.FaviconPath">
+    <style>
+        :root {
+            --primary-color: #0066cc;
+            --secondary-color: #f8f9fa;
+            --text-color: #333;
+            --bg-color: #ffffff;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #0056b3 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+        
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 3rem;
+            width: 100%;
+            max-width: 450px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .university-logo {
+            max-height: 80px;
+            max-width: 200px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .login-header h1 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1.8rem;
+        }
+        
+        .login-header p {
+            color: #666;
+            margin-bottom: 0;
+        }
+        
+        .form-floating > label {
+            color: #666;
+        }
+        
+        .form-control {
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(0, 102, 204, 0.25);
+        }
+        
+        .btn-login {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #0056b3 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 102, 204, 0.3);
+        }
+        
+        .alert {
+            border-radius: 12px;
+            border: none;
+            margin-bottom: 1.5rem;
+        }
+        
+        .login-info {
+            background: rgba(0, 102, 204, 0.1);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            font-size: 0.875rem;
+            color: #666;
+        }
+        
+        .login-info h6 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <img src="@universitySettings.LogoPath" alt="@universitySettings.Name Logo" class="university-logo" />
+                <h1>@universitySettings.Name</h1>
+                <p>@universitySettings.ApplicationTitle</p>
+            </div>
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    @ViewBag.Error
+                </div>
+            }
+
+            <form method="post">
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="userId" name="userId" placeholder="Enter your ID" required>
+                    <label for="userId">Student ID / Professor ID / Username</label>
+                </div>
+
+                <div class="form-floating mb-4">
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                    <label for="password">Password</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-login">
+                    Sign In
+                </button>
+            </form>
+
+            <div class="login-info">
+                <h6>Login Information:</h6>
+                <p><strong>Students & Professors:</strong> Use your ID number and password</p>
+                <p><strong>First-time login:</strong> Password is first 2 letters of your name + last 4 digits of your ID</p>
+                <p><strong>Admin:</strong> Contact system administrator</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
