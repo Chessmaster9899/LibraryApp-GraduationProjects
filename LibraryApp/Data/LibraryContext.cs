@@ -101,8 +101,8 @@ public class LibraryContext : DbContext
             new Admin 
             { 
                 Id = 1, 
-                Username = "admin", 
-                Password = "$2a$11$5G2wV.8gK8y0xGmcKCU0qO8hYcFq1UYc.H6fV7.zOuVT5WiA.zGFi", // Default: "admin123"
+                Username = "Admin", 
+                Password = "$2a$11$APNew6ZOckEPwn6bofQLYO/NE1huf6VExTzyBLC7ZP4I9Oj.1krbO", // Default: "Admin123@"
                 FirstName = "System",
                 LastName = "Administrator",
                 Email = "admin@university.edu",

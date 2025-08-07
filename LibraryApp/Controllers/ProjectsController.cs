@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using LibraryApp.Data;
 using LibraryApp.Models;
 using LibraryApp.Services;
+using LibraryApp.Attributes;
 
 namespace LibraryApp.Controllers
 {
@@ -88,6 +89,7 @@ namespace LibraryApp.Controllers
         }
 
         // GET: Projects/Create
+        [AdminOnly]
         public IActionResult Create()
         {
             var students = _context.Students.Include(s => s.Department)
@@ -110,6 +112,7 @@ namespace LibraryApp.Controllers
         // POST: Projects/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AdminOnly]
         public async Task<IActionResult> Create([Bind("Id,Title,Abstract,Keywords,Status,SubmissionDate,DefenseDate,Grade,StudentId,SupervisorId")] Project project, IFormFile? documentFile)
         {
             // Handle file upload
@@ -154,6 +157,7 @@ namespace LibraryApp.Controllers
         }
 
         // GET: Projects/Edit/5
+        [AdminOnly]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -187,6 +191,7 @@ namespace LibraryApp.Controllers
         // POST: Projects/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AdminOnly]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Abstract,Keywords,Status,SubmissionDate,DefenseDate,Grade,DocumentPath,StudentId,SupervisorId")] Project project, IFormFile? documentFile)
         {
             if (id != project.Id)
@@ -247,6 +252,7 @@ namespace LibraryApp.Controllers
         }
 
         // GET: Projects/Delete/5
+        [AdminOnly]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -269,6 +275,7 @@ namespace LibraryApp.Controllers
         // POST: Projects/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [AdminOnly]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var project = await _context.Projects.FindAsync(id);

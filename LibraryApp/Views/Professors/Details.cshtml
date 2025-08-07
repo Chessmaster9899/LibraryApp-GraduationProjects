@@ -1,0 +1,189 @@
+@model LibraryApp.Models.Professor
+
+@{
+    ViewData["Title"] = "Professor Details";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>Professor Details</h2>
+            <div>
+                <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">@Model.DisplayName</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.ProfessorId)</dt>
+                    <dd class="col-sm-9">@Html.DisplayFor(model => model.ProfessorId)</dd>
+                    
+                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Title)</dt>
+                    <dd class="col-sm-9">@Html.DisplayFor(model => model.Title)</dd>
+                    
+                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.FirstName)</dt>
+                    <dd class="col-sm-9">@Html.DisplayFor(model => model.FirstName)</dd>
+                    
+                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.LastName)</dt>
+                    <dd class="col-sm-9">@Html.DisplayFor(model => model.LastName)</dd>
+                    
+                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Email)</dt>
+                    <dd class="col-sm-9">
+                        <a href="mailto:@Model.Email">@Html.DisplayFor(model => model.Email)</a>
+                    </dd>
+                    
+                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Phone)</dt>
+                    <dd class="col-sm-9">@Html.DisplayFor(model => model.Phone)</dd>
+                    
+                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Department)</dt>
+                    <dd class="col-sm-9">@Html.DisplayFor(model => model.Department.Name)</dd>
+                    
+                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Role)</dt>
+                    <dd class="col-sm-9">@Html.DisplayFor(model => model.Role)</dd>
+                    
+                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Specialization)</dt>
+                    <dd class="col-sm-9">@Html.DisplayFor(model => model.Specialization)</dd>
+                    
+                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.LastLogin)</dt>
+                    <dd class="col-sm-9">
+                        @if (Model.LastLogin.HasValue)
+                        {
+                            @Model.LastLogin.Value.ToString("yyyy-MM-dd HH:mm")
+                        }
+                        else
+                        {
+                            <span class="text-muted">Never logged in</span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="card-title mb-0">Quick Stats</h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-primary">@Model.SupervisedProjects.Count</h4>
+                        <small class="text-muted">Supervised</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-info">@Model.EvaluatedProjects.Count</h4>
+                        <small class="text-muted">Evaluated</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.SupervisedProjects.Any())
+{
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Supervised Projects</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Student</th>
+                                    <th>Status</th>
+                                    <th>Submission Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var project in Model.SupervisedProjects)
+                                {
+                                    <tr>
+                                        <td>@project.Title</td>
+                                        <td>@project.Student.FirstName @project.Student.LastName</td>
+                                        <td>
+                                            <span class="badge bg-secondary">@project.Status</span>
+                                        </td>
+                                        <td>@project.SubmissionDate.ToShortDateString()</td>
+                                        <td>
+                                            <a asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id" class="btn btn-sm btn-outline-info">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (Model.EvaluatedProjects.Any())
+{
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Evaluated Projects</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Student</th>
+                                    <th>Supervisor</th>
+                                    <th>Status</th>
+                                    <th>Submission Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var project in Model.EvaluatedProjects)
+                                {
+                                    <tr>
+                                        <td>@project.Title</td>
+                                        <td>@project.Student.FirstName @project.Student.LastName</td>
+                                        <td>@project.Supervisor.DisplayName</td>
+                                        <td>
+                                            <span class="badge bg-secondary">@project.Status</span>
+                                        </td>
+                                        <td>@project.SubmissionDate.ToShortDateString()</td>
+                                        <td>
+                                            <a asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id" class="btn btn-sm btn-outline-info">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
