@@ -1,0 +1,250 @@
+@model IEnumerable<LibraryApp.Models.Project>
+@{
+    ViewData["Title"] = ViewBag.PageTitle ?? "Projects";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="text-white fw-bold">@ViewBag.PageTitle</h1>
+    <a href="@Url.Action("Index")" class="btn btn-outline-light">
+        <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+    </a>
+</div>
+
+@if (Model.Any())
+{
+    <div class="card">
+        <div class="card-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h5 class="mb-0">@ViewBag.PageTitle (@Model.Count() projects)</h5>
+                </div>
+                <div class="col-auto">
+                    <div class="btn-group" role="group" aria-label="Filter options">
+                        <button type="button" class="btn btn-outline-secondary btn-sm active" onclick="filterProjects('all')">All</button>
+                        <button type="button" class="btn btn-outline-warning btn-sm" onclick="filterProjects('InProgress')">In Progress</button>
+                        <button type="button" class="btn btn-outline-info btn-sm" onclick="filterProjects('Approved')">Approved</button>
+                        <button type="button" class="btn btn-outline-success btn-sm" onclick="filterProjects('Completed')">Completed</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="projectsTable">
+                    <thead>
+                        <tr>
+                            <th>Project Title</th>
+                            <th>Student</th>
+                            <th>Department</th>
+                            <th>Status</th>
+                            <th>Submission Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var project in Model)
+                        {
+                            <tr data-status="@project.Status">
+                                <td>
+                                    <strong>@project.Title</strong>
+                                    @if (!string.IsNullOrEmpty(project.Keywords))
+                                    {
+                                        <br>
+                                        <small class="text-muted">
+                                            <i class="fas fa-tags me-1"></i>@project.Keywords
+                                        </small>
+                                    }
+                                </td>
+                                <td>
+                                    <div>
+                                        <strong>@project.Student.DisplayName</strong>
+                                        <br>
+                                        <small class="text-muted">@project.Student.StudentNumber</small>
+                                        <br>
+                                        <small class="text-muted">
+                                            <i class="fas fa-envelope me-1"></i>
+                                            <a href="mailto:@project.Student.Email">@project.Student.Email</a>
+                                        </small>
+                                    </div>
+                                </td>
+                                <td>@project.Student.Department.Name</td>
+                                <td>
+                                    <span class="badge bg-@(project.Status switch {
+                                        ProjectStatus.Completed => "success",
+                                        ProjectStatus.Defended => "success",
+                                        ProjectStatus.InProgress => "warning",
+                                        ProjectStatus.Approved => "info",
+                                        _ => "secondary"
+                                    })">
+                                        @project.Status
+                                    </span>
+                                </td>
+                                <td>@project.SubmissionDate.ToString("MMM dd, yyyy")</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="@Url.Action("Details", "Projects", new { id = project.Id })" 
+                                           class="btn btn-outline-primary btn-sm" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        @if (project.Status == ProjectStatus.InProgress)
+                                        {
+                                            <a href="@Url.Action("Edit", "Projects", new { id = project.Id })" 
+                                               class="btn btn-outline-warning btn-sm" title="Edit Project">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        }
+                                        @if (ViewBag.PageTitle.Contains("Evaluate") && (project.Status == ProjectStatus.Completed || project.Status == ProjectStatus.InProgress))
+                                        {
+                                            <button type="button" class="btn btn-outline-success btn-sm" 
+                                                    onclick="showEvaluationModal(@project.Id, '@project.Title')" title="Evaluate">
+                                                <i class="fas fa-star"></i>
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Projects Statistics -->
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card border-primary">
+                <div class="card-body text-center">
+                    <h4 class="text-primary">@Model.Count()</h4>
+                    <small class="text-muted">Total Projects</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-success">
+                <div class="card-body text-center">
+                    <h4 class="text-success">@Model.Count(p => p.Status == ProjectStatus.Completed || p.Status == ProjectStatus.Defended)</h4>
+                    <small class="text-muted">Completed</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-warning">
+                <div class="card-body text-center">
+                    <h4 class="text-warning">@Model.Count(p => p.Status == ProjectStatus.InProgress)</h4>
+                    <small class="text-muted">In Progress</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-info">
+                <div class="card-body text-center">
+                    <h4 class="text-info">@Model.Count(p => p.Status == ProjectStatus.Approved)</h4>
+                    <small class="text-muted">Approved</small>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+            <h4 class="text-muted">No Projects Found</h4>
+            <p class="text-muted">
+                @if (ViewBag.PageTitle.Contains("Supervise"))
+                {
+                    <text>You are not currently supervising any projects.</text>
+                }
+                else
+                {
+                    <text>You are not currently evaluating any projects.</text>
+                }
+            </p>
+            <a href="@Url.Action("Index")" class="btn btn-primary">
+                <i class="fas fa-tachometer-alt me-1"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+}
+
+<!-- Evaluation Modal -->
+<div class="modal fade" id="evaluationModal" tabindex="-1" aria-labelledby="evaluationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="evaluationModalLabel">Evaluate Project</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="evaluationForm">
+                    <input type="hidden" id="projectId" name="projectId" />
+                    <div class="mb-3">
+                        <label for="projectTitle" class="form-label">Project Title</label>
+                        <input type="text" class="form-control" id="projectTitle" readonly />
+                    </div>
+                    <div class="mb-3">
+                        <label for="grade" class="form-label">Grade (0-100)</label>
+                        <input type="number" class="form-control" id="grade" name="grade" min="0" max="100" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="comments" class="form-label">Evaluation Comments</label>
+                        <textarea class="form-control" id="comments" name="comments" rows="4" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="submitEvaluation()">Submit Evaluation</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function filterProjects(status) {
+            const table = document.getElementById('projectsTable');
+            const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+            
+            // Update button states
+            document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const rowStatus = row.getAttribute('data-status');
+                
+                if (status === 'all' || rowStatus === status || 
+                    (status === 'Completed' && (rowStatus === 'Completed' || rowStatus === 'Defended'))) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        }
+        
+        function showEvaluationModal(projectId, projectTitle) {
+            document.getElementById('projectId').value = projectId;
+            document.getElementById('projectTitle').value = projectTitle;
+            document.getElementById('grade').value = '';
+            document.getElementById('comments').value = '';
+            
+            const modal = new bootstrap.Modal(document.getElementById('evaluationModal'));
+            modal.show();
+        }
+        
+        function submitEvaluation() {
+            const form = document.getElementById('evaluationForm');
+            const formData = new FormData(form);
+            
+            // Here you would typically send the evaluation to the server
+            // For now, just show a success message and close the modal
+            alert('Evaluation submitted successfully!');
+            
+            const modal = bootstrap.Modal.getInstance(document.getElementById('evaluationModal'));
+            modal.hide();
+        }
+    </script>
+}

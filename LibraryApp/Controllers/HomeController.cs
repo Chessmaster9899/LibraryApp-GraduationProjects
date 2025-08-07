@@ -20,6 +20,12 @@ public class HomeController : BaseController
 
     public async Task<IActionResult> Index()
     {
+        // Redirect unauthenticated users to Guest dashboard
+        if (!IsAuthenticated)
+        {
+            return RedirectToAction("Dashboard", "Guest");
+        }
+
         var dashboardData = new DashboardViewModel
         {
             TotalProjects = await _context.Projects.CountAsync(),

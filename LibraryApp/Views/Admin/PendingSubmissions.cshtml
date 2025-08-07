@@ -1,0 +1,303 @@
+@model List<ProjectSubmission>
+@{
+    ViewBag.Title = "Pending Project Submissions";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1><i class="fas fa-clipboard-check"></i> Pending Project Submissions</h1>
+            <p class="lead">Review and approve project submissions for public gallery publication</p>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h3>@Model.Count(s => s.Status == SubmissionStatus.Pending)</h3>
+                    <p class="mb-0">Pending Review</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h3>@Model.Count(s => s.Status == SubmissionStatus.UnderReview)</h3>
+                    <p class="mb-0">Under Review</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h3>@Model.Count(s => s.Status == SubmissionStatus.Approved)</h3>
+                    <p class="mb-0">Approved</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <h3>@Model.Count(s => s.Status == SubmissionStatus.Rejected)</h3>
+                    <p class="mb-0">Rejected</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submissions List -->
+    @if (Model.Any())
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-list"></i> Submission Queue</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Project Title</th>
+                                        <th>Student</th>
+                                        <th>Department</th>
+                                        <th>Supervisor</th>
+                                        <th>Submission Date</th>
+                                        <th>Status</th>
+                                        <th>Files</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var submission in Model.OrderBy(s => s.SubmissionDate))
+                                    {
+                                        <tr class="@(submission.Status == SubmissionStatus.Pending ? "table-warning" : "")">
+                                            <td>
+                                                <strong>@submission.Project.Title</strong>
+                                                @if (!string.IsNullOrEmpty(submission.SubmissionComments))
+                                                {
+                                                    <br><small class="text-muted">@(submission.SubmissionComments.Length > 100 ? submission.SubmissionComments.Substring(0, 100) + "..." : submission.SubmissionComments)</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                <strong>@submission.Project.Student.FullName</strong><br>
+                                                <small class="text-muted">@submission.Project.Student.StudentNumber</small>
+                                            </td>
+                                            <td>@submission.Project.Student.Department.Name</td>
+                                            <td>@submission.Project.Supervisor.DisplayName</td>
+                                            <td>
+                                                @submission.SubmissionDate.ToString("MMM dd, yyyy")<br>
+                                                <small class="text-muted">@submission.SubmissionDate.ToString("HH:mm")</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-@(submission.Status switch {
+                                                    SubmissionStatus.Pending => "warning",
+                                                    SubmissionStatus.UnderReview => "info",
+                                                    SubmissionStatus.Approved => "success",
+                                                    SubmissionStatus.Rejected => "danger",
+                                                    SubmissionStatus.NeedsRevision => "secondary",
+                                                    _ => "secondary"
+                                                })">
+                                                    @submission.Status
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group-vertical btn-group-sm">
+                                                    @if (!string.IsNullOrEmpty(submission.PosterFilePath))
+                                                    {
+                                                        <a href="@submission.PosterFilePath" target="_blank" class="btn btn-outline-info btn-sm">
+                                                            <i class="fas fa-image"></i> Poster
+                                                        </a>
+                                                    }
+                                                    @if (!string.IsNullOrEmpty(submission.ReportFilePath))
+                                                    {
+                                                        <a href="@submission.ReportFilePath" target="_blank" class="btn btn-outline-success btn-sm">
+                                                            <i class="fas fa-file-pdf"></i> Report
+                                                        </a>
+                                                    }
+                                                    @if (!string.IsNullOrEmpty(submission.CodeFilesPath))
+                                                    {
+                                                        <a href="@submission.CodeFilesPath" class="btn btn-outline-warning btn-sm">
+                                                            <i class="fas fa-code"></i> Code
+                                                        </a>
+                                                    }
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a asp-action="ReviewSubmission" asp-route-id="@submission.Id" 
+                                                       class="btn btn-primary btn-sm">
+                                                        <i class="fas fa-eye"></i> Review
+                                                    </a>
+                                                    @if (submission.Status == SubmissionStatus.Pending)
+                                                    {
+                                                        <button type="button" class="btn btn-success btn-sm" 
+                                                                onclick="quickApprove(@submission.Id)">
+                                                            <i class="fas fa-check"></i> Quick Approve
+                                                        </button>
+                                                        <button type="button" class="btn btn-danger btn-sm" 
+                                                                onclick="quickReject(@submission.Id)">
+                                                            <i class="fas fa-times"></i> Quick Reject
+                                                        </button>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-inbox fa-3x mb-3"></i>
+                    <h4>No Pending Submissions</h4>
+                    <p>There are currently no project submissions waiting for review.</p>
+                    <a asp-action="Dashboard" class="btn btn-primary">
+                        <i class="fas fa-tachometer-alt"></i> Return to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Quick Action Modals -->
+<div class="modal fade" id="quickApproveModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Quick Approve Submission</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to approve this submission and publish it to the public gallery?</p>
+                <div class="mb-3">
+                    <label for="approveComments" class="form-label">Approval Comments (Optional)</label>
+                    <textarea id="approveComments" class="form-control" rows="3" 
+                              placeholder="Add any comments about the approval..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="confirmQuickApprove()">
+                    <i class="fas fa-check"></i> Approve & Publish
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="quickRejectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Quick Reject Submission</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Please provide a reason for rejecting this submission:</p>
+                <div class="mb-3">
+                    <label for="rejectComments" class="form-label">Rejection Reason <span class="text-danger">*</span></label>
+                    <textarea id="rejectComments" class="form-control" rows="3" required
+                              placeholder="Explain why this submission is being rejected..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="confirmQuickReject()">
+                    <i class="fas fa-times"></i> Reject Submission
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentSubmissionId = null;
+
+        function quickApprove(submissionId) {
+            currentSubmissionId = submissionId;
+            new bootstrap.Modal(document.getElementById('quickApproveModal')).show();
+        }
+
+        function quickReject(submissionId) {
+            currentSubmissionId = submissionId;
+            new bootstrap.Modal(document.getElementById('quickRejectModal')).show();
+        }
+
+        function confirmQuickApprove() {
+            const comments = document.getElementById('approveComments').value;
+            performQuickAction('Approved', comments);
+        }
+
+        function confirmQuickReject() {
+            const comments = document.getElementById('rejectComments').value;
+            if (!comments.trim()) {
+                alert('Please provide a reason for rejection.');
+                return;
+            }
+            performQuickAction('Rejected', comments);
+        }
+
+        function performQuickAction(status, comments) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '@Url.Action("ReviewSubmission")';
+            
+            const fields = [
+                { name: 'Submission.Id', value: currentSubmissionId },
+                { name: 'NewStatus', value: status },
+                { name: 'ReviewComments', value: comments },
+                { name: '__RequestVerificationToken', value: $('input[name="__RequestVerificationToken"]').val() }
+            ];
+            
+            fields.forEach(field => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = field.name;
+                input.value = field.value;
+                form.appendChild(input);
+            });
+            
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        $(document).ready(function() {
+            // Add DataTable for better sorting and searching
+            if ($('table tbody tr').length > 5) {
+                $('table').DataTable({
+                    pageLength: 10,
+                    order: [[4, 'asc']], // Sort by submission date
+                    columnDefs: [
+                        { targets: [6, 7], orderable: false } // Disable sorting for Files and Actions columns
+                    ]
+                });
+            }
+
+            // Auto-refresh every 5 minutes
+            setTimeout(function() {
+                location.reload();
+            }, 300000);
+        });
+    </script>
+    
+    <!-- DataTables CSS and JS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+}

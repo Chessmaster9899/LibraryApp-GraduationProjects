@@ -15,6 +15,10 @@ public class LibraryContext : DbContext
     public DbSet<Project> Projects { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Admin> Admins { get; set; }
+    public DbSet<ProjectSubmission> ProjectSubmissions { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
+    public DbSet<SystemAuditLog> SystemAuditLogs { get; set; }
+    public DbSet<Announcement> Announcements { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -88,6 +92,26 @@ public class LibraryContext : DbContext
             .WithOne()
             .HasForeignKey<User>(u => u.ProfessorId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure ProjectSubmission relationships
+        modelBuilder.Entity<ProjectSubmission>()
+            .HasOne(ps => ps.Project)
+            .WithMany()
+            .HasForeignKey(ps => ps.ProjectId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure indexes for new models
+        modelBuilder.Entity<Notification>()
+            .HasIndex(n => new { n.UserId, n.UserRole, n.IsRead });
+
+        modelBuilder.Entity<SystemAuditLog>()
+            .HasIndex(a => new { a.UserId, a.Timestamp });
+
+        modelBuilder.Entity<Announcement>()
+            .HasIndex(a => new { a.IsActive, a.CreatedDate });
+
+        modelBuilder.Entity<ProjectSubmission>()
+            .HasIndex(ps => new { ps.ProjectId, ps.Status });
 
         // Seed some initial data
         modelBuilder.Entity<Department>().HasData(

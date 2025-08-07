@@ -1,0 +1,382 @@
+@model Project
+@{
+    ViewBag.Title = Model.Title;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <!-- Navigation -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="Dashboard">Gallery</a></li>
+                    <li class="breadcrumb-item"><a asp-action="Projects">Projects</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">@Model.Title</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Project Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h1 class="card-title mb-3">@Model.Title</h1>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <strong>Student:</strong> @Model.Student.FullName<br>
+                                    <strong>Student ID:</strong> @Model.Student.StudentNumber<br>
+                                    <strong>Department:</strong> @Model.Student.Department.Name
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Supervisor:</strong> @Model.Supervisor.DisplayName<br>
+                                    @if (Model.Evaluator != null)
+                                    {
+                                        <text><strong>Evaluator:</strong> @Model.Evaluator.DisplayName<br></text>
+                                    }
+                                    <strong>Completion Date:</strong> @(Model.DefenseDate?.ToString("MMMM dd, yyyy") ?? Model.SubmissionDate.ToString("MMMM dd, yyyy"))
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <span class="badge bg-success me-2">@Model.Status</span>
+                                @if (!string.IsNullOrEmpty(Model.Grade))
+                                {
+                                    <span class="badge bg-info me-2">Grade: @Model.Grade</span>
+                                }
+                                @if (Model.DefenseDate.HasValue)
+                                {
+                                    <span class="badge bg-warning">Defended</span>
+                                }
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(Model.Keywords))
+                            {
+                                <div class="mb-3">
+                                    <strong>Keywords:</strong><br>
+                                    @foreach (var keyword in Model.Keywords.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                                    {
+                                        <span class="badge bg-secondary me-1">@keyword.Trim()</span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                        
+                        <div class="col-md-4">
+                            @if (!string.IsNullOrEmpty(Model.PosterPath))
+                            {
+                                <div class="text-center">
+                                    <img src="@Model.PosterPath" class="img-fluid rounded shadow cursor-pointer" 
+                                         alt="@Model.Title Poster" style="max-height: 300px;"
+                                         onclick="viewPoster()">
+                                    <br>
+                                    <small class="text-muted">Click to view full size</small>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 300px;">
+                                    <div class="text-center text-muted">
+                                        <i class="fas fa-image fa-3x mb-2"></i>
+                                        <br>No poster available
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Abstract -->
+    @if (!string.IsNullOrEmpty(Model.Abstract))
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-file-alt"></i> Abstract</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="lead">@Model.Abstract</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Download Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-download"></i> Available Downloads</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        @if (!string.IsNullOrEmpty(Model.PosterPath))
+                        {
+                            <div class="col-md-4 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-image fa-3x text-info mb-2"></i>
+                                        <h5>Project Poster</h5>
+                                        <p class="text-muted">View the project presentation poster</p>
+                                        <a asp-action="ViewPoster" asp-route-id="@Model.Id" 
+                                           class="btn btn-info" target="_blank">
+                                            <i class="fas fa-eye"></i> View Poster
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrEmpty(Model.ReportPath))
+                        {
+                            <div class="col-md-4 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-file-pdf fa-3x text-danger mb-2"></i>
+                                        <h5>Final Report</h5>
+                                        <p class="text-muted">Download the complete project report</p>
+                                        <a asp-action="DownloadReport" asp-route-id="@Model.Id" 
+                                           class="btn btn-danger">
+                                            <i class="fas fa-download"></i> Download PDF
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrEmpty(Model.CodePath))
+                        {
+                            <div class="col-md-4 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-code fa-3x text-warning mb-2"></i>
+                                        <h5>Source Code</h5>
+                                        <p class="text-muted">Download the project source code</p>
+                                        <a asp-action="DownloadCode" asp-route-id="@Model.Id" 
+                                           class="btn btn-warning">
+                                            <i class="fas fa-download"></i> Download Code
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        @if (string.IsNullOrEmpty(Model.PosterPath) && string.IsNullOrEmpty(Model.ReportPath) && string.IsNullOrEmpty(Model.CodePath))
+                        {
+                            <div class="col-12">
+                                <div class="alert alert-info text-center">
+                                    <i class="fas fa-info-circle"></i>
+                                    No downloads are currently available for this project.
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Timeline -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-clock"></i> Project Timeline</h3>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-primary"></div>
+                            <div class="timeline-content">
+                                <h6>Project Submitted</h6>
+                                <p class="text-muted">@Model.SubmissionDate.ToString("MMMM dd, yyyy")</p>
+                            </div>
+                        </div>
+                        
+                        @if (Model.SubmissionForReviewDate.HasValue)
+                        {
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-info"></div>
+                                <div class="timeline-content">
+                                    <h6>Submitted for Review</h6>
+                                    <p class="text-muted">@Model.SubmissionForReviewDate.Value.ToString("MMMM dd, yyyy")</p>
+                                </div>
+                            </div>
+                        }
+                        
+                        @if (Model.ReviewDate.HasValue)
+                        {
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-warning"></div>
+                                <div class="timeline-content">
+                                    <h6>Review Completed</h6>
+                                    <p class="text-muted">@Model.ReviewDate.Value.ToString("MMMM dd, yyyy")</p>
+                                    @if (!string.IsNullOrEmpty(Model.ReviewComments))
+                                    {
+                                        <p><em>@Model.ReviewComments</em></p>
+                                    }
+                                </div>
+                            </div>
+                        }
+                        
+                        @if (Model.DefenseDate.HasValue)
+                        {
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-success"></div>
+                                <div class="timeline-content">
+                                    <h6>Project Defended</h6>
+                                    <p class="text-muted">@Model.DefenseDate.Value.ToString("MMMM dd, yyyy")</p>
+                                    @if (!string.IsNullOrEmpty(Model.Grade))
+                                    {
+                                        <p><strong>Final Grade: @Model.Grade</strong></p>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Projects -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-sitemap"></i> Related Projects</h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        <a asp-action="Projects" asp-route-department="@Model.Student.Department.Name">
+                            View more projects from @Model.Student.Department.Name
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Poster Modal -->
+@if (!string.IsNullOrEmpty(Model.PosterPath))
+{
+    <div class="modal fade" id="posterModal" tabindex="-1" aria-labelledby="posterModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="posterModalLabel">@Model.Title - Poster</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="@Model.PosterPath" class="img-fluid" alt="@Model.Title Poster">
+                </div>
+                <div class="modal-footer">
+                    <a asp-action="ViewPoster" asp-route-id="@Model.Id" class="btn btn-primary" target="_blank">
+                        <i class="fas fa-external-link-alt"></i> Open in New Tab
+                    </a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        function viewPoster() {
+            @if (!string.IsNullOrEmpty(Model.PosterPath))
+            {
+                <text>new bootstrap.Modal(document.getElementById('posterModal')).show();</text>
+            }
+        }
+
+        $(document).ready(function() {
+            // Add smooth scrolling for internal links
+            $('a[href^="#"]').on('click', function(event) {
+                var target = $(this.getAttribute('href'));
+                if (target.length) {
+                    event.preventDefault();
+                    $('html, body').stop().animate({
+                        scrollTop: target.offset().top - 20
+                    }, 1000);
+                }
+            });
+
+            // Add loading states for download buttons
+            $('.btn[href*="Download"]').on('click', function() {
+                var $btn = $(this);
+                var originalText = $btn.html();
+                $btn.html('<i class="fas fa-spinner fa-spin"></i> Downloading...');
+                
+                setTimeout(function() {
+                    $btn.html(originalText);
+                }, 3000);
+            });
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .cursor-pointer {
+            cursor: pointer;
+        }
+        
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+            padding-left: 20px;
+        }
+        
+        .timeline-item:not(:last-child)::before {
+            content: '';
+            position: absolute;
+            left: -15px;
+            top: 20px;
+            height: calc(100% + 20px);
+            width: 2px;
+            background-color: #dee2e6;
+        }
+        
+        .timeline-marker {
+            position: absolute;
+            left: -20px;
+            top: 0;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px #dee2e6;
+        }
+        
+        .timeline-content h6 {
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: 1px solid rgba(0, 0, 0, 0.125);
+        }
+        
+        .card:hover {
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+    </style>
+}

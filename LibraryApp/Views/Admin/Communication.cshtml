@@ -1,0 +1,378 @@
+@model CommunicationViewModel
+@{
+    ViewBag.Title = "Communication Center";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1><i class="fas fa-bullhorn"></i> Communication Center</h1>
+            <p class="lead">Send announcements and manage system-wide communications</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Create Announcement -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-plus"></i> Create New Announcement</h3>
+                </div>
+                <div class="card-body">
+                    <form asp-action="CreateAnnouncement" method="post">
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label required">Announcement Title</label>
+                            <input asp-for="Title" type="text" class="form-control" 
+                                   placeholder="Enter a clear, descriptive title..."
+                                   required maxlength="200">
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Content" class="form-label required">Message Content</label>
+                            <textarea asp-for="Content" class="form-control" rows="5" 
+                                      placeholder="Write your announcement message here..."
+                                      required maxlength="2000"></textarea>
+                            <span asp-validation-for="Content" class="text-danger"></span>
+                            <div class="form-text">
+                                <span id="charCount">0</span>/2000 characters
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Target Audience</label>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" name="TargetRoles" value="Student" id="targetStudents">
+                                    <label class="form-check-label" for="targetStudents">
+                                        <i class="fas fa-user-graduate"></i> Students
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" name="TargetRoles" value="Professor" id="targetProfessors">
+                                    <label class="form-check-label" for="targetProfessors">
+                                        <i class="fas fa-chalkboard-teacher"></i> Professors
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" name="TargetRoles" value="Admin" id="targetAdmins">
+                                    <label class="form-check-label" for="targetAdmins">
+                                        <i class="fas fa-user-shield"></i> Administrators
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="ExpiryDate" class="form-label">Expiry Date (Optional)</label>
+                                <input asp-for="ExpiryDate" type="datetime-local" class="form-control">
+                                <div class="form-text">Leave empty for permanent announcement</div>
+
+                                <div class="form-check mt-3">
+                                    <input asp-for="IsUrgent" type="checkbox" class="form-check-input" id="isUrgent">
+                                    <label class="form-check-label" for="isUrgent">
+                                        <i class="fas fa-exclamation-triangle text-warning"></i> Mark as Urgent
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6><i class="fas fa-preview"></i> Preview</h6>
+                                        <div id="announcementPreview" class="border rounded p-3 bg-white">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h5 id="previewTitle" class="text-muted">Announcement Title</h5>
+                                                <span id="previewUrgent" class="badge bg-warning" style="display: none;">URGENT</span>
+                                            </div>
+                                            <p id="previewContent" class="text-muted">Announcement content will appear here...</p>
+                                            <small class="text-muted">
+                                                <i class="fas fa-calendar"></i> Posted on @DateTime.Now.ToString("MMMM dd, yyyy") by @(Context.Session.GetString("UserName") ?? "Administrator")
+                                                <span id="previewTargets"></span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <button type="button" class="btn btn-outline-secondary" onclick="resetForm()">
+                                    <i class="fas fa-undo"></i> Reset
+                                </button>
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-paper-plane"></i> Send Announcement
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Announcements -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3><i class="fas fa-history"></i> Recent Announcements</h3>
+                    <span class="badge bg-primary">@Model.RecentAnnouncements.Count</span>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.RecentAnnouncements.Any())
+                    {
+                        <div class="list-group list-group-flush" style="max-height: 600px; overflow-y: auto;">
+                            @foreach (var announcement in Model.RecentAnnouncements)
+                            {
+                                <div class="list-group-item @(announcement.IsUrgent ? "border-start border-warning border-3" : "")">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">
+                                            @announcement.Title
+                                            @if (announcement.IsUrgent)
+                                            {
+                                                <span class="badge bg-warning ms-1">URGENT</span>
+                                            }
+                                        </h6>
+                                        <small>@announcement.CreatedDate.ToString("MMM dd")</small>
+                                    </div>
+                                    <p class="mb-1">@(announcement.Content.Length > 100 ? announcement.Content.Substring(0, 100) + "..." : announcement.Content)</p>
+                                    <small>
+                                        <i class="fas fa-user"></i> @announcement.CreatedBy
+                                        @if (!string.IsNullOrEmpty(announcement.TargetRoles))
+                                        {
+                                            <text><br><i class="fas fa-users"></i> To: @announcement.TargetRoles</text>
+                                        }
+                                        @if (announcement.ExpiryDate.HasValue)
+                                        {
+                                            <text><br><i class="fas fa-clock"></i> Expires: @announcement.ExpiryDate.Value.ToString("MMM dd, yyyy")</text>
+                                        }
+                                    </small>
+                                    <div class="mt-2">
+                                        <button type="button" class="btn btn-outline-primary btn-sm" 
+                                                onclick="viewAnnouncement(@announcement.Id)">
+                                            <i class="fas fa-eye"></i> View
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" 
+                                                onclick="editAnnouncement(@announcement.Id)">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                        @if (announcement.IsActive)
+                                        {
+                                            <button type="button" class="btn btn-outline-warning btn-sm" 
+                                                    onclick="deactivateAnnouncement(@announcement.Id)">
+                                                <i class="fas fa-pause"></i> Deactivate
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button type="button" class="btn btn-outline-success btn-sm" 
+                                                    onclick="activateAnnouncement(@announcement.Id)">
+                                                <i class="fas fa-play"></i> Activate
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center p-4">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No announcements yet</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-bar"></i> Communication Stats</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h4 class="text-primary">@Model.RecentAnnouncements.Count(a => a.IsActive)</h4>
+                            <small>Active</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-warning">@Model.RecentAnnouncements.Count(a => a.IsUrgent)</h4>
+                            <small>Urgent</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Character counter
+            $('#Content').on('input', function() {
+                const count = $(this).val().length;
+                $('#charCount').text(count);
+                updatePreview();
+            });
+
+            // Live preview updates
+            $('#Title').on('input', updatePreview);
+            $('#IsUrgent').on('change', updatePreview);
+            $('input[name="TargetRoles"]').on('change', updatePreview);
+
+            // Form validation
+            $('form').on('submit', function(e) {
+                const title = $('#Title').val().trim();
+                const content = $('#Content').val().trim();
+                const targets = $('input[name="TargetRoles"]:checked').length;
+
+                if (!title) {
+                    e.preventDefault();
+                    alert('Please enter an announcement title.');
+                    return false;
+                }
+
+                if (!content) {
+                    e.preventDefault();
+                    alert('Please enter announcement content.');
+                    return false;
+                }
+
+                if (targets === 0) {
+                    e.preventDefault();
+                    alert('Please select at least one target audience.');
+                    return false;
+                }
+
+                if (!confirm('Are you sure you want to send this announcement to ' + targets + ' user group(s)?')) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        });
+
+        function updatePreview() {
+            const title = $('#Title').val() || 'Announcement Title';
+            const content = $('#Content').val() || 'Announcement content will appear here...';
+            const isUrgent = $('#IsUrgent').is(':checked');
+            const targets = $('input[name="TargetRoles"]:checked').map(function() {
+                return $(this).val();
+            }).get();
+
+            $('#previewTitle').text(title);
+            $('#previewContent').text(content);
+            $('#previewUrgent').toggle(isUrgent);
+            
+            if (targets.length > 0) {
+                $('#previewTargets').html(' | <i class="fas fa-users"></i> To: ' + targets.join(', '));
+            } else {
+                $('#previewTargets').empty();
+            }
+        }
+
+        function resetForm() {
+            if (confirm('Are you sure you want to reset the form? All entered data will be lost.')) {
+                $('form')[0].reset();
+                updatePreview();
+            }
+        }
+
+        function viewAnnouncement(id) {
+            // Implementation for viewing announcement details
+            alert('View announcement ' + id + ' details would be implemented here.');
+        }
+
+        function editAnnouncement(id) {
+            // Implementation for editing announcement
+            alert('Edit announcement ' + id + ' functionality would be implemented here.');
+        }
+
+        function deactivateAnnouncement(id) {
+            if (confirm('Are you sure you want to deactivate this announcement?')) {
+                // Implementation for deactivating announcement
+                alert('Deactivate announcement ' + id + ' functionality would be implemented here.');
+            }
+        }
+
+        function activateAnnouncement(id) {
+            if (confirm('Are you sure you want to activate this announcement?')) {
+                // Implementation for activating announcement
+                alert('Activate announcement ' + id + ' functionality would be implemented here.');
+            }
+        }
+
+        // Auto-save draft
+        let saveTimeout;
+        $('#Title, #Content').on('input', function() {
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(function() {
+                const title = $('#Title').val();
+                const content = $('#Content').val();
+                if (title.length > 5 || content.length > 10) {
+                    localStorage.setItem('announcement_draft', JSON.stringify({
+                        title: title,
+                        content: content,
+                        timestamp: new Date().getTime()
+                    }));
+                }
+            }, 2000);
+        });
+
+        // Load draft on page load
+        const draft = localStorage.getItem('announcement_draft');
+        if (draft) {
+            const draftData = JSON.parse(draft);
+            const age = new Date().getTime() - draftData.timestamp;
+            
+            // Only load if draft is less than 1 hour old
+            if (age < 3600000 && (!$('#Title').val() && !$('#Content').val())) {
+                if (confirm('You have a saved draft. Would you like to restore it?')) {
+                    $('#Title').val(draftData.title);
+                    $('#Content').val(draftData.content);
+                    updatePreview();
+                }
+            }
+        }
+
+        // Clear draft on successful submission
+        $('form').on('submit', function() {
+            localStorage.removeItem('announcement_draft');
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .required::after {
+            content: " *";
+            color: red;
+        }
+        
+        .form-check-input:checked + .form-check-label {
+            font-weight: bold;
+        }
+        
+        #announcementPreview {
+            min-height: 120px;
+            transition: all 0.3s ease;
+        }
+        
+        .list-group-item {
+            transition: background-color 0.2s ease;
+        }
+        
+        .list-group-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .border-warning.border-3 {
+            border-width: 0.25rem !important;
+        }
+    </style>
+}

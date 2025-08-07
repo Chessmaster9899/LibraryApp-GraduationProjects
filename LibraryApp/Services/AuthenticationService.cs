@@ -53,6 +53,19 @@ public class AuthenticationService : IAuthenticationService
             }
         }
 
+        // Check for guest access (special case)
+        if (userId.ToLower() == "guest")
+        {
+            return new AuthenticationResult
+            {
+                Success = true,
+                Role = UserRole.Guest,
+                EntityId = 0,
+                DisplayName = "Guest User",
+                MustChangePassword = false
+            };
+        }
+
         // Check students
         var student = await _context.Students.FirstOrDefaultAsync(s => s.StudentNumber == userId);
         if (student != null && student.Password != null && VerifyPassword(password, student.Password))

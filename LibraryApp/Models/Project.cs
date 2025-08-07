@@ -8,6 +8,9 @@ public enum ProjectStatus
     Approved,
     InProgress,
     Completed,
+    SubmittedForReview,
+    ReviewApproved,
+    ReviewRejected,
     Defended,
     Published
 }
@@ -40,6 +43,29 @@ public class Project
     
     [Display(Name = "Document Path")]
     public string? DocumentPath { get; set; } // Path to PDF or document file
+    
+    [Display(Name = "Poster Path")]
+    public string? PosterPath { get; set; } // Path to project poster
+    
+    [Display(Name = "Report Path")]
+    public string? ReportPath { get; set; } // Path to final report
+    
+    [Display(Name = "Code Path")]
+    public string? CodePath { get; set; } // Path to source code files
+    
+    [Display(Name = "Submission Date for Review")]
+    public DateTime? SubmissionForReviewDate { get; set; }
+    
+    [Display(Name = "Review Date")]
+    public DateTime? ReviewDate { get; set; }
+    
+    [Display(Name = "Review Comments")]
+    public string? ReviewComments { get; set; }
+    
+    [Display(Name = "Reviewed By")]
+    public string? ReviewedBy { get; set; }
+    
+    public bool IsPubliclyVisible { get; set; } = false; // For guest viewing
     
     // Foreign keys
     [Display(Name = "Student")]

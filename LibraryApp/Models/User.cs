@@ -6,7 +6,8 @@ public enum UserRole
 {
     Admin,
     Student,
-    Professor
+    Professor,
+    Guest
 }
 
 public class User
