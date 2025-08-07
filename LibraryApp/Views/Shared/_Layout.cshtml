@@ -113,18 +113,22 @@
                         </li>
                         @if (!string.IsNullOrEmpty(Context.Session.GetString("UserId")))
                         {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Students" asp-action="Index">Students</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Professors" asp-action="Index">Professors</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Projects" asp-action="Index">Projects</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Departments" asp-action="Index">Departments</a>
-                            </li>
+                            var userRole = Context.Session.GetString("UserRole");
+                            if (userRole == "Admin")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Students" asp-action="Index">Students</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Professors" asp-action="Index">Professors</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Projects" asp-action="Index">Projects</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Departments" asp-action="Index">Departments</a>
+                                </li>
+                            }
                         }
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>

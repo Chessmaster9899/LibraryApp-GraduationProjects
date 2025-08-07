@@ -339,7 +339,7 @@ h4:not(.card h4):not(.card-header h4):not(.card-body h4),
 h5:not(.card h5):not(.card-header h5):not(.card-body h5),
 h6:not(.card h6):not(.card-header h6):not(.card-body h6) {
   color: white !important;
-  font-weight: bold !important;
+  font-weight: normal !important;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
@@ -348,14 +348,14 @@ label:not(.card label):not(.card-body label):not(.modal label),
 .form-label:not(.card .form-label):not(.card-body .form-label):not(.modal .form-label),
 .control-label:not(.card .control-label):not(.card-body .control-label):not(.modal .control-label) {
   color: white !important;
-  font-weight: bold !important;
+  font-weight: normal !important;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
 }
 
 /* Ensure form text and validation messages are visible */
 .text-danger:not(.card .text-danger):not(.card-body .text-danger):not(.modal .text-danger) {
   color: #ff6b6b !important;
-  font-weight: bold !important;
+  font-weight: normal !important;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
 }
 
@@ -367,13 +367,13 @@ label:not(.card label):not(.card-body label):not(.modal label),
 /* Additional utility classes for background visibility */
 .text-white-shadow {
   color: white !important;
-  font-weight: bold !important;
+  font-weight: normal !important;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .bg-text-white {
   color: white !important;
-  font-weight: bold !important;
+  font-weight: normal !important;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
 }
 
