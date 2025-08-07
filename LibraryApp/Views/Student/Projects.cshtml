@@ -74,6 +74,21 @@
                             <a href="@Url.Action("Details", "Projects", new { id = project.Id })" class="btn btn-outline-primary btn-sm">
                                 <i class="fas fa-eye me-1"></i>View Details
                             </a>
+                            @if (!string.IsNullOrEmpty(project.DocumentPath))
+                            {
+                                <a href="@project.DocumentPath" target="_blank" class="btn btn-outline-success btn-sm">
+                                    <i class="fas fa-file-pdf me-1"></i>Document
+                                </a>
+                            }
+                            @if (!string.IsNullOrEmpty(project.PosterPath))
+                            {
+                                <a href="@project.PosterPath" target="_blank" class="btn btn-outline-info btn-sm">
+                                    <i class="fas fa-image me-1"></i>Poster
+                                </a>
+                            }
+                            <a href="@Url.Action("EditProject", new { id = project.Id })" class="btn btn-warning btn-sm">
+                                <i class="fas fa-edit me-1"></i>Edit
+                            </a>
                         </div>
                     </div>
                 </div>

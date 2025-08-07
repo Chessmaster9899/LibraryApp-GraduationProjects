@@ -104,7 +104,9 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                                <i class="fas fa-home me-1"></i>Home
+                            </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Guest" asp-action="Dashboard">
@@ -117,21 +119,70 @@
                             if (userRole == "Admin")
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link" asp-area="" asp-controller="Students" asp-action="Index">Students</a>
+                                    <a class="nav-link" asp-area="" asp-controller="Students" asp-action="Index">
+                                        <i class="fas fa-user-graduate me-1"></i>Students
+                                    </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" asp-area="" asp-controller="Professors" asp-action="Index">Professors</a>
+                                    <a class="nav-link" asp-area="" asp-controller="Professors" asp-action="Index">
+                                        <i class="fas fa-chalkboard-teacher me-1"></i>Professors
+                                    </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" asp-area="" asp-controller="Projects" asp-action="Index">Projects</a>
+                                    <a class="nav-link" asp-area="" asp-controller="Projects" asp-action="Index">
+                                        <i class="fas fa-project-diagram me-1"></i>All Projects
+                                    </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" asp-area="" asp-controller="Departments" asp-action="Index">Departments</a>
+                                    <a class="nav-link" asp-area="" asp-controller="Departments" asp-action="Index">
+                                        <i class="fas fa-building me-1"></i>Departments
+                                    </a>
+                                </li>
+                            }
+                            else if (userRole == "Student")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Student" asp-action="Projects">
+                                        <i class="fas fa-project-diagram me-1"></i>My Projects
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Student" asp-action="Profile">
+                                        <i class="fas fa-user me-1"></i>My Profile
+                                    </a>
+                                </li>
+                            }
+                            else if (userRole == "Professor")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Professor" asp-action="SupervisedProjects">
+                                        <i class="fas fa-project-diagram me-1"></i>Supervised Projects
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Professor" asp-action="EvaluatedProjects">
+                                        <i class="fas fa-clipboard-check me-1"></i>Evaluated Projects
+                                    </a>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="professorDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-users me-1"></i>Students
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="professorDropdown">
+                                        <li><a class="dropdown-item" asp-controller="Professor" asp-action="MyStudents"><i class="fas fa-user-graduate me-2"></i>My Students</a></li>
+                                    </ul>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Professor" asp-action="Profile">
+                                        <i class="fas fa-user me-1"></i>My Profile
+                                    </a>
                                 </li>
                             }
                         }
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">
+                                <i class="fas fa-shield-alt me-1"></i>Privacy
+                            </a>
                         </li>
                     </ul>
                     
