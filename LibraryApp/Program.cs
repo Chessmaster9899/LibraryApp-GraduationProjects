@@ -27,11 +27,16 @@ builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
 var app = builder.Build();
 
-// Seed sample data
+// Migrate database and seed sample data
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<LibraryContext>();
     var authService = scope.ServiceProvider.GetRequiredService<IAuthenticationService>();
+    
+    // Ensure the database is created and all migrations are applied
+    await context.Database.MigrateAsync();
+    
+    // Seed sample data
     await SeedDataService.SeedAsync(context, authService);
 }
 

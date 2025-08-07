@@ -1,0 +1,137 @@
+@model LibraryApp.Models.Student
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="text-white fw-bold">My Profile</h1>
+    <a href="@Url.Action("Index")" class="btn btn-outline-light">
+        <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-user me-2"></i>Student Information</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" asp-action="UpdateProfile">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="StudentNumber" class="form-label">Student Number</label>
+                                <input asp-for="StudentNumber" class="form-control" readonly />
+                                <small class="form-text text-muted">Student number cannot be changed</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="Email" class="form-label">Email Address</label>
+                                <input asp-for="Email" class="form-control" type="email" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="FirstName" class="form-label">First Name</label>
+                                <input asp-for="FirstName" class="form-control" />
+                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="LastName" class="form-label">Last Name</label>
+                                <input asp-for="LastName" class="form-control" />
+                                <span asp-validation-for="LastName" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="Phone" class="form-label">Phone Number</label>
+                                <input asp-for="Phone" class="form-control" />
+                                <span asp-validation-for="Phone" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Department</label>
+                                <input value="@Model.Department.Name" class="form-control" readonly />
+                                <small class="form-text text-muted">Contact administration to change department</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label class="form-label">Enrollment Date</label>
+                        <input value="@Model.EnrollmentDate.ToString("MMMM dd, yyyy")" class="form-control" readonly />
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Save Changes
+                        </button>
+                        <a href="@Url.Action("Index")" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Account Statistics</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-6">Projects:</dt>
+                    <dd class="col-6">@Model.Projects.Count</dd>
+                    
+                    <dt class="col-6">Completed:</dt>
+                    <dd class="col-6">@Model.Projects.Count(p => p.Status == ProjectStatus.Completed || p.Status == ProjectStatus.Defended)</dd>
+                    
+                    <dt class="col-6">In Progress:</dt>
+                    <dd class="col-6">@Model.Projects.Count(p => p.Status == ProjectStatus.InProgress)</dd>
+                    
+                    @if (Model.LastLogin.HasValue)
+                    {
+                        <dt class="col-6">Last Login:</dt>
+                        <dd class="col-6">@Model.LastLogin.Value.ToString("MMM dd, yyyy")</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-cog me-2"></i>Account Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="@Url.Action("Projects")" class="btn btn-outline-primary">
+                        <i class="fas fa-folder me-1"></i>View My Projects
+                    </a>
+                    <a href="@Url.Action("ChangePassword", "Auth")" class="btn btn-outline-warning">
+                        <i class="fas fa-key me-1"></i>Change Password
+                    </a>
+                    <hr>
+                    <a href="@Url.Action("Logout", "Auth")" class="btn btn-danger">
+                        <i class="fas fa-sign-out-alt me-1"></i>Sign Out
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

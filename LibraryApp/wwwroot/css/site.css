@@ -330,3 +330,63 @@ body {
 .bg-university-primary { background-color: var(--primary-color) !important; }
 .bg-university-secondary { background-color: var(--secondary-color) !important; }
 .border-university-primary { border-color: var(--primary-color) !important; }
+
+/* Fix dark text on background.png for elements not in cards */
+h1:not(.card h1):not(.card-header h1):not(.card-body h1),
+h2:not(.card h2):not(.card-header h2):not(.card-body h2),
+h3:not(.card h3):not(.card-header h3):not(.card-body h3),
+h4:not(.card h4):not(.card-header h4):not(.card-body h4),
+h5:not(.card h5):not(.card-header h5):not(.card-body h5),
+h6:not(.card h6):not(.card-header h6):not(.card-body h6) {
+  color: white !important;
+  font-weight: bold !important;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Fix labels and text on background */
+label:not(.card label):not(.card-body label):not(.modal label),
+.form-label:not(.card .form-label):not(.card-body .form-label):not(.modal .form-label),
+.control-label:not(.card .control-label):not(.card-body .control-label):not(.modal .control-label) {
+  color: white !important;
+  font-weight: bold !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+/* Ensure form text and validation messages are visible */
+.text-danger:not(.card .text-danger):not(.card-body .text-danger):not(.modal .text-danger) {
+  color: #ff6b6b !important;
+  font-weight: bold !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+.text-muted:not(.card .text-muted):not(.card-body .text-muted):not(.modal .text-muted) {
+  color: #f8f9fa !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+/* Additional utility classes for background visibility */
+.text-white-shadow {
+  color: white !important;
+  font-weight: bold !important;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.bg-text-white {
+  color: white !important;
+  font-weight: bold !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+/* Override for navbar items to keep proper colors */
+.navbar h1, .navbar h2, .navbar h3, .navbar h4, .navbar h5, .navbar h6,
+.navbar label, .navbar .form-label {
+  color: var(--navbar-text) !important;
+  text-shadow: none !important;
+}
+
+/* Override for footer items to keep proper colors */
+.footer h1, .footer h2, .footer h3, .footer h4, .footer h5, .footer h6,
+.footer label, .footer .form-label {
+  color: var(--dark-color) !important;
+  text-shadow: none !important;
+}

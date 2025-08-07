@@ -1,0 +1,200 @@
+@model LibraryApp.Models.Professor
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="text-white fw-bold">My Profile</h1>
+    <a href="@Url.Action("Index")" class="btn btn-outline-light">
+        <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-user-tie me-2"></i>Professor Information</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" asp-action="UpdateProfile">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="ProfessorId" class="form-label">Professor ID</label>
+                                <input asp-for="ProfessorId" class="form-control" readonly />
+                                <small class="form-text text-muted">Professor ID cannot be changed</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="Email" class="form-label">Email Address</label>
+                                <input asp-for="Email" class="form-control" type="email" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group mb-3">
+                                <label asp-for="Title" class="form-label">Title</label>
+                                <select asp-for="Title" class="form-select">
+                                    <option value="">Select Title</option>
+                                    <option value="Dr.">Dr.</option>
+                                    <option value="Prof.">Prof.</option>
+                                    <option value="Assoc. Prof.">Assoc. Prof.</option>
+                                    <option value="Asst. Prof.">Asst. Prof.</option>
+                                    <option value="Mr.">Mr.</option>
+                                    <option value="Ms.">Ms.</option>
+                                </select>
+                                <span asp-validation-for="Title" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                <label asp-for="FirstName" class="form-label">First Name</label>
+                                <input asp-for="FirstName" class="form-control" />
+                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="form-group mb-3">
+                                <label asp-for="LastName" class="form-label">Last Name</label>
+                                <input asp-for="LastName" class="form-control" />
+                                <span asp-validation-for="LastName" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="Phone" class="form-label">Phone Number</label>
+                                <input asp-for="Phone" class="form-control" />
+                                <span asp-validation-for="Phone" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Department</label>
+                                <input value="@Model.Department.Name" class="form-control" readonly />
+                                <small class="form-text text-muted">Contact administration to change department</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="Specialization" class="form-label">Specialization</label>
+                                <input asp-for="Specialization" class="form-control" />
+                                <span asp-validation-for="Specialization" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Role</label>
+                                <input value="@Model.Role" class="form-control" readonly />
+                                <small class="form-text text-muted">Contact administration to change role</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Save Changes
+                        </button>
+                        <a href="@Url.Action("Index")" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Activity Statistics</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-8">Supervised Projects:</dt>
+                    <dd class="col-4">@Model.SupervisedProjects.Count</dd>
+                    
+                    <dt class="col-8">Completed Supervised:</dt>
+                    <dd class="col-4">@Model.SupervisedProjects.Count(p => p.Status == ProjectStatus.Completed || p.Status == ProjectStatus.Defended)</dd>
+                    
+                    @if (Model.Role == ProfessorRole.Evaluator || Model.Role == ProfessorRole.Both)
+                    {
+                        <dt class="col-8">Evaluated Projects:</dt>
+                        <dd class="col-4">@Model.EvaluatedProjects.Count</dd>
+                        
+                        <dt class="col-8">Completed Evaluated:</dt>
+                        <dd class="col-4">@Model.EvaluatedProjects.Count(p => p.Status == ProjectStatus.Completed || p.Status == ProjectStatus.Defended)</dd>
+                    }
+                    
+                    @if (Model.LastLogin.HasValue)
+                    {
+                        <dt class="col-8">Last Login:</dt>
+                        <dd class="col-4">@Model.LastLogin.Value.ToString("MMM dd")</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-tasks me-2"></i>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="@Url.Action("SupervisedProjects")" class="btn btn-outline-primary">
+                        <i class="fas fa-clipboard-list me-1"></i>Projects I Supervise
+                    </a>
+                    @if (Model.Role == ProfessorRole.Evaluator || Model.Role == ProfessorRole.Both)
+                    {
+                        <a href="@Url.Action("EvaluatedProjects")" class="btn btn-outline-success">
+                            <i class="fas fa-star me-1"></i>Projects I Evaluate
+                        </a>
+                    }
+                    <hr>
+                    <a href="@Url.Action("ChangePassword", "Auth")" class="btn btn-outline-warning">
+                        <i class="fas fa-key me-1"></i>Change Password
+                    </a>
+                    <a href="@Url.Action("Logout", "Auth")" class="btn btn-danger">
+                        <i class="fas fa-sign-out-alt me-1"></i>Sign Out
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Role Information</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-2"><strong>Current Role:</strong> 
+                    <span class="badge bg-info">@Model.Role</span>
+                </p>
+                
+                @if (Model.Role == ProfessorRole.Supervisor)
+                {
+                    <p class="mb-0"><small class="text-muted">As a Supervisor, you can guide students through their graduation projects and monitor their progress.</small></p>
+                }
+                else if (Model.Role == ProfessorRole.Evaluator)
+                {
+                    <p class="mb-0"><small class="text-muted">As an Evaluator, you can assess and grade student projects for their final evaluations.</small></p>
+                }
+                else if (Model.Role == ProfessorRole.Both)
+                {
+                    <p class="mb-0"><small class="text-muted">You can both supervise student projects and evaluate projects from other supervisors.</small></p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
