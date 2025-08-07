@@ -214,6 +214,153 @@ namespace LibraryApp.Controllers
 
             return RedirectToAction("Index");
         }
+
+        public async Task<IActionResult> EditProject(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var project = await _context.Projects
+                .Include(p => p.Student)
+                .Include(p => p.Supervisor)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (project == null)
+            {
+                return NotFound();
+            }
+
+            // Check permission - only the assigned student can edit
+            var studentId = int.Parse(CurrentUserId!);
+            if (project.StudentId != studentId)
+            {
+                this.AddError("Permission Denied", "You can only edit your own projects");
+                return RedirectToAction("Index");
+            }
+
+            return View(project);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditProject(int id, [Bind("Id,Title,Abstract,Keywords,DocumentPath,PosterPath")] Project model, IFormFile? documentFile, IFormFile? posterFile)
+        {
+            if (id != model.Id)
+            {
+                return NotFound();
+            }
+
+            var project = await _context.Projects
+                .Include(p => p.Student)
+                .Include(p => p.Supervisor)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (project == null)
+            {
+                return NotFound();
+            }
+
+            // Check permission - only the assigned student can edit
+            var studentId = int.Parse(CurrentUserId!);
+            if (project.StudentId != studentId)
+            {
+                this.AddError("Permission Denied", "You can only edit your own projects");
+                return RedirectToAction("Index");
+            }
+
+            // Handle document file upload
+            if (documentFile != null && documentFile.Length > 0)
+            {
+                var allowedExtensions = new[] { ".pdf", ".doc", ".docx", ".txt" };
+                var extension = Path.GetExtension(documentFile.FileName).ToLowerInvariant();
+                
+                if (!allowedExtensions.Contains(extension))
+                {
+                    this.AddError("Invalid File Type", "Only PDF, DOC, DOCX, and TXT files are allowed for documents");
+                    return View(project);
+                }
+
+                var webRootPath = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>().WebRootPath;
+                var uploadsFolder = Path.Combine(webRootPath, "documents");
+                Directory.CreateDirectory(uploadsFolder);
+                
+                // Delete old file if it exists
+                if (!string.IsNullOrEmpty(project.DocumentPath))
+                {
+                    var oldFilePath = Path.Combine(webRootPath, project.DocumentPath.TrimStart('/'));
+                    if (System.IO.File.Exists(oldFilePath))
+                    {
+                        System.IO.File.Delete(oldFilePath);
+                    }
+                }
+                
+                var uniqueFileName = Guid.NewGuid().ToString() + "_" + documentFile.FileName;
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await documentFile.CopyToAsync(fileStream);
+                }
+                
+                project.DocumentPath = "/documents/" + uniqueFileName;
+            }
+
+            // Handle poster file upload
+            if (posterFile != null && posterFile.Length > 0)
+            {
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".pdf" };
+                var extension = Path.GetExtension(posterFile.FileName).ToLowerInvariant();
+                
+                if (!allowedExtensions.Contains(extension))
+                {
+                    this.AddError("Invalid File Type", "Only JPG, PNG, GIF, and PDF files are allowed for posters");
+                    return View(project);
+                }
+
+                var webRootPath = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>().WebRootPath;
+                var uploadsFolder = Path.Combine(webRootPath, "posters");
+                Directory.CreateDirectory(uploadsFolder);
+                
+                // Delete old poster if it exists
+                if (!string.IsNullOrEmpty(project.PosterPath))
+                {
+                    var oldFilePath = Path.Combine(webRootPath, project.PosterPath.TrimStart('/'));
+                    if (System.IO.File.Exists(oldFilePath))
+                    {
+                        System.IO.File.Delete(oldFilePath);
+                    }
+                }
+                
+                var uniqueFileName = Guid.NewGuid().ToString() + "_" + posterFile.FileName;
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await posterFile.CopyToAsync(fileStream);
+                }
+                
+                project.PosterPath = "/posters/" + uniqueFileName;
+            }
+
+            // Update the allowed fields
+            project.Title = model.Title;
+            project.Abstract = model.Abstract;
+            project.Keywords = model.Keywords;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                this.AddSuccess("Project Updated", "Your project has been successfully updated");
+                return RedirectToAction("Projects");
+            }
+            catch (Exception)
+            {
+                this.AddError("Update Failed", "Failed to update your project. Please try again");
+                return View(project);
+            }
+        }
     }
 
     public class StudentDashboardViewModel

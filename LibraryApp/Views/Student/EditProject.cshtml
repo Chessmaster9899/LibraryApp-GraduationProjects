@@ -1,0 +1,185 @@
+@model LibraryApp.Models.Project
+@{
+    ViewData["Title"] = "Edit Project";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">Edit Project</h1>
+            <p class="text-muted mb-0">Update your project details and upload files</p>
+        </div>
+        <div>
+            <a asp-action="Projects" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left me-1"></i>Back to Projects
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-edit me-2"></i>Project Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="EditProject" method="post" enctype="multipart/form-data">
+                        <input type="hidden" asp-for="Id" />
+                        
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label">Project Title <span class="text-danger">*</span></label>
+                            <input asp-for="Title" class="form-control" placeholder="Enter project title">
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Abstract" class="form-label">Abstract</label>
+                            <textarea asp-for="Abstract" class="form-control" rows="5" placeholder="Provide a brief description of your project"></textarea>
+                            <span asp-validation-for="Abstract" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Keywords" class="form-label">Keywords</label>
+                            <input asp-for="Keywords" class="form-control" placeholder="Enter keywords separated by commas">
+                            <span asp-validation-for="Keywords" class="text-danger"></span>
+                            <div class="form-text">Separate multiple keywords with commas (e.g., AI, Machine Learning, Python)</div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="documentFile" class="form-label">
+                                        <i class="fas fa-file-pdf me-1"></i>Project Document
+                                    </label>
+                                    <input type="file" class="form-control" id="documentFile" name="documentFile" accept=".pdf,.doc,.docx,.txt">
+                                    <div class="form-text">Allowed formats: PDF, DOC, DOCX, TXT</div>
+                                    @if (!string.IsNullOrEmpty(Model.DocumentPath))
+                                    {
+                                        <div class="mt-2">
+                                            <small class="text-success">
+                                                <i class="fas fa-check-circle me-1"></i>Current document: 
+                                                <a href="@Model.DocumentPath" target="_blank" class="text-decoration-none">View Document</a>
+                                            </small>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="posterFile" class="form-label">
+                                        <i class="fas fa-image me-1"></i>Project Poster
+                                    </label>
+                                    <input type="file" class="form-control" id="posterFile" name="posterFile" accept=".jpg,.jpeg,.png,.gif,.pdf">
+                                    <div class="form-text">Allowed formats: JPG, PNG, GIF, PDF</div>
+                                    @if (!string.IsNullOrEmpty(Model.PosterPath))
+                                    {
+                                        <div class="mt-2">
+                                            <small class="text-success">
+                                                <i class="fas fa-check-circle me-1"></i>Current poster: 
+                                                <a href="@Model.PosterPath" target="_blank" class="text-decoration-none">View Poster</a>
+                                            </small>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>Update Project
+                                </button>
+                                <a asp-action="Projects" class="btn btn-secondary ms-2">
+                                    <i class="fas fa-times me-1"></i>Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Project Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label text-muted small">Supervisor</label>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-chalkboard-teacher text-primary me-2"></i>
+                            <span>@Model.Supervisor?.Title @Model.Supervisor?.FirstName @Model.Supervisor?.LastName</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted small">Status</label>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-@(Model.Status == ProjectStatus.Completed ? "success" : 
+                                                      Model.Status == ProjectStatus.InProgress ? "warning" : 
+                                                      Model.Status == ProjectStatus.Approved ? "info" : "secondary") me-2">
+                                @Model.Status
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted small">Submission Date</label>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-calendar text-primary me-2"></i>
+                            <span>@Model.SubmissionDate.ToString("MMM dd, yyyy")</span>
+                        </div>
+                    </div>
+
+                    @if (Model.DefenseDate.HasValue)
+                    {
+                        <div class="mb-3">
+                            <label class="form-label text-muted small">Defense Date</label>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-presentation text-warning me-2"></i>
+                                <span>@Model.DefenseDate.Value.ToString("MMM dd, yyyy")</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="card shadow-sm mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>Tips
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <small>Keep your abstract concise and informative</small>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <small>Use relevant keywords for better searchability</small>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <small>Upload final versions of your documents</small>
+                        </li>
+                        <li class="mb-0">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <small>Contact your supervisor for guidance</small>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
