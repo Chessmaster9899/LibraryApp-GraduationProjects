@@ -156,8 +156,9 @@ namespace LibraryApp.Controllers
             }
 
             // Check permission - only the assigned student can submit
-            var studentId = int.Parse(CurrentUserId!);
-            if (project.StudentId != studentId)
+            var currentStudent = await _context.Students
+                .FirstOrDefaultAsync(s => s.StudentNumber == CurrentUserId);
+            if (currentStudent == null || project.StudentId != currentStudent.Id)
             {
                 this.AddError("Permission Denied", "You can only submit your own projects");
                 return RedirectToAction("Index");
@@ -194,8 +195,9 @@ namespace LibraryApp.Controllers
             }
 
             // Check permission - only the assigned student can start
-            var studentId = int.Parse(CurrentUserId!);
-            if (project.StudentId != studentId)
+            var currentStudent = await _context.Students
+                .FirstOrDefaultAsync(s => s.StudentNumber == CurrentUserId);
+            if (currentStudent == null || project.StudentId != currentStudent.Id)
             {
                 this.AddError("Permission Denied", "You can only start your own projects");
                 return RedirectToAction("Index");
@@ -233,8 +235,9 @@ namespace LibraryApp.Controllers
             }
 
             // Check permission - only the assigned student can edit
-            var studentId = int.Parse(CurrentUserId!);
-            if (project.StudentId != studentId)
+            var currentStudent = await _context.Students
+                .FirstOrDefaultAsync(s => s.StudentNumber == CurrentUserId);
+            if (currentStudent == null || project.StudentId != currentStudent.Id)
             {
                 this.AddError("Permission Denied", "You can only edit your own projects");
                 return RedirectToAction("Index");
@@ -263,8 +266,9 @@ namespace LibraryApp.Controllers
             }
 
             // Check permission - only the assigned student can edit
-            var studentId = int.Parse(CurrentUserId!);
-            if (project.StudentId != studentId)
+            var currentStudent = await _context.Students
+                .FirstOrDefaultAsync(s => s.StudentNumber == CurrentUserId);
+            if (currentStudent == null || project.StudentId != currentStudent.Id)
             {
                 this.AddError("Permission Denied", "You can only edit your own projects");
                 return RedirectToAction("Index");
