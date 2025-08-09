@@ -49,8 +49,8 @@ public class ProjectsController : ControllerBase
             {
                 query = query.Where(p => 
                     p.Title.Contains(search) || 
-                    p.Abstract.Contains(search) || 
-                    p.Keywords.Contains(search) ||
+                    (p.Abstract ?? string.Empty).Contains(search) || 
+                    (p.Keywords ?? string.Empty).Contains(search) ||
                     p.Student.FirstName.Contains(search) ||
                     p.Student.LastName.Contains(search));
             }

@@ -223,8 +223,9 @@ namespace LibraryApp.Controllers
             }
 
             // Check permission - only supervisor can approve
-            var professorId = int.Parse(CurrentUserId!);
-            if (project.SupervisorId != professorId)
+            var currentProfessor = await _context.Professors
+                .FirstOrDefaultAsync(p => p.ProfessorId == CurrentUserId);
+            if (currentProfessor == null || project.SupervisorId != currentProfessor.Id)
             {
                 this.AddError("Permission Denied", "You can only approve projects you supervise");
                 return RedirectToAction("Index");
@@ -268,8 +269,9 @@ namespace LibraryApp.Controllers
             }
 
             // Check permission - only supervisor can reject
-            var professorId = int.Parse(CurrentUserId!);
-            if (project.SupervisorId != professorId)
+            var currentProfessor = await _context.Professors
+                .FirstOrDefaultAsync(p => p.ProfessorId == CurrentUserId);
+            if (currentProfessor == null || project.SupervisorId != currentProfessor.Id)
             {
                 this.AddError("Permission Denied", "You can only reject projects you supervise");
                 return RedirectToAction("Index");
@@ -307,8 +309,9 @@ namespace LibraryApp.Controllers
             }
 
             // Check permission - supervisor or evaluator can mark as completed
-            var professorId = int.Parse(CurrentUserId!);
-            if (project.SupervisorId != professorId && project.EvaluatorId != professorId)
+            var currentProfessor = await _context.Professors
+                .FirstOrDefaultAsync(p => p.ProfessorId == CurrentUserId);
+            if (currentProfessor == null || (project.SupervisorId != currentProfessor.Id && project.EvaluatorId != currentProfessor.Id))
             {
                 this.AddError("Permission Denied", "You can only mark projects you supervise or evaluate as completed");
                 return RedirectToAction("Index");
@@ -346,8 +349,9 @@ namespace LibraryApp.Controllers
             }
 
             // Check permission - supervisor can schedule defense
-            var professorId = int.Parse(CurrentUserId!);
-            if (project.SupervisorId != professorId)
+            var currentProfessor = await _context.Professors
+                .FirstOrDefaultAsync(p => p.ProfessorId == CurrentUserId);
+            if (currentProfessor == null || project.SupervisorId != currentProfessor.Id)
             {
                 this.AddError("Permission Denied", "You can only schedule defense for projects you supervise");
                 return RedirectToAction("Index");
@@ -389,8 +393,9 @@ namespace LibraryApp.Controllers
             }
 
             // Check permission - only supervisor can edit
-            var professorId = int.Parse(CurrentUserId!);
-            if (project.SupervisorId != professorId)
+            var currentProfessor = await _context.Professors
+                .FirstOrDefaultAsync(p => p.ProfessorId == CurrentUserId);
+            if (currentProfessor == null || project.SupervisorId != currentProfessor.Id)
             {
                 this.AddError("Permission Denied", "You can only edit projects you supervise");
                 return RedirectToAction("Index");
@@ -419,8 +424,9 @@ namespace LibraryApp.Controllers
             }
 
             // Check permission - only supervisor can edit
-            var professorId = int.Parse(CurrentUserId!);
-            if (project.SupervisorId != professorId)
+            var currentProfessor = await _context.Professors
+                .FirstOrDefaultAsync(p => p.ProfessorId == CurrentUserId);
+            if (currentProfessor == null || project.SupervisorId != currentProfessor.Id)
             {
                 this.AddError("Permission Denied", "You can only edit projects you supervise");
                 return RedirectToAction("Index");

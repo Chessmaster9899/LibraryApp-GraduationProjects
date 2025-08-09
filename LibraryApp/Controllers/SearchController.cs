@@ -99,7 +99,7 @@ public class SearchController : BaseController
         // Project suggestions
         var projectSuggestions = await _context.Projects
             .Where(p => p.IsPubliclyVisible || CurrentUserRoleEnum != UserRole.Guest)
-            .Where(p => p.Title.Contains(query) || p.Abstract.Contains(query) || p.Keywords.Contains(query))
+            .Where(p => p.Title.Contains(query) || (p.Abstract ?? string.Empty).Contains(query) || (p.Keywords ?? string.Empty).Contains(query))
             .Take(limit / 2)
             .Select(p => new {
                 type = "project",
@@ -165,8 +165,8 @@ public class SearchController : BaseController
         // Apply text search
         projectsQuery = projectsQuery.Where(p => 
             p.Title.Contains(query) || 
-            p.Abstract.Contains(query) || 
-            p.Keywords.Contains(query) ||
+            (p.Abstract ?? string.Empty).Contains(query) || 
+            (p.Keywords ?? string.Empty).Contains(query) ||
             p.Student.FirstName.Contains(query) ||
             p.Student.LastName.Contains(query) ||
             p.Supervisor.FirstName.Contains(query) ||
@@ -230,7 +230,7 @@ public class SearchController : BaseController
             p.LastName.Contains(query) || 
             p.ProfessorId.Contains(query) ||
             p.Email.Contains(query) ||
-            p.Specialization.Contains(query));
+            (p.Specialization ?? string.Empty).Contains(query));
 
         if (!string.IsNullOrEmpty(department))
         {
@@ -256,8 +256,8 @@ public class SearchController : BaseController
 
         projectsQuery = projectsQuery.Where(p => 
             p.Title.Contains(query) || 
-            p.Abstract.Contains(query) || 
-            p.Keywords.Contains(query) ||
+            (p.Abstract ?? string.Empty).Contains(query) || 
+            (p.Keywords ?? string.Empty).Contains(query) ||
             p.Student.FirstName.Contains(query) ||
             p.Student.LastName.Contains(query) ||
             p.Supervisor.FirstName.Contains(query) ||
@@ -303,7 +303,7 @@ public class SearchController : BaseController
             p.LastName.Contains(query) || 
             p.ProfessorId.Contains(query) ||
             p.Email.Contains(query) ||
-            p.Specialization.Contains(query));
+            (p.Specialization ?? string.Empty).Contains(query));
 
         if (!string.IsNullOrEmpty(department))
         {

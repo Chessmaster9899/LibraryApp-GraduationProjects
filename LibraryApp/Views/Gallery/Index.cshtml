@@ -1,0 +1,693 @@
+@model LibraryApp.Controllers.EnhancedGalleryViewModel
+@{
+    ViewData["Title"] = "Project Gallery";
+    var universitySettings = ViewBag.UniversitySettings as LibraryApp.Models.UniversitySettings;
+}
+
+<!-- Enhanced Project Gallery - Standout Feature -->
+<div class="gallery-container">
+    <!-- Hero Section with Advanced Graphics -->
+    <div class="hero-section">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="container">
+                <div class="row align-items-center min-vh-50">
+                    <div class="col-lg-8 mx-auto text-center">
+                        <div class="hero-badge mb-3">
+                            <span class="badge bg-primary bg-opacity-20 text-primary px-3 py-2 rounded-pill">
+                                <i class="fas fa-star me-1"></i>Project Showcase
+                            </span>
+                        </div>
+                        <h1 class="hero-title display-3 fw-bold mb-4">
+                            Discover <span class="text-gradient">Innovative</span> Projects
+                        </h1>
+                        <p class="hero-subtitle lead mb-4 text-white-50">
+                            Explore cutting-edge research and creative solutions from our talented students and faculty
+                        </p>
+                        <div class="hero-stats row text-center mb-4">
+                            <div class="col-3">
+                                <h3 class="fw-bold text-white">@Model.Stats.TotalProjects</h3>
+                                <small class="text-white-50">Projects</small>
+                            </div>
+                            <div class="col-3">
+                                <h3 class="fw-bold text-white">@Model.Stats.TotalStudents</h3>
+                                <small class="text-white-50">Students</small>
+                            </div>
+                            <div class="col-3">
+                                <h3 class="fw-bold text-white">@Model.Stats.TotalSupervisors</h3>
+                                <small class="text-white-50">Supervisors</small>
+                            </div>
+                            <div class="col-3">
+                                <h3 class="fw-bold text-white">@Model.Stats.TotalDepartments</h3>
+                                <small class="text-white-50">Departments</small>
+                            </div>
+                        </div>
+                        <div class="hero-actions">
+                            <button class="btn btn-primary btn-lg me-3" onclick="scrollToGallery()">
+                                <i class="fas fa-compass me-2"></i>Explore Gallery
+                            </button>
+                            <button class="btn btn-outline-light btn-lg" onclick="showStatistics()">
+                                <i class="fas fa-chart-bar me-2"></i>View Analytics
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="hero-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+        </div>
+    </div>
+
+    <!-- Admin Controls Panel (Only visible to admins) -->
+    @if (Model.IsAdmin)
+    {
+        <div class="admin-controls-panel">
+            <div class="container">
+                <div class="alert alert-info border-0 shadow-sm">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-tools text-primary me-2"></i>
+                            <strong>Gallery Administration</strong>
+                        </div>
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-sm btn-outline-primary" onclick="toggleGalleryMode()">
+                                <i class="fas fa-edit me-1"></i>Edit Mode
+                            </button>
+                            <button class="btn btn-sm btn-outline-success" onclick="manageVisibility()">
+                                <i class="fas fa-eye me-1"></i>Manage Visibility
+                            </button>
+                            <button class="btn btn-sm btn-outline-warning" onclick="customizeLayout()">
+                                <i class="fas fa-palette me-1"></i>Customize
+                            </button>
+                            <a href="@Url.Action("AdminSettings")" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-cog me-1"></i>Settings
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Projects Grid/List View -->
+    <div class="projects-section pb-5" id="gallery-main">
+        <div class="container">
+            <!-- Advanced Search and Filter Section -->
+            <div class="search-bar-container mb-5">
+                <form method="get" class="row align-items-center">
+                    <div class="col-lg-4 mb-3">
+                        <div class="search-input-wrapper">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" name="search" value="@Model.CurrentSearch" class="form-control search-input" placeholder="Search projects, students, keywords...">
+                        </div>
+                    </div>
+                    <div class="col-lg-2 mb-3">
+                        <select name="department" class="form-select">
+                            <option value="">All Departments</option>
+                            @foreach (var dept in Model.Departments)
+                            {
+                                <option value="@dept.Name" selected="@(Model.CurrentDepartment == dept.Name)">@dept.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-lg-2 mb-3">
+                        <select name="sort" class="form-select">
+                            <option value="date_desc" selected="@(Model.CurrentSort == "date_desc")">Latest First</option>
+                            <option value="date_asc" selected="@(Model.CurrentSort == "date_asc")">Oldest First</option>
+                            <option value="title" selected="@(Model.CurrentSort == "title")">Title A-Z</option>
+                            <option value="student" selected="@(Model.CurrentSort == "student")">Student Name</option>
+                            <option value="department" selected="@(Model.CurrentSort == "department")">Department</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2 mb-3">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-filter me-1"></i>Filter
+                        </button>
+                    </div>
+                    <div class="col-lg-2 mb-3">
+                        <div class="view-toggle">
+                            <button type="button" class="btn btn-outline-secondary view-btn active" data-view="grid">
+                                <i class="fas fa-th"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary view-btn" data-view="list">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Results Summary -->
+                <div class="results-summary mt-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0">Showing @Model.Projects.Count of @Model.TotalProjects projects</h6>
+                            @if (!string.IsNullOrEmpty(Model.CurrentSearch) || !string.IsNullOrEmpty(Model.CurrentDepartment))
+                            {
+                                <p class="text-muted small mb-0">
+                                    Filtered by:
+                                    @if (!string.IsNullOrEmpty(Model.CurrentSearch))
+                                    {
+                                        <span class="badge bg-primary me-1">Search: @Model.CurrentSearch</span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(Model.CurrentDepartment))
+                                    {
+                                        <span class="badge bg-info me-1">Department: @Model.CurrentDepartment</span>
+                                    }
+                                    <a href="@Url.Action("Index")" class="text-decoration-none small">Clear filters</a>
+                                </p>
+                            }
+                        </div>
+                        <div class="results-actions">
+                            <button class="btn btn-outline-secondary btn-sm" onclick="exportResults()">
+                                <i class="fas fa-download me-1"></i>Export
+                            </button>
+                            <button class="btn btn-outline-primary btn-sm" onclick="shareGallery()">
+                                <i class="fas fa-share me-1"></i>Share
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="projects-grid" class="row view-grid">
+                @foreach (var project in Model.Projects)
+                {
+                    <div class="col-lg-4 col-md-6 mb-4 project-item" data-department="@project.Student?.Department?.Name" data-title="@project.Title.ToLower()">
+                        <div class="project-card h-100">
+                            <div class="project-image">
+                                @if (!string.IsNullOrEmpty(project.PosterPath))
+                                {
+                                    <img src="@project.PosterPath" alt="@project.Title" class="img-fluid">
+                                }
+                                else
+                                {
+                                    <div class="placeholder-image">
+                                        <i class="fas fa-project-diagram fa-2x text-muted"></i>
+                                    </div>
+                                }
+                                <div class="project-overlay">
+                                    <div class="project-actions">
+                                        <a href="@Url.Action("Project", "Gallery", new { id = project.Id })" class="btn btn-white btn-sm">
+                                            <i class="fas fa-eye me-1"></i>View
+                                        </a>
+                                        @if (!string.IsNullOrEmpty(project.DocumentPath))
+                                        {
+                                            <a href="@project.DocumentPath" target="_blank" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-download me-1"></i>PDF
+                                            </a>
+                                        }
+                                        @if (Model.IsAdmin)
+                                        {
+                                            <button class="btn btn-warning btn-sm" onclick="toggleProjectVisibility(@project.Id)">
+                                                <i class="fas fa-eye-slash"></i>
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="project-content">
+                                <div class="project-header mb-2">
+                                    <h5 class="project-title mb-1">@project.Title</h5>
+                                    <div class="project-meta">
+                                        <span class="text-muted small">@project.Student?.FullName</span>
+                                        <span class="badge bg-primary ms-2">@project.Student?.Department?.Name</span>
+                                    </div>
+                                </div>
+                                @if (!string.IsNullOrEmpty(project.Abstract))
+                                {
+                                    <p class="project-abstract text-muted small">
+                                        @(project.Abstract.Length > 120 ? project.Abstract.Substring(0, 120) + "..." : project.Abstract)
+                                    </p>
+                                }
+                                <div class="project-footer">
+                                    <div class="project-tags">
+                                        @if (!string.IsNullOrEmpty(project.Keywords))
+                                        {
+                                            @foreach (var keyword in project.Keywords.Split(',', StringSplitOptions.RemoveEmptyEntries).Take(3))
+                                            {
+                                                <span class="tag">@keyword.Trim()</span>
+                                            }
+                                        }
+                                    </div>
+                                    <div class="project-date">
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar me-1"></i>
+                                            @((project.DefenseDate ?? project.SubmissionDate).ToString("MMM yyyy"))
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Pagination -->
+            @if (Model.TotalPages > 1)
+            {
+                <nav aria-label="Gallery pagination" class="mt-5">
+                    <ul class="pagination justify-content-center">
+                        @if (Model.CurrentPage > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("Index", new { department = Model.CurrentDepartment, search = Model.CurrentSearch, sort = Model.CurrentSort, page = Model.CurrentPage - 1 })">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                        }
+
+                        @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                        {
+                            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("Index", new { department = Model.CurrentDepartment, search = Model.CurrentSearch, sort = Model.CurrentSort, page = i })">@i</a>
+                            </li>
+                        }
+
+                        @if (Model.CurrentPage < Model.TotalPages)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("Index", new { department = Model.CurrentDepartment, search = Model.CurrentSearch, sort = Model.CurrentSort, page = Model.CurrentPage + 1 })">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
+        </div>
+    </div>
+</div>
+
+@section Styles {
+<style>
+.gallery-container {
+    background: #fff;
+}
+
+/* Hero Section with Advanced Graphics */
+.hero-section {
+    position: relative;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 1;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+}
+
+.text-gradient {
+    background: linear-gradient(45deg, #FFD700, #FFA500, #FF6347);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-shapes {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.shape {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+}
+
+.shape-1 {
+    width: 300px;
+    height: 300px;
+    top: 10%;
+    right: 10%;
+    animation-delay: 0s;
+}
+
+.shape-2 {
+    width: 200px;
+    height: 200px;
+    bottom: 20%;
+    left: 15%;
+    animation-delay: 2s;
+}
+
+.shape-3 {
+    width: 150px;
+    height: 150px;
+    top: 50%;
+    left: 60%;
+    animation-delay: 4s;
+}
+
+@@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(10deg); }
+}
+
+.search-bar-container {
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    margin-top: -50px;
+    position: relative;
+    z-index: 3;
+}
+
+.search-input-wrapper {
+    position: relative;
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    z-index: 3;
+}
+
+.search-input {
+    padding-left: 45px;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    height: 48px;
+}
+
+.view-toggle {
+    display: flex;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #e9ecef;
+}
+
+.view-btn {
+    border: none;
+    border-radius: 0;
+    padding: 12px 16px;
+}
+
+.view-btn.active {
+    background: #007bff;
+    color: white;
+}
+
+.project-card {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    background: white;
+    border: 1px solid #f0f0f0;
+}
+
+.project-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+}
+
+.project-image {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+}
+
+.project-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.project-card:hover .project-image img {
+    transform: scale(1.05);
+}
+
+.placeholder-image {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+}
+
+.project-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.project-card:hover .project-overlay {
+    opacity: 1;
+}
+
+.project-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.project-content {
+    padding: 20px;
+}
+
+.project-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: 8px;
+    color: #212529;
+}
+
+.project-abstract {
+    line-height: 1.5;
+    margin-bottom: 15px;
+}
+
+.project-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: auto;
+}
+
+.project-tags {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.tag {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.admin-controls-panel {
+    background: #fff;
+    border-bottom: 1px solid #e9ecef;
+    padding: 15px 0;
+}
+
+.view-list .project-item {
+    width: 100%;
+}
+
+.view-list .project-card {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.view-list .project-image {
+    width: 200px;
+    flex-shrink: 0;
+}
+
+.view-list .project-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+@@media (max-width: 768px) {
+    .hero-section {
+        min-height: 80vh;
+        text-align: center;
+    }
+    
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-stats {
+        margin-bottom: 30px;
+    }
+    
+    .search-bar-container {
+        padding: 20px;
+        margin-top: -30px;
+    }
+    
+    .view-list .project-card {
+        flex-direction: column;
+    }
+    
+    .view-list .project-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initializeGallery();
+});
+
+function initializeGallery() {
+    // Initialize view toggle
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const view = this.dataset.view;
+            toggleView(view);
+        });
+    });
+
+    // Initialize animations
+    animateOnScroll();
+}
+
+function scrollToGallery() {
+    document.getElementById('gallery-main').scrollIntoView({ 
+        behavior: 'smooth' 
+    });
+}
+
+function toggleView(view) {
+    const grid = document.getElementById('projects-grid');
+    const buttons = document.querySelectorAll('.view-btn');
+    
+    buttons.forEach(btn => btn.classList.remove('active'));
+    document.querySelector(`[data-view="${view}"]`).classList.add('active');
+    
+    grid.className = view === 'list' ? 'row view-list' : 'row view-grid';
+}
+
+function showStatistics() {
+    fetch('@Url.Action("Statistics")', {
+        headers: { 'Accept': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        showToast('info', 'Statistics', 'Loading detailed analytics...');
+    });
+}
+
+function toggleProjectVisibility(projectId) {
+    if (!confirm('Are you sure you want to toggle this project\'s visibility?')) {
+        return;
+    }
+    
+    fetch('@Url.Action("ToggleProjectVisibility")', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `projectId=${projectId}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('success', 'Success', data.message);
+            location.reload();
+        } else {
+            showToast('error', 'Error', data.message);
+        }
+    });
+}
+
+function toggleGalleryMode() {
+    showToast('info', 'Edit Mode', 'Gallery edit mode activated');
+}
+
+function manageVisibility() {
+    showToast('info', 'Visibility', 'Opening visibility management panel...');
+}
+
+function customizeLayout() {
+    showToast('info', 'Customize', 'Opening layout customization options...');
+}
+
+function exportResults() {
+    showToast('info', 'Export', 'Preparing gallery export...');
+}
+
+function shareGallery() {
+    if (navigator.share) {
+        navigator.share({
+            title: 'Project Gallery',
+            text: 'Check out these amazing student projects!',
+            url: window.location.href
+        });
+    } else {
+        navigator.clipboard.writeText(window.location.href);
+        showToast('success', 'Link Copied', 'Gallery link copied to clipboard');
+    }
+}
+
+function animateOnScroll() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('fade-in');
+            }
+        });
+    });
+
+    document.querySelectorAll('.project-card').forEach(card => {
+        observer.observe(card);
+    });
+}
+</script>
