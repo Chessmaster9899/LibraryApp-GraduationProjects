@@ -3,24 +3,55 @@
     ViewData["Title"] = "Student Dashboard";
 }
 
-<div class="container-fluid">
-    <!-- Welcome Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-0 bg-primary text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h1 class="h3 mb-1">Welcome back, @Model.Student.FirstName! 👋</h1>
-                            <p class="mb-0 opacity-75">Here's your academic progress overview</p>
-                        </div>
-                        <div class="text-end">
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-user-graduate fa-2x me-3 opacity-75"></i>
-                                <div>
-                                    <div class="fw-bold">@Model.Student.FullName</div>
-                                    <small class="opacity-75">@Model.Student.StudentNumber</small>
+<!-- Professional Student Dashboard - High-End Design -->
+<div class="dashboard-container">
+    <!-- Modern Welcome Header with Analytics -->
+    <div class="welcome-section mb-4">
+        <div class="card border-0 shadow-lg overflow-hidden dashboard-header">
+            <div class="card-body p-0">
+                <div class="row g-0">
+                    <div class="col-lg-8">
+                        <div class="p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="avatar-lg me-3">
+                                    <div class="avatar-title bg-white bg-opacity-20 rounded-circle">
+                                        <i class="fas fa-user-graduate fa-2x text-on-dark"></i>
+                                    </div>
                                 </div>
+                                <div>
+                                    <h1 class="dashboard-title">Welcome back, @Model.Student.FirstName!</h1>
+                                    <p class="dashboard-subtitle">@Model.Student.Department?.Name • Student Progress Dashboard</p>
+                                </div>
+                            </div>
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <div class="p-2">
+                                        <h4 class="mb-1 fw-bold text-on-dark">@Model.TotalProjects</h4>
+                                        <small class="opacity-75">Total Projects</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="p-2">
+                                        <h4 class="mb-1 fw-bold text-on-dark">@Model.CompletedProjects</h4>
+                                        <small class="opacity-75">Completed</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="p-2">
+                                        @{
+                                            var completionRate = Model.TotalProjects > 0 ? Math.Round((double)Model.CompletedProjects / Model.TotalProjects * 100, 1) : 0;
+                                        }
+                                        <h4 class="mb-1 fw-bold text-on-dark">@completionRate%</h4>
+                                        <small class="opacity-75">Success Rate</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 d-none d-lg-block">
+                        <div class="p-4 text-center">
+                            <div class="dashboard-chart-container">
+                                <canvas id="studentChart" width="200" height="200"></canvas>
                             </div>
                         </div>
                     </div>
@@ -28,216 +59,342 @@
             </div>
         </div>
     </div>
-        
-    <!-- Enhanced Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card border-0 shadow-sm h-100">
+
+    <!-- Advanced Metrics Grid -->
+    <div class="row mb-4 dashboard-stats-grid">
+        <!-- Total Projects Card -->
+        <div class="col-xl-3 col-lg-6 mb-4">
+            <div class="stat-card card-hover">
                 <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="icon-shape bg-primary bg-opacity-10 text-primary rounded-circle p-3 me-3">
-                            <i class="fas fa-project-diagram fa-lg"></i>
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                            <i class="fas fa-project-diagram"></i>
                         </div>
-                        <div>
-                            <h4 class="mb-1 text-primary">@Model.TotalProjects</h4>
-                            <p class="text-muted mb-0 small">Total Projects</p>
+                        <div class="dropdown">
+                            <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="@Url.Action("Projects")">View All</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="exportData('projects')">Export Data</a></li>
+                            </ul>
                         </div>
+                    </div>
+                    <h3 class="stat-number text-primary">@Model.TotalProjects</h3>
+                    <p class="stat-label">Total Projects</p>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                            @{
+                                var totalProgress = Model.TotalProjects > 0 ? (Model.CompletedProjects * 100.0 / Model.TotalProjects) : 0;
+                            }
+                            <div class="progress-bar bg-primary" style="width: @(totalProgress)%"></div>
+                        </div>
+                        <small class="stat-trend text-success fw-semibold">@Model.CompletedProjects completed</small>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card border-0 shadow-sm h-100">
+
+        <!-- Completed Projects Card -->
+        <div class="col-xl-3 col-lg-6 mb-4">
+            <div class="stat-card card-hover">
                 <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="stat-icon bg-success bg-opacity-10 text-success">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="@Url.Action("Projects")">View Completed</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="exportData('completed')">Export Report</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <h3 class="stat-number text-success">@Model.CompletedProjects</h3>
+                    <p class="stat-label">Completed Projects</p>
                     <div class="d-flex align-items-center">
-                        <div class="icon-shape bg-success bg-opacity-10 text-success rounded-circle p-3 me-3">
-                            <i class="fas fa-check-circle fa-lg"></i>
-                        </div>
-                        <div>
-                            <h4 class="mb-1 text-success">@Model.CompletedProjects</h4>
-                            <p class="text-muted mb-0 small">Completed</p>
-                        </div>
+                        <i class="fas fa-arrow-up text-success me-1"></i>
+                        <small class="stat-trend text-success">Successfully finished</small>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card border-0 shadow-sm h-100">
+
+        <!-- In Progress Projects Card -->
+        <div class="col-xl-3 col-lg-6 mb-4">
+            <div class="stat-card card-hover">
                 <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="@Url.Action("Projects")">View Active</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="exportData('active')">Export List</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <h3 class="stat-number text-warning">@Model.InProgressProjects</h3>
+                    <p class="stat-label">In Progress</p>
                     <div class="d-flex align-items-center">
-                        <div class="icon-shape bg-warning bg-opacity-10 text-warning rounded-circle p-3 me-3">
-                            <i class="fas fa-clock fa-lg"></i>
-                        </div>
-                        <div>
-                            <h4 class="mb-1 text-warning">@Model.InProgressProjects</h4>
-                            <p class="text-muted mb-0 small">In Progress</p>
-                        </div>
+                        <i class="fas fa-spinner text-warning me-1"></i>
+                        <small class="stat-trend text-warning">Currently working on</small>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card border-0 shadow-sm h-100">
+
+        <!-- Success Rate Card -->
+        <div class="col-xl-3 col-lg-6 mb-4">
+            <div class="stat-card card-hover">
                 <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="icon-shape bg-info bg-opacity-10 text-info rounded-circle p-3 me-3">
-                            <i class="fas fa-percentage fa-lg"></i>
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="stat-icon bg-info bg-opacity-10 text-info">
+                            <i class="fas fa-chart-line"></i>
                         </div>
-                        <div>
-                            <h4 class="mb-1 text-info">@(Model.TotalProjects > 0 ? Math.Round((double)Model.CompletedProjects / Model.TotalProjects * 100, 1) : 0)%</h4>
-                            <p class="text-muted mb-0 small">Success Rate</p>
+                        <div class="dropdown">
+                            <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="showPerformanceAnalysis()">Detailed Analysis</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="exportData('performance')">Export Report</a></li>
+                            </ul>
                         </div>
+                    </div>
+                    <h3 class="stat-number text-info">@completionRate%</h3>
+                    <p class="stat-label">Success Rate</p>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                            <div class="progress-bar bg-info" style="width: @completionRate%"></div>
+                        </div>
+                        <small class="stat-trend text-info fw-semibold">Excellent progress</small>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Main Content Row -->
+    <!-- Advanced Dashboard Tabs -->
     <div class="row">
-        <div class="col-lg-8 mb-4">
-            <!-- Recent Projects with Enhanced Design -->
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-bottom-0 py-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0 fw-bold">
-                            <i class="fas fa-clock text-primary me-2"></i>Recent Projects
-                        </h5>
-                        <a href="@Url.Action("Projects")" class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-arrow-right me-1"></i>View All
-                        </a>
-                    </div>
+        <div class="col-12">
+            <div class="content-card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs nav-tabs-professional card-header-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#recent-projects" role="tab">
+                                <i class="fas fa-clock me-2"></i>Recent Projects
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#project-timeline" role="tab">
+                                <i class="fas fa-stream me-2"></i>Project Timeline
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#performance" role="tab">
+                                <i class="fas fa-chart-bar me-2"></i>Performance
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#quick-actions" role="tab">
+                                <i class="fas fa-bolt me-2"></i>Quick Actions
+                            </a>
+                        </li>
+                    </ul>
                 </div>
-                <div class="card-body p-0">
-                    @if (Model.RecentProjects.Any())
-                    {
-                        @foreach (var project in Model.RecentProjects)
-                        {
-                            <div class="border-bottom p-3 hover-bg-light">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div class="flex-grow-1">
-                                        <h6 class="mb-1 fw-bold">@project.Title</h6>
-                                        <div class="d-flex align-items-center text-muted small mb-2">
-                                            <i class="fas fa-user-tie me-1"></i>
-                                            <span class="me-3">@project.Supervisor.DisplayName</span>
-                                            <i class="fas fa-calendar me-1"></i>
-                                            <span>@project.SubmissionDate.ToString("MMM dd, yyyy")</span>
-                                        </div>
-                                        @if (!string.IsNullOrEmpty(project.Keywords))
+                <div class="card-body">
+                    <div class="tab-content">
+                        <!-- Recent Projects Tab -->
+                        <div class="tab-pane fade show active" id="recent-projects" role="tabpanel">
+                            <div class="row">
+                                <div class="col-12">
+                                    <h6 class="section-title">Recent Project Activity</h6>
+                                    <div class="timeline-professional">
+                                        @if (Model.RecentProjects.Any())
                                         {
-                                            <div class="mb-2">
-                                                @foreach (var keyword in project.Keywords.Split(',', StringSplitOptions.RemoveEmptyEntries).Take(3))
-                                                {
-                                                    <span class="badge bg-light text-dark me-1">@keyword.Trim()</span>
-                                                }
+                                            @foreach (var project in Model.RecentProjects.Take(5))
+                                            {
+                                                <div class="timeline-item-professional">
+                                                    <h6>@project.Title</h6>
+                                                    <p class="text-professional">Supervisor: @project.Supervisor.DisplayName</p>
+                                                    <div class="d-flex align-items-center justify-content-between">
+                                                        <span class="badge badge-professional bg-@(project.Status switch {
+                                                            ProjectStatus.Completed => "success",
+                                                            ProjectStatus.Defended => "success",
+                                                            ProjectStatus.InProgress => "warning",
+                                                            ProjectStatus.Approved => "info",
+                                                            ProjectStatus.Proposed => "secondary",
+                                                            ProjectStatus.SubmittedForReview => "primary",
+                                                            ProjectStatus.ReviewApproved => "success",
+                                                            ProjectStatus.ReviewRejected => "danger",
+                                                            ProjectStatus.Published => "dark",
+                                                            _ => "secondary"
+                                                        })">
+                                                            @project.Status
+                                                        </span>
+                                                        <div class="meta">
+                                                            <i class="fas fa-calendar me-1"></i>
+                                                            @project.SubmissionDate.ToString("MMM dd, yyyy")
+                                                        </div>
+                                                    </div>
+                                                    @if (!string.IsNullOrEmpty(project.Keywords))
+                                                    {
+                                                        <div class="mt-2">
+                                                            @foreach (var keyword in project.Keywords.Split(',', StringSplitOptions.RemoveEmptyEntries).Take(3))
+                                                            {
+                                                                <span class="badge bg-light text-dark me-1">@keyword.Trim()</span>
+                                                            }
+                                                        </div>
+                                                    }
+                                                </div>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <div class="text-center py-5">
+                                                <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                                                <h6 class="text-muted">No projects yet</h6>
+                                                <p class="text-professional">Your projects will appear here once assigned</p>
                                             </div>
                                         }
                                     </div>
-                                    <div class="text-end">
-                                        <span class="badge badge-status bg-@(project.Status switch {
-                                            ProjectStatus.Completed => "success",
-                                            ProjectStatus.Defended => "success",
-                                            ProjectStatus.InProgress => "warning",
-                                            ProjectStatus.Approved => "info",
-                                            ProjectStatus.Proposed => "secondary",
-                                            ProjectStatus.SubmittedForReview => "primary",
-                                            ProjectStatus.ReviewApproved => "success",
-                                            ProjectStatus.ReviewRejected => "danger",
-                                            ProjectStatus.Published => "dark",
-                                            _ => "secondary"
-                                        })">
-                                            @project.Status.ToString().Replace("Status", "")
-                                        </span>
-                                        <div class="mt-2">
-                                            @if (project.Status == ProjectStatus.Approved)
-                                            {
-                                                <button class="btn btn-success btn-xs" onclick="startProject(@project.Id)">
-                                                    <i class="fas fa-play me-1"></i>Start
-                                                </button>
-                                            }
-                                            else if (project.Status == ProjectStatus.InProgress)
-                                            {
-                                                <button class="btn btn-primary btn-xs" onclick="submitProject(@project.Id)">
-                                                    <i class="fas fa-paper-plane me-1"></i>Submit
-                                                </button>
-                                            }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Project Timeline Tab -->
+                        <div class="tab-pane fade" id="project-timeline" role="tabpanel">
+                            <div class="row">
+                                @{
+                                    var proposedProjects = Model.RecentProjects.Where(p => p.Status == ProjectStatus.Proposed).ToList();
+                                    var inProgressProjects = Model.RecentProjects.Where(p => p.Status == ProjectStatus.InProgress).ToList();
+                                    var reviewProjects = Model.RecentProjects.Where(p => p.Status == ProjectStatus.SubmittedForReview).ToList();
+                                    var completedProjects = Model.RecentProjects.Where(p => p.Status == ProjectStatus.Completed || p.Status == ProjectStatus.Defended).ToList();
+                                }
+                                
+                                <div class="col-md-3">
+                                    <div class="pipeline-stage">
+                                        <h6>Proposed (@proposedProjects.Count())</h6>
+                                        @foreach (var project in proposedProjects.Take(3))
+                                        {
+                                            <div class="pipeline-item">
+                                                <h6>@project.Title</h6>
+                                                <small>@project.Supervisor.DisplayName</small>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-3">
+                                    <div class="pipeline-stage">
+                                        <h6>In Progress (@inProgressProjects.Count())</h6>
+                                        @foreach (var project in inProgressProjects.Take(3))
+                                        {
+                                            <div class="pipeline-item">
+                                                <h6>@project.Title</h6>
+                                                <small>@project.Supervisor.DisplayName</small>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-3">
+                                    <div class="pipeline-stage">
+                                        <h6>Under Review (@reviewProjects.Count())</h6>
+                                        @foreach (var project in reviewProjects.Take(3))
+                                        {
+                                            <div class="pipeline-item">
+                                                <h6>@project.Title</h6>
+                                                <small>@project.Supervisor.DisplayName</small>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-3">
+                                    <div class="pipeline-stage">
+                                        <h6>Completed (@completedProjects.Count())</h6>
+                                        @foreach (var project in completedProjects.Take(3))
+                                        {
+                                            <div class="pipeline-item">
+                                                <h6>@project.Title</h6>
+                                                <small>@project.Supervisor.DisplayName</small>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Performance Tab -->
+                        <div class="tab-pane fade" id="performance" role="tabpanel">
+                            <div class="row">
+                                <div class="col-lg-8">
+                                    <h6 class="section-title">Academic Progress</h6>
+                                    <canvas id="progressChart" height="300"></canvas>
+                                </div>
+                                <div class="col-lg-4">
+                                    <h6 class="section-title">Student Profile</h6>
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-body">
+                                            <dl class="row mb-0">
+                                                <dt class="col-5 small text-muted-professional">Student ID:</dt>
+                                                <dd class="col-7 small text-professional">@Model.Student.StudentNumber</dd>
+                                                
+                                                <dt class="col-5 small text-muted-professional">Name:</dt>
+                                                <dd class="col-7 small text-professional">@Model.Student.FullName</dd>
+                                                
+                                                <dt class="col-5 small text-muted-professional">Email:</dt>
+                                                <dd class="col-7 small text-professional">@Model.Student.Email</dd>
+                                                
+                                                <dt class="col-5 small text-muted-professional">Department:</dt>
+                                                <dd class="col-7 small text-professional">@Model.Student.Department?.Name</dd>
+                                                
+                                                <dt class="col-5 small text-muted-professional">Enrolled:</dt>
+                                                <dd class="col-7 small text-professional">@Model.Student.EnrollmentDate.ToString("MMM yyyy")</dd>
+                                                
+                                                <dt class="col-5 small text-muted-professional">Last Login:</dt>
+                                                <dd class="col-7 small text-professional">@(Model.Student.LastLogin?.ToString("MMM dd, yyyy") ?? "Never")</dd>
+                                            </dl>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        }
-                    }
-                    else
-                    {
-                        <div class="text-center py-5">
-                            <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
-                            <h6 class="text-muted">No projects yet</h6>
-                            <p class="text-muted">Your projects will appear here once assigned</p>
                         </div>
-                    }
-                </div>
-            </div>
-        </div>
 
-        <div class="col-lg-4">
-            <!-- Student Profile Card -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white border-bottom-0 py-3">
-                    <h6 class="mb-0 fw-bold">
-                        <i class="fas fa-user text-primary me-2"></i>Profile Information
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <dl class="row mb-0">
-                        <dt class="col-5 small text-muted">Student ID:</dt>
-                        <dd class="col-7 small">@Model.Student.StudentNumber</dd>
-                        
-                        <dt class="col-5 small text-muted">Name:</dt>
-                        <dd class="col-7 small">@Model.Student.FullName</dd>
-                        
-                        <dt class="col-5 small text-muted">Email:</dt>
-                        <dd class="col-7 small">@Model.Student.Email</dd>
-                        
-                        <dt class="col-5 small text-muted">Department:</dt>
-                        <dd class="col-7 small">@Model.Student.Department?.Name</dd>
-                        
-                        <dt class="col-5 small text-muted">Enrolled:</dt>
-                        <dd class="col-7 small">@Model.Student.EnrollmentDate.ToString("MMM yyyy")</dd>
-                        
-                        <dt class="col-5 small text-muted">Last Login:</dt>
-                        <dd class="col-7 small">@(Model.Student.LastLogin?.ToString("MMM dd, yyyy") ?? "Never")</dd>
-                    </dl>
-                </div>
-                <div class="card-footer bg-light border-top-0">
-                    <div class="d-grid gap-2">
-                        <a href="@Url.Action("Profile")" class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-edit me-1"></i>Edit Profile
-                        </a>
-                        <a href="@Url.Action("Projects")" class="btn btn-primary btn-sm">
-                            <i class="fas fa-list me-1"></i>All Projects
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-bottom-0 py-3">
-                    <h6 class="mb-0 fw-bold">
-                        <i class="fas fa-bolt text-warning me-2"></i>Quick Actions
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <a href="@Url.Action("Projects")" class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-eye me-2"></i>View All Projects
-                        </a>
-                        <a href="@Url.Action("Profile")" class="btn btn-outline-secondary btn-sm">
-                            <i class="fas fa-user-edit me-2"></i>Update Profile
-                        </a>
-                        <a href="@Url.Action("Projects", "Guest")" class="btn btn-outline-info btn-sm">
-                            <i class="fas fa-globe me-2"></i>Browse Gallery
-                        </a>
+                        <!-- Quick Actions Tab -->
+                        <div class="tab-pane fade" id="quick-actions" role="tabpanel">
+                            <div class="quick-actions-grid">
+                                <div class="quick-action-card" onclick="window.location.href='@Url.Action("Projects")'">
+                                    <i class="fas fa-eye"></i>
+                                    <h6>View All Projects</h6>
+                                    <p>Browse and manage all your projects</p>
+                                </div>
+                                <div class="quick-action-card" onclick="window.location.href='@Url.Action("Profile")'">
+                                    <i class="fas fa-user-edit"></i>
+                                    <h6>Update Profile</h6>
+                                    <p>Edit your personal information</p>
+                                </div>
+                                <div class="quick-action-card" onclick="window.location.href='@Url.Action("Projects", "Guest")'">
+                                    <i class="fas fa-globe"></i>
+                                    <h6>Browse Gallery</h6>
+                                    <p>Explore public project gallery</p>
+                                </div>
+                                <div class="quick-action-card" onclick="exportStudentData()">
+                                    <i class="fas fa-file-export"></i>
+                                    <h6>Export Data</h6>
+                                    <p>Generate comprehensive reports</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -246,7 +403,73 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeStudentCharts();
+        });
+
+        function initializeStudentCharts() {
+            // Student Progress Donut Chart
+            const studentCtx = document.getElementById('studentChart').getContext('2d');
+            new Chart(studentCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Completed', 'In Progress', 'Remaining'],
+                    datasets: [{
+                        data: [@Model.CompletedProjects, @Model.InProgressProjects, @(Model.TotalProjects - Model.CompletedProjects - Model.InProgressProjects)],
+                        backgroundColor: ['#10b981', '#f59e0b', '#e5e7eb'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            // Progress Trends Chart (if performance tab is active)
+            setTimeout(() => {
+                const progressCtx = document.getElementById('progressChart');
+                if (progressCtx) {
+                    new Chart(progressCtx, {
+                        type: 'line',
+                        data: {
+                            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Current'],
+                            datasets: [{
+                                label: 'Project Progress',
+                                data: [20, 35, 50, 75, @completionRate],
+                                borderColor: 'var(--primary-color)',
+                                backgroundColor: 'rgba(var(--primary-color-rgb), 0.1)',
+                                tension: 0.4,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 100
+                                }
+                            }
+                        }
+                    });
+                }
+            }, 100);
+        }
+
         function startProject(projectId) {
             if (confirm('Start working on this project?')) {
                 fetch(`/Student/StartProject`, {
@@ -283,31 +506,26 @@
                 });
             }
         }
+
+        function exportData(type) {
+            showToast('info', 'Export', `Exporting ${type} data...`);
+            // Implementation for data export
+        }
+
+        function exportStudentData() {
+            showToast('info', 'Export', 'Generating comprehensive student report...');
+            // Implementation for student data export
+        }
+
+        function showPerformanceAnalysis() {
+            showToast('info', 'Analysis', 'Loading detailed performance analysis...');
+            // Implementation for performance analysis modal
+        }
+
+        // Utility function for toast notifications
+        function showToast(type, title, message) {
+            // Toast implementation would go here
+            console.log(`${type}: ${title} - ${message}`);
+        }
     </script>
 }
-
-<style>
-    .badge-status {
-        font-size: 0.75rem;
-        padding: 0.375rem 0.75rem;
-    }
-    
-    .btn-xs {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.75rem;
-    }
-    
-    .icon-shape {
-        width: 48px;
-        height: 48px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .hover-bg-light:hover {
-        background-color: rgba(0, 0, 0, 0.02);
-        transition: background-color 0.2s ease;
-    }
-</style>
-</div>

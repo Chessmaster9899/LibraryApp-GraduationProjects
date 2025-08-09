@@ -4,29 +4,37 @@
     ViewData["Title"] = "Projects";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>Projects</h1>
-    <a asp-action="Create" class="btn btn-primary">
-        <i class="fas fa-plus"></i> Create New Project
-    </a>
-</div>
+<!-- Professional Projects Management -->
+<div class="dashboard-container">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="dashboard-title text-on-light">All Projects</h1>
+            <p class="text-muted-professional">Manage and monitor graduation projects</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary btn-professional">
+            <i class="fas fa-plus me-2"></i>Create New Project
+        </a>
+    </div>
 
-<!-- Search and Filter Section -->
-<div class="card mb-4">
-    <div class="card-body">
-        <form method="get">
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label for="searchTitle">Search by Title</label>
+    <!-- Search and Filter Section -->
+    <div class="content-card mb-4">
+        <div class="card-header">
+            <h5 class="card-title-professional">
+                <i class="fas fa-filter text-primary me-2"></i>Search & Filter
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="get">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="searchTitle" class="form-label text-professional">Search by Title</label>
                         <input type="text" class="form-control" id="searchTitle" name="searchTitle" 
                                placeholder="Enter project title..." value="@ViewData["SearchTitle"]">
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="statusFilter">Filter by Status</label>
-                        <select class="form-control" id="statusFilter" name="statusFilter">
+                    <div class="col-md-3 mb-3">
+                        <label for="statusFilter" class="form-label text-professional">Filter by Status</label>
+                        <select class="form-select" id="statusFilter" name="statusFilter">
                             <option value="">All Statuses</option>
                             @foreach (var status in Enum.GetValues<LibraryApp.Models.ProjectStatus>())
                             {
@@ -36,11 +44,9 @@
                             }
                         </select>
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="supervisorFilter">Filter by Supervisor</label>
-                        <select class="form-control" id="supervisorFilter" name="supervisorFilter">
+                    <div class="col-md-3 mb-3">
+                        <label for="supervisorFilter" class="form-label text-professional">Filter by Supervisor</label>
+                        <select class="form-select" id="supervisorFilter" name="supervisorFilter">
                             <option value="">All Supervisors</option>
                             @if (ViewData["Supervisors"] is IEnumerable<dynamic> supervisors)
                             {
@@ -53,125 +59,156 @@
                             }
                         </select>
                     </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="form-group">
-                        <label>&nbsp;</label>
-                        <div>
-                            <button type="submit" class="btn btn-outline-primary btn-block">
-                                <i class="fas fa-search"></i> Search
+                    <div class="col-md-2 mb-3">
+                        <label class="form-label text-professional">&nbsp;</label>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-outline-primary btn-professional">
+                                <i class="fas fa-search me-2"></i>Search
                             </button>
                         </div>
                     </div>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
+
+    @if (Model.Any())
+    {
+        <!-- Projects Table -->
+        <div class="content-card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="card-title-professional">
+                        <i class="fas fa-list text-primary me-2"></i>Projects (@Model.Count())
+                    </h5>
+                    <button class="btn btn-outline-secondary btn-sm btn-professional" onclick="exportProjects()">
+                        <i class="fas fa-download me-1"></i>Export
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-professional" style="font-weight: 700;">
+                                    @Html.DisplayNameFor(model => model.Title)
+                                </th>
+                                <th class="text-professional" style="font-weight: 700;">
+                                    @Html.DisplayNameFor(model => model.Student)
+                                </th>
+                                <th class="text-professional" style="font-weight: 700;">
+                                    @Html.DisplayNameFor(model => model.Supervisor)
+                                </th>
+                                <th class="text-professional" style="font-weight: 700;">
+                                    @Html.DisplayNameFor(model => model.Status)
+                                </th>
+                                <th class="text-professional" style="font-weight: 700;">
+                                    Submission Date
+                                </th>
+                                <th class="text-professional" style="font-weight: 700;">
+                                    Defense Date
+                                </th>
+                                <th class="text-center text-professional" style="font-weight: 700;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model) {
+                                <tr>
+                                    <td>
+                                        <h6 class="mb-1 text-professional" style="font-weight: 600;">@Html.DisplayFor(modelItem => item.Title)</h6>
+                                        @if (!string.IsNullOrEmpty(item.Keywords))
+                                        {
+                                            <div>
+                                                @foreach (var keyword in item.Keywords.Split(',', StringSplitOptions.RemoveEmptyEntries).Take(3))
+                                                {
+                                                    <span class="badge bg-light text-dark me-1" style="font-size: 0.7rem;">@keyword.Trim()</span>
+                                                }
+                                            </div>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="text-professional" style="font-weight: 600;">
+                                            @Html.DisplayFor(modelItem => item.Student.FirstName) @Html.DisplayFor(modelItem => item.Student.LastName)
+                                        </div>
+                                        <small class="text-muted-professional">@Html.DisplayFor(modelItem => item.Student.StudentNumber)</small>
+                                    </td>
+                                    <td>
+                                        <div class="text-professional" style="font-weight: 600;">
+                                            @Html.DisplayFor(modelItem => item.Supervisor.Title) @Html.DisplayFor(modelItem => item.Supervisor.FirstName) @Html.DisplayFor(modelItem => item.Supervisor.LastName)
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(item.Supervisor.Specialization))
+                                        {
+                                            <small class="text-muted-professional">@item.Supervisor.Specialization</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-professional bg-@(item.Status == LibraryApp.Models.ProjectStatus.Completed ? "success" : 
+                                                                  item.Status == LibraryApp.Models.ProjectStatus.InProgress ? "warning" : 
+                                                                  item.Status == LibraryApp.Models.ProjectStatus.Approved ? "info" : 
+                                                                  item.Status == LibraryApp.Models.ProjectStatus.Defended ? "success" :
+                                                                  item.Status == LibraryApp.Models.ProjectStatus.Published ? "success" : "secondary")">
+                                            @Html.DisplayFor(modelItem => item.Status)
+                                        </span>
+                                    </td>
+                                    <td class="text-professional">
+                                        @Html.DisplayFor(modelItem => item.SubmissionDate)
+                                    </td>
+                                    <td>
+                                        @if (item.DefenseDate.HasValue)
+                                        {
+                                            <span class="text-professional">@Html.DisplayFor(modelItem => item.DefenseDate)</span>
+                                        }
+                                        else
+                                        {
+                                            <em class="text-muted-professional">Not scheduled</em>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="Details" asp-route-id="@item.Id" 
+                                               class="btn btn-sm btn-outline-info btn-professional" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a asp-action="Edit" asp-route-id="@item.Id" 
+                                               class="btn btn-sm btn-outline-warning btn-professional" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@item.Id" 
+                                               class="btn btn-sm btn-outline-danger btn-professional" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Empty State -->
+        <div class="content-card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-folder-open fa-4x text-muted mb-4"></i>
+                <h4 class="text-professional mb-3">No Projects Found</h4>
+                <p class="text-muted-professional mb-4">Get started by creating your first graduation project or adjust your search criteria.</p>
+                <a asp-action="Create" class="btn btn-primary btn-professional">
+                    <i class="fas fa-plus me-2"></i>Create New Project
+                </a>
+            </div>
+        </div>
+    }
 </div>
 
-@if (Model.Any())
-{
-    <div class="card">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead class="thead-light">
-                        <tr>
-                            <th>
-                                @Html.DisplayNameFor(model => model.Title)
-                            </th>
-                            <th>
-                                @Html.DisplayNameFor(model => model.Student)
-                            </th>
-                            <th>
-                                @Html.DisplayNameFor(model => model.Supervisor)
-                            </th>
-                            <th>
-                                @Html.DisplayNameFor(model => model.Status)
-                            </th>
-                            <th>
-                                @Html.DisplayNameFor(model => model.SubmissionDate)
-                            </th>
-                            <th>
-                                @Html.DisplayNameFor(model => model.DefenseDate)
-                            </th>
-                            <th class="text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model) {
-                            <tr>
-                                <td>
-                                    <strong>@Html.DisplayFor(modelItem => item.Title)</strong>
-                                    @if (!string.IsNullOrEmpty(item.Keywords))
-                                    {
-                                        <br><small class="text-muted">@item.Keywords</small>
-                                    }
-                                </td>
-                                <td>
-                                    @Html.DisplayFor(modelItem => item.Student.FirstName) @Html.DisplayFor(modelItem => item.Student.LastName)
-                                    <br /><small class="text-muted">@Html.DisplayFor(modelItem => item.Student.StudentNumber)</small>
-                                </td>
-                                <td>
-                                    @Html.DisplayFor(modelItem => item.Supervisor.Title) @Html.DisplayFor(modelItem => item.Supervisor.FirstName) @Html.DisplayFor(modelItem => item.Supervisor.LastName)
-                                    @if (!string.IsNullOrEmpty(item.Supervisor.Specialization))
-                                    {
-                                        <br><small class="text-muted">@item.Supervisor.Specialization</small>
-                                    }
-                                </td>
-                                <td>
-                                    <span class="badge badge-@(item.Status == LibraryApp.Models.ProjectStatus.Completed ? "success" : 
-                                                              item.Status == LibraryApp.Models.ProjectStatus.InProgress ? "primary" : 
-                                                              item.Status == LibraryApp.Models.ProjectStatus.Approved ? "info" : 
-                                                              item.Status == LibraryApp.Models.ProjectStatus.Defended ? "success" :
-                                                              item.Status == LibraryApp.Models.ProjectStatus.Published ? "success" : "secondary")">
-                                        @Html.DisplayFor(modelItem => item.Status)
-                                    </span>
-                                </td>
-                                <td>
-                                    @Html.DisplayFor(modelItem => item.SubmissionDate)
-                                </td>
-                                <td>
-                                    @if (item.DefenseDate.HasValue)
-                                    {
-                                        @Html.DisplayFor(modelItem => item.DefenseDate)
-                                    }
-                                    else
-                                    {
-                                        <em class="text-muted">Not scheduled</em>
-                                    }
-                                </td>
-                                <td class="text-center">
-                                    <div class="btn-group" role="group">
-                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info" title="View Details">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning" title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger" title="Delete">
-                                            <i class="fas fa-trash"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-}
-else
-{
-    <div class="card">
-        <div class="card-body text-center">
-            <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
-            <h4>No Projects Found</h4>
-            <p class="text-muted">Get started by creating your first graduation project.</p>
-            <a asp-action="Create" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Create New Project
-            </a>
-        </div>
-    </div>
+@section Scripts {
+    <script>
+        function exportProjects() {
+            console.log('Exporting projects...');
+            // Export functionality would be implemented here
+        }
+    </script>
 }
