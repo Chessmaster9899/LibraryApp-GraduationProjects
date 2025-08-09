@@ -50,7 +50,7 @@
                     <a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-lg">
                         <i class="fas fa-home me-2"></i>Home
                     </a>
-                    @if (User.Identity.IsAuthenticated)
+                    @if (User.Identity?.IsAuthenticated == true)
                     {
                         @if (User.IsInRole("Student"))
                         {

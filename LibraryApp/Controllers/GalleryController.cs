@@ -38,8 +38,8 @@ public class GalleryController : BaseController
         if (!string.IsNullOrEmpty(search))
         {
             query = query.Where(p => p.Title.Contains(search) || 
-                                   p.Abstract.Contains(search) || 
-                                   p.Keywords.Contains(search) ||
+                                   (p.Abstract ?? string.Empty).Contains(search) || 
+                                   (p.Keywords ?? string.Empty).Contains(search) ||
                                    p.Student.FullName.Contains(search));
         }
 

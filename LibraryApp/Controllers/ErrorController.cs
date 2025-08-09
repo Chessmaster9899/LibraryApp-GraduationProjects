@@ -65,7 +65,7 @@ namespace LibraryApp.Controllers
             ViewBag.StatusCode = 401;
             
             // If user is not authenticated, redirect to login
-            if (!User.Identity.IsAuthenticated)
+            if (User.Identity?.IsAuthenticated != true)
             {
                 return RedirectToAction("Login", "Auth");
             }
