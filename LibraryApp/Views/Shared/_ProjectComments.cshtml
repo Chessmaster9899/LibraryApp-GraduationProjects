@@ -1,0 +1,421 @@
+@model LibraryApp.Models.Project
+
+<div id="comments-section" class="mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-comments me-2"></i>Project Comments
+                </h5>
+                <small class="text-muted">Supervisor and student discussion</small>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Comment Form -->
+            <div id="comment-form" class="mb-4">
+                <div class="border rounded p-3 bg-light">
+                    <div class="form-group mb-3">
+                        <label for="comment-content" class="form-label fw-bold">Add a comment:</label>
+                        <textarea id="comment-content" class="form-control" rows="3" placeholder="Enter your comment here..."></textarea>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="comment-type" class="form-label">Comment Type:</label>
+                            <select id="comment-type" class="form-select">
+                                <option value="General">General Comment</option>
+                                <option value="ReviewComment">Review Comment</option>
+                                <option value="SupervisorNote">Supervisor Note</option>
+                                <option value="EvaluatorComment">Evaluator Comment</option>
+                                <option value="StudentResponse">Student Response</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check mt-4" id="acknowledgment-check" style="display: none;">
+                                <input class="form-check-input" type="checkbox" id="requires-acknowledgment">
+                                <label class="form-check-label" for="requires-acknowledgment">
+                                    Requires student acknowledgment
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <button id="add-comment-btn" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i>Add Comment
+                        </button>
+                        <small class="text-muted">Comments help track project progress and communication</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comments Display -->
+            <div id="comments-container">
+                <div id="loading-comments" class="text-center py-4">
+                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                    Loading comments...
+                </div>
+                <div id="no-comments" class="text-center py-4 text-muted" style="display: none;">
+                    <i class="fas fa-comment-slash fa-2x mb-2"></i>
+                    <p class="mb-0">No comments yet. Be the first to add a comment!</p>
+                </div>
+                <div id="comments-list"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.comment-item {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background: #fff;
+    transition: box-shadow 0.2s;
+}
+
+.comment-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.comment-header {
+    display: flex;
+    justify-content: between;
+    align-items: center;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #f8f9fa;
+    padding-bottom: 8px;
+}
+
+.comment-author {
+    font-weight: 600;
+    color: #495057;
+}
+
+.comment-role {
+    font-size: 0.875rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-left: 8px;
+}
+
+.comment-role.Student {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.comment-role.Professor {
+    background-color: #f3e5f5;
+    color: #7b1fa2;
+}
+
+.comment-role.Admin {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+.comment-content {
+    color: #212529;
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+.comment-meta {
+    font-size: 0.875rem;
+    color: #6c757d;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.comment-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.comment-actions button {
+    font-size: 0.875rem;
+    padding: 4px 8px;
+}
+
+.reply-item {
+    margin-left: 30px;
+    margin-top: 10px;
+    border-left: 3px solid #007bff;
+    padding-left: 15px;
+    background-color: #f8f9fa;
+}
+
+.comment-type-badge {
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-right: 8px;
+}
+
+.comment-type-General {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.comment-type-ReviewComment {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.comment-type-SupervisorNote {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.comment-type-EvaluatorComment {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.comment-type-StudentResponse {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.acknowledgment-required {
+    border-left: 4px solid #ffc107;
+    background-color: #fff8e1;
+}
+
+.acknowledgment-badge {
+    background-color: #ffc107;
+    color: #212529;
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 8px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const projectId = @Model.Id;
+    const currentUserRole = '@ViewBag.CurrentUserRole';
+    
+    // Load comments on page load
+    loadComments();
+    
+    // Show/hide acknowledgment checkbox based on comment type and user role
+    document.getElementById('comment-type').addEventListener('change', function() {
+        const acknowledgeCheck = document.getElementById('acknowledgment-check');
+        const selectedType = this.value;
+        
+        if ((currentUserRole === 'Professor' && (selectedType === 'ReviewComment' || selectedType === 'SupervisorNote')) ||
+            (currentUserRole === 'Professor' && selectedType === 'EvaluatorComment')) {
+            acknowledgeCheck.style.display = 'block';
+        } else {
+            acknowledgeCheck.style.display = 'none';
+            document.getElementById('requires-acknowledgment').checked = false;
+        }
+    });
+    
+    // Add comment button click
+    document.getElementById('add-comment-btn').addEventListener('click', function() {
+        const content = document.getElementById('comment-content').value.trim();
+        const type = document.getElementById('comment-type').value;
+        const requiresAcknowledgment = document.getElementById('requires-acknowledgment').checked;
+        
+        if (!content) {
+            showToast('error', 'Validation Error', 'Please enter a comment');
+            return;
+        }
+        
+        addComment(content, type, requiresAcknowledgment);
+    });
+    
+    function loadComments() {
+        fetch(`/Comments/GetProjectComments?projectId=${projectId}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loading-comments').style.display = 'none';
+                
+                if (data.success) {
+                    if (data.comments.length === 0) {
+                        document.getElementById('no-comments').style.display = 'block';
+                    } else {
+                        displayComments(data.comments);
+                    }
+                } else {
+                    showToast('error', 'Error', data.message || 'Failed to load comments');
+                }
+            })
+            .catch(error => {
+                document.getElementById('loading-comments').style.display = 'none';
+                showToast('error', 'Error', 'Failed to load comments');
+                console.error('Error loading comments:', error);
+            });
+    }
+    
+    function addComment(content, type, requiresAcknowledgment = false, parentCommentId = null) {
+        const data = {
+            projectId: projectId,
+            content: content,
+            type: type,
+            requiresStudentAcknowledgment: requiresAcknowledgment,
+            parentCommentId: parentCommentId
+        };
+        
+        fetch('/Comments/AddComment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('success', 'Success', 'Comment added successfully');
+                document.getElementById('comment-content').value = '';
+                document.getElementById('requires-acknowledgment').checked = false;
+                loadComments(); // Reload comments
+            } else {
+                showToast('error', 'Error', data.message || 'Failed to add comment');
+            }
+        })
+        .catch(error => {
+            showToast('error', 'Error', 'Failed to add comment');
+            console.error('Error adding comment:', error);
+        });
+    }
+    
+    function displayComments(comments) {
+        const container = document.getElementById('comments-list');
+        container.innerHTML = '';
+        
+        comments.forEach(comment => {
+            const commentElement = createCommentElement(comment);
+            container.appendChild(commentElement);
+        });
+    }
+    
+    function createCommentElement(comment) {
+        const div = document.createElement('div');
+        div.className = `comment-item ${comment.requiresAcknowledgment && !comment.isAcknowledged ? 'acknowledgment-required' : ''}`;
+        
+        const acknowledgeButton = comment.requiresAcknowledgment && !comment.isAcknowledged && currentUserRole === 'Student' 
+            ? `<button class="btn btn-sm btn-warning" onclick="acknowledgeComment(${comment.id})">
+                 <i class="fas fa-check me-1"></i>Acknowledge
+               </button>` 
+            : '';
+        
+        const acknowledgeBadge = comment.requiresAcknowledgment 
+            ? `<span class="acknowledgment-badge">
+                 ${comment.isAcknowledged ? 'Acknowledged' : 'Requires Acknowledgment'}
+               </span>`
+            : '';
+        
+        div.innerHTML = `
+            <div class="comment-header">
+                <div>
+                    <span class="comment-author">${comment.authorName}</span>
+                    <span class="comment-role ${comment.authorRole}">${comment.authorRole}</span>
+                    <span class="comment-type-badge comment-type-${comment.type}">${comment.type}</span>
+                    ${acknowledgeBadge}
+                </div>
+                <div class="comment-actions">
+                    ${comment.canEdit ? `<button class="btn btn-sm btn-outline-secondary" onclick="editComment(${comment.id})">
+                                           <i class="fas fa-edit"></i>
+                                         </button>` : ''}
+                    ${comment.canDelete ? `<button class="btn btn-sm btn-outline-danger" onclick="deleteComment(${comment.id})">
+                                             <i class="fas fa-trash"></i>
+                                           </button>` : ''}
+                    ${acknowledgeButton}
+                </div>
+            </div>
+            <div class="comment-content">${comment.content}</div>
+            <div class="comment-meta">
+                <span>${comment.createdAt}${comment.isEdited ? ' (edited)' : ''}</span>
+            </div>
+            <div class="replies">
+                ${comment.replies.map(reply => `
+                    <div class="reply-item">
+                        <div class="comment-header">
+                            <div>
+                                <span class="comment-author">${reply.authorName}</span>
+                                <span class="comment-role ${reply.authorRole}">${reply.authorRole}</span>
+                            </div>
+                            <div class="comment-actions">
+                                ${reply.canEdit ? `<button class="btn btn-sm btn-outline-secondary" onclick="editComment(${reply.id})">
+                                                     <i class="fas fa-edit"></i>
+                                                   </button>` : ''}
+                                ${reply.canDelete ? `<button class="btn btn-sm btn-outline-danger" onclick="deleteComment(${reply.id})">
+                                                       <i class="fas fa-trash"></i>
+                                                     </button>` : ''}
+                            </div>
+                        </div>
+                        <div class="comment-content">${reply.content}</div>
+                        <div class="comment-meta">
+                            <span>${reply.createdAt}</span>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+        
+        return div;
+    }
+    
+    // Global functions for comment actions
+    window.editComment = function(commentId) {
+        // Implementation for edit comment
+        showToast('info', 'Feature', 'Edit comment functionality to be implemented');
+    };
+    
+    window.deleteComment = function(commentId) {
+        if (confirm('Are you sure you want to delete this comment?')) {
+            fetch('/Comments/DeleteComment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `commentId=${commentId}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('success', 'Success', 'Comment deleted successfully');
+                    loadComments();
+                } else {
+                    showToast('error', 'Error', data.message || 'Failed to delete comment');
+                }
+            })
+            .catch(error => {
+                showToast('error', 'Error', 'Failed to delete comment');
+                console.error('Error deleting comment:', error);
+            });
+        }
+    };
+    
+    window.acknowledgeComment = function(commentId) {
+        fetch('/Comments/AcknowledgeComment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `commentId=${commentId}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('success', 'Success', 'Comment acknowledged successfully');
+                loadComments();
+            } else {
+                showToast('error', 'Error', data.message || 'Failed to acknowledge comment');
+            }
+        })
+        .catch(error => {
+            showToast('error', 'Error', 'Failed to acknowledge comment');
+            console.error('Error acknowledging comment:', error);
+        });
+    };
+});
+</script>

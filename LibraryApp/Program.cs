@@ -38,6 +38,9 @@ builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 // Add Permission Service
 builder.Services.AddScoped<IPermissionService, PermissionService>();
 
+// Add Project Comment Service
+builder.Services.AddScoped<IProjectCommentService, ProjectCommentService>();
+
 var app = builder.Build();
 
 // Migrate database and seed sample data

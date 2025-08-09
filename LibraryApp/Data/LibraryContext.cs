@@ -26,6 +26,9 @@ public class LibraryContext : DbContext
     public DbSet<RolePermission> RolePermissions { get; set; }
     public DbSet<UserRoleAssignment> UserRoles { get; set; }
     public DbSet<UserPermission> UserPermissions { get; set; }
+    
+    // Comment System
+    public DbSet<ProjectComment> ProjectComments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -194,5 +197,25 @@ public class LibraryContext : DbContext
         modelBuilder.Entity<Permission>()
             .HasIndex(p => p.Type)
             .IsUnique();
+
+        // Configure Comment System relationships
+        modelBuilder.Entity<ProjectComment>()
+            .HasOne(pc => pc.Project)
+            .WithMany()
+            .HasForeignKey(pc => pc.ProjectId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ProjectComment>()
+            .HasOne(pc => pc.ParentComment)
+            .WithMany(pc => pc.Replies)
+            .HasForeignKey(pc => pc.ParentCommentId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Configure indexes for comment system
+        modelBuilder.Entity<ProjectComment>()
+            .HasIndex(pc => new { pc.ProjectId, pc.CreatedAt });
+
+        modelBuilder.Entity<ProjectComment>()
+            .HasIndex(pc => new { pc.AuthorId, pc.AuthorRole });
     }
 }
