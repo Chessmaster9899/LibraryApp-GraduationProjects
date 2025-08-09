@@ -19,6 +19,13 @@ public class LibraryContext : DbContext
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<SystemAuditLog> SystemAuditLogs { get; set; }
     public DbSet<Announcement> Announcements { get; set; }
+    
+    // Permission System
+    public DbSet<Permission> Permissions { get; set; }
+    public DbSet<Role> Roles { get; set; }
+    public DbSet<RolePermission> RolePermissions { get; set; }
+    public DbSet<UserRoleAssignment> UserRoles { get; set; }
+    public DbSet<UserPermission> UserPermissions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -133,5 +140,59 @@ public class LibraryContext : DbContext
                 IsActive = true
             }
         );
+
+        // Configure Permission System relationships
+        modelBuilder.Entity<RolePermission>()
+            .HasOne(rp => rp.Role)
+            .WithMany(r => r.RolePermissions)
+            .HasForeignKey(rp => rp.RoleId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<RolePermission>()
+            .HasOne(rp => rp.Permission)
+            .WithMany(p => p.RolePermissions)
+            .HasForeignKey(rp => rp.PermissionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserRoleAssignment>()
+            .HasOne(ur => ur.User)
+            .WithMany()
+            .HasForeignKey(ur => ur.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserRoleAssignment>()
+            .HasOne(ur => ur.Role)
+            .WithMany(r => r.UserRoles)
+            .HasForeignKey(ur => ur.RoleId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserPermission>()
+            .HasOne(up => up.User)
+            .WithMany()
+            .HasForeignKey(up => up.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserPermission>()
+            .HasOne(up => up.Permission)
+            .WithMany(p => p.UserPermissions)
+            .HasForeignKey(up => up.PermissionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure indexes for permission system
+        modelBuilder.Entity<RolePermission>()
+            .HasIndex(rp => new { rp.RoleId, rp.PermissionId })
+            .IsUnique();
+
+        modelBuilder.Entity<UserRoleAssignment>()
+            .HasIndex(ur => new { ur.UserId, ur.RoleId })
+            .IsUnique();
+
+        modelBuilder.Entity<UserPermission>()
+            .HasIndex(up => new { up.UserId, up.PermissionId })
+            .IsUnique();
+
+        modelBuilder.Entity<Permission>()
+            .HasIndex(p => p.Type)
+            .IsUnique();
     }
 }

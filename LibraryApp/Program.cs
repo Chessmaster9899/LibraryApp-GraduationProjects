@@ -35,6 +35,9 @@ builder.Services.AddScoped<LibraryApp.Controllers.INotificationService, LibraryA
 // Add File Upload Service
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 
+// Add Permission Service
+builder.Services.AddScoped<IPermissionService, PermissionService>();
+
 var app = builder.Build();
 
 // Migrate database and seed sample data
@@ -42,9 +45,13 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<LibraryContext>();
     var authService = scope.ServiceProvider.GetRequiredService<IAuthenticationService>();
+    var permissionService = scope.ServiceProvider.GetRequiredService<IPermissionService>();
     
     // Ensure the database is created and all migrations are applied
     await context.Database.MigrateAsync();
+    
+    // Initialize permissions and roles
+    await permissionService.InitializeDefaultRolesAndPermissionsAsync();
     
     // Seed sample data
     await SeedDataService.SeedAsync(context, authService);
