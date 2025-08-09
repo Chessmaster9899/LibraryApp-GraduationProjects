@@ -1,25 +1,173 @@
 ﻿@model ErrorViewModel
 @{
-    ViewData["Title"] = "Error";
+    ViewData["Title"] = "Oops! Something went wrong";
+    var statusCode = ViewBag.StatusCode as int?;
+    var errorMessage = ViewBag.ErrorMessage as string;
 }
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="error-container text-center">
+                <div class="error-illustration mb-4">
+                    @if (statusCode == 404)
+                    {
+                        <i class="fas fa-search error-icon" style="font-size: 6rem; color: var(--info-color); opacity: 0.7;"></i>
+                        <h1 class="display-3 fw-bold text-white-shadow mt-3">404</h1>
+                        <h2 class="h3 text-white-shadow mb-4">Page Not Found</h2>
+                        <p class="lead text-white-shadow mb-4">
+                            Sorry, the page you're looking for doesn't exist or has been moved.
+                        </p>
+                    }
+                    else if (statusCode == 403)
+                    {
+                        <i class="fas fa-lock error-icon" style="font-size: 6rem; color: var(--warning-color); opacity: 0.7;"></i>
+                        <h1 class="display-3 fw-bold text-white-shadow mt-3">403</h1>
+                        <h2 class="h3 text-white-shadow mb-4">Access Forbidden</h2>
+                        <p class="lead text-white-shadow mb-4">
+                            You don't have permission to access this resource.
+                        </p>
+                    }
+                    else if (statusCode == 500)
+                    {
+                        <i class="fas fa-server error-icon" style="font-size: 6rem; color: var(--danger-color); opacity: 0.7;"></i>
+                        <h1 class="display-3 fw-bold text-white-shadow mt-3">500</h1>
+                        <h2 class="h3 text-white-shadow mb-4">Server Error</h2>
+                        <p class="lead text-white-shadow mb-4">
+                            We're experiencing technical difficulties. Please try again later.
+                        </p>
+                    }
+                    else
+                    {
+                        <i class="fas fa-exclamation-triangle error-icon" style="font-size: 6rem; color: var(--danger-color); opacity: 0.7;"></i>
+                        <h1 class="display-3 fw-bold text-white-shadow mt-3">Oops!</h1>
+                        <h2 class="h3 text-white-shadow mb-4">Something went wrong</h2>
+                        <p class="lead text-white-shadow mb-4">
+                            An unexpected error occurred while processing your request.
+                        </p>
+                    }
+                </div>
 
-@if (Model.ShowRequestId)
-{
-    <p>
-        <strong>Request ID:</strong> <code>@Model.RequestId</code>
-    </p>
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="card bg-light border-0 shadow-sm mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title text-danger">
+                                <i class="fas fa-info-circle me-2"></i>Error Details
+                            </h5>
+                            <p class="card-text">@errorMessage</p>
+                        </div>
+                    </div>
+                }
+
+                <div class="error-actions">
+                    <div class="btn-group" role="group">
+                        <a href="javascript:history.back()" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-arrow-left me-2"></i>Go Back
+                        </a>
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-lg">
+                            <i class="fas fa-home me-2"></i>Home
+                        </a>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            @if (User.IsInRole("Student"))
+                            {
+                                <a asp-controller="Student" asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                                </a>
+                            }
+                            else if (User.IsInRole("Professor"))
+                            {
+                                <a asp-controller="Professor" asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                                </a>
+                            }
+                        }
+                    </div>
+                </div>
+
+                @if (Model?.ShowRequestId == true)
+                {
+                    <div class="card bg-light border-0 shadow-sm mt-4">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">
+                                <i class="fas fa-bug me-2"></i>Technical Information
+                            </h6>
+                            <small class="text-muted">Request ID: <code>@Model.RequestId</code></small>
+                        </div>
+                    </div>
+                }
+
+                <div class="mt-5">
+                    <p class="text-white-shadow mb-3">
+                        <strong>Need help?</strong>
+                    </p>
+                    <div class="contact-info">
+                        @if (!string.IsNullOrEmpty(ViewBag.UniversitySettings?.ContactEmail))
+                        {
+                            <a href="mailto:@ViewBag.UniversitySettings.ContactEmail" class="btn btn-outline-light me-2">
+                                <i class="fas fa-envelope me-2"></i>Email Support
+                            </a>
+                        }
+                        @if (!string.IsNullOrEmpty(ViewBag.UniversitySettings?.ContactPhone))
+                        {
+                            <a href="tel:@ViewBag.UniversitySettings.ContactPhone" class="btn btn-outline-light">
+                                <i class="fas fa-phone me-2"></i>Call Support
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .error-container {
+            padding: 2rem 1rem;
+        }
+        
+        .error-icon {
+            animation: bounce 2s infinite;
+        }
+        
+        @@keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        .error-actions .btn {
+            margin: 0.25rem;
+        }
+        
+        .contact-info .btn {
+            margin: 0.25rem;
+        }
+        
+        @@media (max-width: 768px) {
+            .error-container {
+                padding: 1rem 0.5rem;
+            }
+            
+            .display-3 {
+                font-size: 3rem;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .btn-group .btn {
+                margin-bottom: 0.5rem;
+            }
+        }
+    </style>
 }
-
-<h3>Development Mode</h3>
-<p>
-    Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
-</p>
-<p>
-    <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
-    It can result in displaying sensitive information from exceptions to end users.
-    For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
-    and restarting the app.
-</p>
