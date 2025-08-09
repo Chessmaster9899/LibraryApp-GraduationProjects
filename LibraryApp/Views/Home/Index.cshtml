@@ -4,230 +4,294 @@
     ViewData["Title"] = "Dashboard";
 }
 
-<div class="row mb-4">
-    <div class="col-12">
-        <h1 class="display-4">@Model.UniversitySettings.Name @Model.UniversitySettings.ApplicationTitle</h1>
-        <p class="lead">@Model.UniversitySettings.TagLine</p>
+<!-- Professional Home Dashboard -->
+<div class="dashboard-container">
+    <!-- Modern Welcome Header -->
+    <div class="welcome-section mb-4">
+        <div class="card border-0 shadow-lg overflow-hidden dashboard-header">
+            <div class="card-body p-4">
+                <div class="text-center">
+                    <h1 class="dashboard-title mb-3">@Model.UniversitySettings.Name</h1>
+                    <h2 class="dashboard-subtitle mb-3">@Model.UniversitySettings.ApplicationTitle</h2>
+                    <p class="lead text-on-dark">@Model.UniversitySettings.TagLine</p>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
 
-<!-- Statistics Cards -->
-<div class="row mb-4">
-    <div class="col-lg-3 col-md-6 mb-3">
-        <div class="card bg-primary text-white h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h4 class="card-title">@Model.TotalProjects</h4>
-                        <p class="card-text">Total Projects</p>
+    <!-- Advanced Statistics Grid -->
+    <div class="row mb-4 dashboard-stats-grid">
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="stat-card card-hover">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                            <i class="fas fa-project-diagram"></i>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" asp-controller="Projects" asp-action="Index">View All</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="exportData('projects')">Export List</a></li>
+                            </ul>
+                        </div>
                     </div>
-                    <div class="align-self-center">
-                        <i class="fas fa-project-diagram fa-2x"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="card-footer">
-                <a asp-controller="Projects" asp-action="Index" class="text-white">
-                    <small>View all projects <i class="fas fa-arrow-right"></i></small>
-                </a>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-lg-3 col-md-6 mb-3">
-        <div class="card bg-success text-white h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h4 class="card-title">@Model.TotalStudents</h4>
-                        <p class="card-text">Students</p>
-                    </div>
-                    <div class="align-self-center">
-                        <i class="fas fa-user-graduate fa-2x"></i>
+                    <h3 class="stat-number text-primary">@Model.TotalProjects</h3>
+                    <p class="stat-label">Total Projects</p>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-arrow-up text-success me-1"></i>
+                        <small class="stat-trend text-success">Active in system</small>
                     </div>
                 </div>
             </div>
-            <div class="card-footer">
-                <a asp-controller="Students" asp-action="Index" class="text-white">
-                    <small>View all students <i class="fas fa-arrow-right"></i></small>
-                </a>
-            </div>
         </div>
-    </div>
-    
-    <div class="col-lg-3 col-md-6 mb-3">
-        <div class="card bg-info text-white h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h4 class="card-title">@Model.TotalProfessors</h4>
-                        <p class="card-text">Professors</p>
+        
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="stat-card card-hover">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="stat-icon bg-success bg-opacity-10 text-success">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" asp-controller="Students" asp-action="Index">View All</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="exportData('students')">Export List</a></li>
+                            </ul>
+                        </div>
                     </div>
-                    <div class="align-self-center">
-                        <i class="fas fa-chalkboard-teacher fa-2x"></i>
+                    <h3 class="stat-number text-success">@Model.TotalStudents</h3>
+                    <p class="stat-label">Students</p>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-users text-success me-1"></i>
+                        <small class="stat-trend text-success">Registered users</small>
                     </div>
                 </div>
             </div>
-            <div class="card-footer">
-                <a asp-controller="Professors" asp-action="Index" class="text-white">
-                    <small>View all professors <i class="fas fa-arrow-right"></i></small>
-                </a>
-            </div>
         </div>
-    </div>
-    
-    <div class="col-lg-3 col-md-6 mb-3">
-        <div class="card bg-warning text-white h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h4 class="card-title">@Model.TotalDepartments</h4>
-                        <p class="card-text">Departments</p>
+        
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="stat-card card-hover">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="stat-icon bg-info bg-opacity-10 text-info">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" asp-controller="Professors" asp-action="Index">View All</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="exportData('professors')">Export List</a></li>
+                            </ul>
+                        </div>
                     </div>
-                    <div class="align-self-center">
-                        <i class="fas fa-building fa-2x"></i>
+                    <h3 class="stat-number text-info">@Model.TotalProfessors</h3>
+                    <p class="stat-label">Professors</p>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-user-tie text-info me-1"></i>
+                        <small class="stat-trend text-info">Faculty members</small>
                     </div>
                 </div>
             </div>
-            <div class="card-footer">
-                <a asp-controller="Departments" asp-action="Index" class="text-white">
-                    <small>View all departments <i class="fas fa-arrow-right"></i></small>
-                </a>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="stat-card card-hover">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" asp-controller="Departments" asp-action="Index">View All</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="exportData('departments')">Export List</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <h3 class="stat-number text-warning">@Model.TotalDepartments</h3>
+                    <p class="stat-label">Departments</p>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-sitemap text-warning me-1"></i>
+                        <small class="stat-trend text-warning">Academic units</small>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Project Status Overview -->
-<div class="row mb-4">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Projects by Status</h5>
-            </div>
-            <div class="card-body">
-                @if (Model.ProjectsByStatus.Any())
-                {
-                    <div class="row">
-                        @foreach (var statusGroup in Model.ProjectsByStatus)
-                        {
-                            var badgeClass = statusGroup.Status switch
-                            {
-                                LibraryApp.Models.ProjectStatus.Completed => "success",
-                                LibraryApp.Models.ProjectStatus.Defended => "success",
-                                LibraryApp.Models.ProjectStatus.Published => "success",
-                                LibraryApp.Models.ProjectStatus.InProgress => "primary",
-                                LibraryApp.Models.ProjectStatus.Approved => "info",
-                                _ => "secondary"
-                            };
-                            
-                            <div class="col-sm-6 mb-2">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="badge badge-@badgeClass">@statusGroup.Status</span>
-                                    <strong>@statusGroup.Count</strong>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                }
-                else
-                {
-                    <p class="text-muted">No projects found.</p>
-                }
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Quick Actions</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-12 mb-2">
-                        <a asp-controller="Projects" asp-action="Create" class="btn btn-primary btn-block">
-                            <i class="fas fa-plus"></i> Add New Project
-                        </a>
-                    </div>
-                    <div class="col-12 mb-2">
-                        <a asp-controller="Students" asp-action="Create" class="btn btn-success btn-block">
-                            <i class="fas fa-user-plus"></i> Add New Student
-                        </a>
-                    </div>
-                    <div class="col-12 mb-2">
-                        <a asp-controller="Professors" asp-action="Create" class="btn btn-info btn-block">
-                            <i class="fas fa-user-tie"></i> Add New Professor
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Recent Projects -->
-@if (Model.RecentProjects.Any())
-{
+    <!-- Professional Content Sections -->
     <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Recent Projects</h5>
-                    <a asp-controller="Projects" asp-action="Index" class="btn btn-sm btn-outline-primary">View All</a>
+        <div class="col-lg-6 mb-4">
+            <!-- Projects by Status -->
+            <div class="content-card">
+                <div class="card-header">
+                    <h5 class="card-title-professional">
+                        <i class="fas fa-chart-pie text-primary me-2"></i>Projects by Status
+                    </h5>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Title</th>
-                                    <th>Student</th>
-                                    <th>Supervisor</th>
-                                    <th>Status</th>
-                                    <th>Submission Date</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var project in Model.RecentProjects)
+                    @if (Model.ProjectsByStatus.Any())
+                    {
+                        <div class="row">
+                            @foreach (var statusGroup in Model.ProjectsByStatus)
+                            {
+                                var badgeClass = statusGroup.Status switch
                                 {
-                                    <tr>
-                                        <td>
-                                            <strong>@project.Title</strong>
-                                            @if (!string.IsNullOrEmpty(project.Keywords))
-                                            {
-                                                <br><small class="text-muted">@project.Keywords</small>
-                                            }
-                                        </td>
-                                        <td>
-                                            @project.Student.FirstName @project.Student.LastName
-                                            <br><small class="text-muted">@project.Student.StudentNumber</small>
-                                        </td>
-                                        <td>
-                                            @project.Supervisor.Title @project.Supervisor.FirstName @project.Supervisor.LastName
-                                        </td>
-                                        <td>
-                                            <span class="badge badge-@(project.Status == LibraryApp.Models.ProjectStatus.Completed ? "success" : 
-                                                                      project.Status == LibraryApp.Models.ProjectStatus.InProgress ? "primary" : 
-                                                                      project.Status == LibraryApp.Models.ProjectStatus.Approved ? "info" : 
-                                                                      project.Status == LibraryApp.Models.ProjectStatus.Defended ? "success" :
-                                                                      project.Status == LibraryApp.Models.ProjectStatus.Published ? "success" : "secondary")">
-                                                @project.Status
-                                            </span>
-                                        </td>
-                                        <td>@project.SubmissionDate.ToShortDateString()</td>
-                                        <td>
-                                            <a asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id" 
-                                               class="btn btn-sm btn-outline-info">Details</a>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
+                                    LibraryApp.Models.ProjectStatus.Completed => "success",
+                                    LibraryApp.Models.ProjectStatus.Defended => "success",
+                                    LibraryApp.Models.ProjectStatus.Published => "success",
+                                    LibraryApp.Models.ProjectStatus.InProgress => "warning",
+                                    LibraryApp.Models.ProjectStatus.Approved => "info",
+                                    _ => "secondary"
+                                };
+                                
+                                <div class="col-sm-6 mb-3">
+                                    <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+                                        <span class="badge badge-professional bg-@badgeClass">@statusGroup.Status</span>
+                                        <strong class="stat-number text-@badgeClass" style="font-size: 1.25rem;">@statusGroup.Count</strong>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="fas fa-chart-pie fa-3x text-muted mb-3"></i>
+                            <p class="text-muted-professional">No projects found.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6 mb-4">
+            <!-- Quick Actions -->
+            <div class="content-card">
+                <div class="card-header">
+                    <h5 class="card-title-professional">
+                        <i class="fas fa-bolt text-warning me-2"></i>Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="quick-actions-grid" style="grid-template-columns: 1fr; gap: 0.75rem;">
+                        <div class="quick-action-card" onclick="window.location.href='@Url.Action("Create", "Projects")'" style="padding: 1rem; min-height: auto;">
+                            <i class="fas fa-plus" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                            <h6 style="font-size: 0.9rem;">Add New Project</h6>
+                            <p style="font-size: 0.8rem; margin: 0;">Create a new project</p>
+                        </div>
+                        <div class="quick-action-card" onclick="window.location.href='@Url.Action("Create", "Students")'" style="padding: 1rem; min-height: auto;">
+                            <i class="fas fa-user-plus" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                            <h6 style="font-size: 0.9rem;">Add New Student</h6>
+                            <p style="font-size: 0.8rem; margin: 0;">Register a new student</p>
+                        </div>
+                        <div class="quick-action-card" onclick="window.location.href='@Url.Action("Create", "Professors")'" style="padding: 1rem; min-height: auto;">
+                            <i class="fas fa-user-tie" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                            <h6 style="font-size: 0.9rem;">Add New Professor</h6>
+                            <p style="font-size: 0.8rem; margin: 0;">Register a new professor</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Recent Projects -->
+    @if (Model.RecentProjects.Any())
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="content-card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="card-title-professional">
+                                <i class="fas fa-clock text-primary me-2"></i>Recent Projects
+                            </h5>
+                            <a asp-controller="Projects" asp-action="Index" class="btn btn-outline-primary btn-professional">
+                                <i class="fas fa-arrow-right me-1"></i>View All
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="text-professional" style="font-weight: 700;">Title</th>
+                                        <th class="text-professional" style="font-weight: 700;">Student</th>
+                                        <th class="text-professional" style="font-weight: 700;">Supervisor</th>
+                                        <th class="text-professional" style="font-weight: 700;">Status</th>
+                                        <th class="text-professional" style="font-weight: 700;">Date</th>
+                                        <th class="text-professional" style="font-weight: 700;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var project in Model.RecentProjects)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <h6 class="mb-1 text-professional" style="font-weight: 600;">@project.Title</h6>
+                                                @if (!string.IsNullOrEmpty(project.Keywords))
+                                                {
+                                                    <div>
+                                                        @foreach (var keyword in project.Keywords.Split(',', StringSplitOptions.RemoveEmptyEntries).Take(2))
+                                                        {
+                                                            <span class="badge bg-light text-dark me-1" style="font-size: 0.7rem;">@keyword.Trim()</span>
+                                                        }
+                                                    </div>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="text-professional" style="font-weight: 600;">@project.Student.FirstName @project.Student.LastName</div>
+                                                <small class="text-muted-professional">@project.Student.StudentNumber</small>
+                                            </td>
+                                            <td>
+                                                <div class="text-professional" style="font-weight: 600;">@project.Supervisor.Title @project.Supervisor.FirstName @project.Supervisor.LastName</div>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-professional bg-@(project.Status == LibraryApp.Models.ProjectStatus.Completed ? "success" : 
+                                                                          project.Status == LibraryApp.Models.ProjectStatus.InProgress ? "warning" : 
+                                                                          project.Status == LibraryApp.Models.ProjectStatus.Approved ? "info" : 
+                                                                          project.Status == LibraryApp.Models.ProjectStatus.Defended ? "success" :
+                                                                          project.Status == LibraryApp.Models.ProjectStatus.Published ? "success" : "secondary")">
+                                                    @project.Status
+                                                </span>
+                                            </td>
+                                            <td class="text-professional">@project.SubmissionDate.ToString("MMM dd, yyyy")</td>
+                                            <td>
+                                                <a asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id" 
+                                                   class="btn btn-sm btn-outline-info btn-professional">
+                                                   <i class="fas fa-eye me-1"></i>Details
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function exportData(type) {
+            console.log(`Exporting ${type} data...`);
+            // Export functionality would be implemented here
+        }
+    </script>
 }

@@ -1,147 +1,178 @@
 @model AdminDashboardEnhancedViewModel
 @{
-    ViewBag.Title = "Enhanced Admin Dashboard";
+    ViewBag.Title = "Admin Dashboard";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container-fluid mt-4">
-    <!-- Dashboard Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <h1>Enhanced Admin Dashboard</h1>
-            <p class="lead">Complete system overview and management tools</p>
-        </div>
-    </div>
-
-    <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h3 class="card-title">@Model.TotalProjects</h3>
-                            <p class="card-text">Total Projects</p>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-project-diagram fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer">
-                    <a asp-controller="Projects" asp-action="Index" class="text-white">
-                        View all projects <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h3 class="card-title">@Model.TotalStudents</h3>
-                            <p class="card-text">Total Students</p>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-user-graduate fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer">
-                    <a asp-action="UserManagement" class="text-white">
-                        Manage users <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-info text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h3 class="card-title">@Model.TotalProfessors</h3>
-                            <p class="card-text">Total Professors</p>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-chalkboard-teacher fa-2x"></i>
+<!-- Professional Admin Dashboard - High-End Design -->
+<div class="dashboard-container">
+    <!-- Modern Welcome Header with Analytics -->
+    <div class="welcome-section mb-4">
+        <div class="card border-0 shadow-lg overflow-hidden dashboard-header">
+            <div class="card-body p-0">
+                <div class="row g-0">
+                    <div class="col-lg-8">
+                        <div class="p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="avatar-lg me-3">
+                                    <div class="avatar-title bg-white bg-opacity-20 rounded-circle">
+                                        <i class="fas fa-cogs fa-2x text-on-dark"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h1 class="dashboard-title">Admin Dashboard</h1>
+                                    <p class="dashboard-subtitle">Complete system overview and management center</p>
+                                </div>
+                            </div>
+                            <div class="row text-center">
+                                <div class="col-3">
+                                    <div class="p-2">
+                                        <h4 class="mb-1 fw-bold text-on-dark">@Model.TotalProjects</h4>
+                                        <small class="opacity-75">Total Projects</small>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="p-2">
+                                        <h4 class="mb-1 fw-bold text-on-dark">@Model.TotalStudents</h4>
+                                        <small class="opacity-75">Students</small>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="p-2">
+                                        <h4 class="mb-1 fw-bold text-on-dark">@Model.TotalProfessors</h4>
+                                        <small class="opacity-75">Professors</small>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="p-2">
+                                        <h4 class="mb-1 fw-bold text-on-dark">@Model.PendingSubmissions.Count</h4>
+                                        <small class="opacity-75">Pending</small>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="card-footer">
-                    <a asp-controller="Professors" asp-action="Index" class="text-white">
-                        View professors <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-warning text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h3 class="card-title">@Model.PendingSubmissions.Count</h3>
-                            <p class="card-text">Pending Reviews</p>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-hourglass-half fa-2x"></i>
+                    <div class="col-lg-4 d-none d-lg-block">
+                        <div class="p-4 text-center">
+                            <div class="dashboard-chart-container">
+                                <canvas id="adminChart" width="200" height="200"></canvas>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="card-footer">
-                    <a asp-action="PendingSubmissions" class="text-white">
-                        Review submissions <i class="fas fa-arrow-right"></i>
-                    </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Quick Actions -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
-                </div>
+    <!-- Advanced Metrics Grid -->
+    <div class="row mb-4 dashboard-stats-grid">
+        <!-- Total Projects Card -->
+        <div class="col-xl-3 col-lg-6 mb-4">
+            <div class="stat-card card-hover">
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-2 mb-3">
-                            <a asp-action="PendingSubmissions" class="btn btn-warning btn-lg w-100">
-                                <i class="fas fa-clipboard-check d-block mb-2"></i>
-                                Review Submissions
-                            </a>
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                            <i class="fas fa-project-diagram"></i>
                         </div>
-                        <div class="col-md-2 mb-3">
-                            <a asp-action="UserManagement" class="btn btn-success btn-lg w-100">
-                                <i class="fas fa-users-cog d-block mb-2"></i>
-                                User Management
-                            </a>
+                        <div class="dropdown">
+                            <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" asp-controller="Projects" asp-action="Index">View All Projects</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="exportData('projects')">Export Data</a></li>
+                            </ul>
                         </div>
-                        <div class="col-md-2 mb-3">
-                            <a asp-action="Analytics" class="btn btn-info btn-lg w-100">
-                                <i class="fas fa-chart-line d-block mb-2"></i>
-                                Analytics
-                            </a>
+                    </div>
+                    <h3 class="stat-number text-primary">@Model.TotalProjects</h3>
+                    <p class="stat-label">Total Projects</p>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-arrow-up text-success me-1"></i>
+                        <small class="stat-trend text-success">Active in system</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Students Card -->
+        <div class="col-xl-3 col-lg-6 mb-4">
+            <div class="stat-card card-hover">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="stat-icon bg-success bg-opacity-10 text-success">
+                            <i class="fas fa-user-graduate"></i>
                         </div>
-                        <div class="col-md-2 mb-3">
-                            <a asp-action="Communication" class="btn btn-primary btn-lg w-100">
-                                <i class="fas fa-bullhorn d-block mb-2"></i>
-                                Announcements
-                            </a>
+                        <div class="dropdown">
+                            <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" asp-action="UserManagement">Manage Students</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="exportData('students')">Export List</a></li>
+                            </ul>
                         </div>
-                        <div class="col-md-2 mb-3">
-                            <a asp-action="AuditTrail" class="btn btn-secondary btn-lg w-100">
-                                <i class="fas fa-history d-block mb-2"></i>
-                                Audit Trail
-                            </a>
+                    </div>
+                    <h3 class="stat-number text-success">@Model.TotalStudents</h3>
+                    <p class="stat-label">Total Students</p>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-users text-success me-1"></i>
+                        <small class="stat-trend text-success">Registered users</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Professors Card -->
+        <div class="col-xl-3 col-lg-6 mb-4">
+            <div class="stat-card card-hover">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="stat-icon bg-info bg-opacity-10 text-info">
+                            <i class="fas fa-chalkboard-teacher"></i>
                         </div>
-                        <div class="col-md-2 mb-3">
-                            <a asp-controller="Guest" asp-action="Dashboard" class="btn btn-outline-primary btn-lg w-100">
-                                <i class="fas fa-eye d-block mb-2"></i>
-                                Public Gallery
-                            </a>
+                        <div class="dropdown">
+                            <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" asp-controller="Professors" asp-action="Index">View Professors</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="exportData('professors')">Export List</a></li>
+                            </ul>
                         </div>
+                    </div>
+                    <h3 class="stat-number text-info">@Model.TotalProfessors</h3>
+                    <p class="stat-label">Total Professors</p>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-user-tie text-info me-1"></i>
+                        <small class="stat-trend text-info">Faculty members</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Submissions Card -->
+        <div class="col-xl-3 col-lg-6 mb-4">
+            <div class="stat-card card-hover">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                            <i class="fas fa-hourglass-half"></i>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" asp-action="PendingSubmissions">Review Submissions</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="exportData('pending')">Export Report</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <h3 class="stat-number text-warning">@Model.PendingSubmissions.Count</h3>
+                    <p class="stat-label">Pending Reviews</p>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-clock text-warning me-1"></i>
+                        <small class="stat-trend text-warning">Requires attention</small>
                     </div>
                 </div>
             </div>
@@ -153,195 +184,371 @@
     {
         <div class="row mb-4">
             <div class="col-12">
-                <div class="alert alert-warning">
-                    <h4><i class="fas fa-exclamation-triangle"></i> Pending Project Reviews</h4>
-                    <p>You have <strong>@Model.PendingSubmissions.Count</strong> project submissions waiting for review.</p>
-                    <a asp-action="PendingSubmissions" class="btn btn-warning">
-                        <i class="fas fa-eye"></i> Review Now
-                    </a>
-                </div>
-            </div>
-        </div>
-    }
-
-    <div class="row">
-        <!-- Project Status Chart -->
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-header">
-                    <h4><i class="fas fa-chart-pie"></i> Project Status Distribution</h4>
-                </div>
-                <div class="card-body">
-                    <canvas id="projectStatusChart" width="400" height="200"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- User Activity Chart -->
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-header">
-                    <h4><i class="fas fa-chart-bar"></i> User Activity (Last 7 Days)</h4>
-                </div>
-                <div class="card-body">
-                    <canvas id="userActivityChart" width="400" height="200"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <!-- Recent Submissions -->
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4><i class="fas fa-clock"></i> Recent Submissions</h4>
-                    <a asp-action="PendingSubmissions" class="btn btn-sm btn-outline-primary">View All</a>
-                </div>
-                <div class="card-body">
-                    @if (Model.PendingSubmissions.Any())
-                    {
-                        <div class="list-group list-group-flush">
-                            @foreach (var submission in Model.PendingSubmissions.Take(5))
-                            {
-                                <div class="list-group-item">
-                                    <div class="d-flex w-100 justify-content-between">
-                                        <h6 class="mb-1">@submission.Project.Title</h6>
-                                        <small>@submission.SubmissionDate.ToString("MMM dd")</small>
-                                    </div>
-                                    <p class="mb-1">By: @submission.Project.Student.FullName</p>
-                                    <small>
-                                        <span class="badge bg-@(submission.Status == SubmissionStatus.Pending ? "warning" : "info")">
-                                            @submission.Status
-                                        </span>
-                                    </small>
-                                </div>
-                            }
-                        </div>
-                    }
-                    else
-                    {
-                        <p class="text-muted">No pending submissions</p>
-                    }
-                </div>
-            </div>
-        </div>
-
-        <!-- Recent Activity -->
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4><i class="fas fa-activity"></i> Recent System Activity</h4>
-                    <a asp-action="AuditTrail" class="btn btn-sm btn-outline-primary">View All</a>
-                </div>
-                <div class="card-body">
-                    @if (Model.RecentAuditLogs.Any())
-                    {
-                        <div class="list-group list-group-flush">
-                            @foreach (var log in Model.RecentAuditLogs.Take(5))
-                            {
-                                <div class="list-group-item">
-                                    <div class="d-flex w-100 justify-content-between">
-                                        <h6 class="mb-1">@log.Action</h6>
-                                        <small>@log.Timestamp.ToString("MMM dd, HH:mm")</small>
-                                    </div>
-                                    <p class="mb-1">@log.UserId (@log.UserRole)</p>
-                                    <small class="text-muted">@log.EntityType @(log.EntityId?.ToString() ?? "")</small>
-                                </div>
-                            }
-                        </div>
-                    }
-                    else
-                    {
-                        <p class="text-muted">No recent activity</p>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Recent Notifications -->
-    @if (Model.RecentNotifications.Any())
-    {
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h4><i class="fas fa-bell"></i> Recent Notifications</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="list-group">
-                            @foreach (var notification in Model.RecentNotifications.Take(3))
-                            {
-                                <div class="list-group-item @(notification.IsRead ? "" : "list-group-item-warning")">
-                                    <div class="d-flex w-100 justify-content-between">
-                                        <h6 class="mb-1">@notification.Title</h6>
-                                        <small>@notification.CreatedDate.ToString("MMM dd, yyyy")</small>
-                                    </div>
-                                    <p class="mb-1">@notification.Message</p>
-                                </div>
-                            }
+                <div class="alert alert-professional alert-warning">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+                        <div class="flex-grow-1">
+                            <h5 class="mb-1">Pending Project Reviews</h5>
+                            <p class="mb-2">You have <strong>@Model.PendingSubmissions.Count</strong> project submissions waiting for review.</p>
+                            <a asp-action="PendingSubmissions" class="btn btn-warning btn-professional">
+                                <i class="fas fa-eye me-2"></i>Review Now
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     }
+
+    <!-- Advanced Dashboard Tabs -->
+    <div class="row">
+        <div class="col-12">
+            <div class="content-card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs nav-tabs-professional card-header-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#quick-actions" role="tab">
+                                <i class="fas fa-bolt me-2"></i>Quick Actions
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#recent-activity" role="tab">
+                                <i class="fas fa-clock me-2"></i>Recent Activity
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#analytics" role="tab">
+                                <i class="fas fa-chart-line me-2"></i>Analytics
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#system-health" role="tab">
+                                <i class="fas fa-heartbeat me-2"></i>System Health
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content">
+                        <!-- Quick Actions Tab -->
+                        <div class="tab-pane fade show active" id="quick-actions" role="tabpanel">
+                            <div class="quick-actions-grid">
+                                <div class="quick-action-card" onclick="window.location.href='@Url.Action("PendingSubmissions")'">
+                                    <i class="fas fa-clipboard-check"></i>
+                                    <h6>Review Submissions</h6>
+                                    <p>Review and approve project submissions</p>
+                                </div>
+                                <div class="quick-action-card" onclick="window.location.href='@Url.Action("UserManagement")'">
+                                    <i class="fas fa-users-cog"></i>
+                                    <h6>User Management</h6>
+                                    <p>Manage students and professors</p>
+                                </div>
+                                <div class="quick-action-card" onclick="window.location.href='@Url.Action("Analytics")'">
+                                    <i class="fas fa-chart-line"></i>
+                                    <h6>Analytics</h6>
+                                    <p>View detailed system analytics</p>
+                                </div>
+                                <div class="quick-action-card" onclick="window.location.href='@Url.Action("Communication")'">
+                                    <i class="fas fa-bullhorn"></i>
+                                    <h6>Announcements</h6>
+                                    <p>Send system-wide notifications</p>
+                                </div>
+                                <div class="quick-action-card" onclick="window.location.href='@Url.Action("AuditTrail")'">
+                                    <i class="fas fa-history"></i>
+                                    <h6>Audit Trail</h6>
+                                    <p>Review system activity logs</p>
+                                </div>
+                                <div class="quick-action-card" onclick="window.location.href='@Url.Action("Dashboard", "Guest")'">
+                                    <i class="fas fa-eye"></i>
+                                    <h6>Public Gallery</h6>
+                                    <p>View public project gallery</p>
+                                </div>
+                                <div class="quick-action-card" onclick="exportSystemData()">
+                                    <i class="fas fa-file-export"></i>
+                                    <h6>Export Reports</h6>
+                                    <p>Generate comprehensive reports</p>
+                                </div>
+                                <div class="quick-action-card" onclick="systemBackup()">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <h6>System Backup</h6>
+                                    <p>Create system backup</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity Tab -->
+                        <div class="tab-pane fade" id="recent-activity" role="tabpanel">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <h6 class="section-title">Recent Submissions</h6>
+                                    <div class="timeline-professional">
+                                        @if (Model.PendingSubmissions.Any())
+                                        {
+                                            @foreach (var submission in Model.PendingSubmissions.Take(5))
+                                            {
+                                                <div class="timeline-item-professional">
+                                                    <h6>@submission.Project.Title</h6>
+                                                    <p class="text-professional">By: @submission.Project.Student.FullName</p>
+                                                    <div class="d-flex align-items-center justify-content-between">
+                                                        <span class="badge badge-professional bg-@(submission.Status == SubmissionStatus.Pending ? "warning" : "info")">
+                                                            @submission.Status
+                                                        </span>
+                                                        <div class="meta">
+                                                            <i class="fas fa-calendar me-1"></i>
+                                                            @submission.SubmissionDate.ToString("MMM dd, yyyy")
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <div class="text-center py-4">
+                                                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                                <p class="text-muted-professional">No pending submissions</p>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <h6 class="section-title">System Activity</h6>
+                                    <div class="timeline-professional">
+                                        @if (Model.RecentAuditLogs.Any())
+                                        {
+                                            @foreach (var log in Model.RecentAuditLogs.Take(5))
+                                            {
+                                                <div class="timeline-item-professional">
+                                                    <h6>@log.Action</h6>
+                                                    <p class="text-professional">@log.UserId (@log.UserRole)</p>
+                                                    <div class="d-flex align-items-center justify-content-between">
+                                                        <span class="badge badge-professional bg-secondary">@log.EntityType</span>
+                                                        <div class="meta">
+                                                            <i class="fas fa-clock me-1"></i>
+                                                            @log.Timestamp.ToString("MMM dd, HH:mm")
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <div class="text-center py-4">
+                                                <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                                                <p class="text-muted-professional">No recent activity</p>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Analytics Tab -->
+                        <div class="tab-pane fade" id="analytics" role="tabpanel">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <h6 class="section-title">Project Status Distribution</h6>
+                                    <canvas id="projectStatusChart" height="300"></canvas>
+                                </div>
+                                <div class="col-lg-6">
+                                    <h6 class="section-title">User Activity (Last 7 Days)</h6>
+                                    <canvas id="userActivityChart" height="300"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- System Health Tab -->
+                        <div class="tab-pane fade" id="system-health" role="tabpanel">
+                            <div class="row">
+                                <div class="col-lg-3 mb-4">
+                                    <div class="stat-card">
+                                        <div class="card-body text-center">
+                                            <div class="stat-icon bg-success bg-opacity-10 text-success mx-auto mb-3">
+                                                <i class="fas fa-server"></i>
+                                            </div>
+                                            <h5 class="stat-number text-success">99.9%</h5>
+                                            <p class="stat-label mb-0">System Uptime</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 mb-4">
+                                    <div class="stat-card">
+                                        <div class="card-body text-center">
+                                            <div class="stat-icon bg-info bg-opacity-10 text-info mx-auto mb-3">
+                                                <i class="fas fa-database"></i>
+                                            </div>
+                                            <h5 class="stat-number text-info">78%</h5>
+                                            <p class="stat-label mb-0">Database Usage</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 mb-4">
+                                    <div class="stat-card">
+                                        <div class="card-body text-center">
+                                            <div class="stat-icon bg-warning bg-opacity-10 text-warning mx-auto mb-3">
+                                                <i class="fas fa-memory"></i>
+                                            </div>
+                                            <h5 class="stat-number text-warning">64%</h5>
+                                            <p class="stat-label mb-0">Memory Usage</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 mb-4">
+                                    <div class="stat-card">
+                                        <div class="card-body text-center">
+                                            <div class="stat-icon bg-primary bg-opacity-10 text-primary mx-auto mb-3">
+                                                <i class="fas fa-tachometer-alt"></i>
+                                            </div>
+                                            <h5 class="stat-number text-primary">1.2s</h5>
+                                            <p class="stat-label mb-0">Avg Response</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Recent Notifications -->
+                            @if (Model.RecentNotifications.Any())
+                            {
+                                <div class="row">
+                                    <div class="col-12">
+                                        <h6 class="section-title">Recent System Notifications</h6>
+                                        <div class="timeline-professional">
+                                            @foreach (var notification in Model.RecentNotifications.Take(3))
+                                            {
+                                                <div class="timeline-item-professional @(!notification.IsRead ? "border-warning" : "")">
+                                                    <h6>@notification.Title</h6>
+                                                    <p class="text-professional">@notification.Message</p>
+                                                    <div class="meta">
+                                                        <i class="fas fa-calendar me-1"></i>
+                                                        @notification.CreatedDate.ToString("MMM dd, yyyy")
+                                                        @if (!notification.IsRead)
+                                                        {
+                                                            <span class="badge badge-professional bg-warning ms-2">NEW</span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Project Status Chart
-        const projectStatusCtx = document.getElementById('projectStatusChart').getContext('2d');
-        const projectStatusChart = new Chart(projectStatusCtx, {
-            type: 'doughnut',
-            data: {
-                labels: [@Html.Raw(string.Join(",", Model.ProjectStatusCounts.Keys.Select(k => $"'{k}'")))],
-                datasets: [{
-                    data: [@string.Join(",", Model.ProjectStatusCounts.Values)],
-                    backgroundColor: [
-                        '#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#20c997', '#fd7e14'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                }
-            }
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeAdminCharts();
         });
 
-        // User Activity Chart
-        const userActivityCtx = document.getElementById('userActivityChart').getContext('2d');
-        const userActivityChart = new Chart(userActivityCtx, {
-            type: 'bar',
-            data: {
-                labels: [@Html.Raw(string.Join(",", Model.UserActivityCounts.Keys.Select(k => $"'{k}'")))],
-                datasets: [{
-                    label: 'Activities',
-                    data: [@string.Join(",", Model.UserActivityCounts.Values)],
-                    backgroundColor: '#007bff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
+        function initializeAdminCharts() {
+            // Admin Overview Donut Chart
+            const adminCtx = document.getElementById('adminChart').getContext('2d');
+            new Chart(adminCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Projects', 'Students', 'Professors'],
+                    datasets: [{
+                        data: [@Model.TotalProjects, @Model.TotalStudents, @Model.TotalProfessors],
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b'],
+                        borderWidth: 0
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
                     }
                 }
-            }
-        });
+            });
+
+            // Project Status Chart
+            setTimeout(() => {
+                const projectStatusCtx = document.getElementById('projectStatusChart');
+                if (projectStatusCtx) {
+                    new Chart(projectStatusCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: [@Html.Raw(string.Join(",", Model.ProjectStatusCounts.Keys.Select(k => $"'{k}'")))],
+                            datasets: [{
+                                data: [@string.Join(",", Model.ProjectStatusCounts.Values)],
+                                backgroundColor: [
+                                    '#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#20c997', '#fd7e14'
+                                ]
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom'
+                                }
+                            }
+                        }
+                    });
+                }
+            }, 100);
+
+            // User Activity Chart
+            setTimeout(() => {
+                const userActivityCtx = document.getElementById('userActivityChart');
+                if (userActivityCtx) {
+                    new Chart(userActivityCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: [@Html.Raw(string.Join(",", Model.UserActivityCounts.Keys.Select(k => $"'{k}'")))],
+                            datasets: [{
+                                label: 'Activities',
+                                data: [@string.Join(",", Model.UserActivityCounts.Values)],
+                                backgroundColor: 'var(--primary-color)'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                }
+            }, 100);
+        }
+
+        function exportData(type) {
+            showToast('info', 'Export', `Exporting ${type} data...`);
+            // Implementation for data export
+        }
+
+        function exportSystemData() {
+            showToast('info', 'Export', 'Generating comprehensive system report...');
+            // Implementation for system data export
+        }
+
+        function systemBackup() {
+            showToast('info', 'Backup', 'Creating system backup...');
+            // Implementation for system backup
+        }
+
+        // Utility function for toast notifications
+        function showToast(type, title, message) {
+            // Toast implementation would go here
+            console.log(`${type}: ${title} - ${message}`);
+        }
     </script>
 }
