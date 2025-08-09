@@ -1,0 +1,360 @@
+@model LibraryApp.Controllers.ProfessorDashboardViewModel
+@{
+    ViewData["Title"] = "Professor Dashboard";
+}
+
+<div class="container-fluid">
+    <!-- Welcome Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 bg-primary text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="h3 mb-1">Welcome, @Model.Professor.Title @Model.Professor.LastName! 👋</h1>
+                            <p class="mb-0 opacity-75">Manage your supervised and evaluated projects</p>
+                        </div>
+                        <div class="text-end">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-chalkboard-teacher fa-2x me-3 opacity-75"></i>
+                                <div>
+                                    <div class="fw-bold">@Model.Professor.DisplayName</div>
+                                    <small class="opacity-75">@Model.Professor.Department?.Name</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        
+    <!-- Enhanced Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-shape bg-primary bg-opacity-10 text-primary rounded-circle p-3 me-3">
+                            <i class="fas fa-user-graduate fa-lg"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-1 text-primary">@Model.TotalSupervisedProjects</h4>
+                            <p class="text-muted mb-0 small">Supervised Projects</p>
+                            <small class="text-success">@Model.CompletedSupervisedProjects completed</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-shape bg-success bg-opacity-10 text-success rounded-circle p-3 me-3">
+                            <i class="fas fa-clipboard-check fa-lg"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-1 text-success">@Model.TotalEvaluatedProjects</h4>
+                            <p class="text-muted mb-0 small">Evaluated Projects</p>
+                            <small class="text-success">@Model.CompletedEvaluatedProjects completed</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-shape bg-warning bg-opacity-10 text-warning rounded-circle p-3 me-3">
+                            <i class="fas fa-chart-line fa-lg"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-1 text-warning">@(Model.TotalSupervisedProjects + Model.TotalEvaluatedProjects)</h4>
+                            <p class="text-muted mb-0 small">Total Workload</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-shape bg-info bg-opacity-10 text-info rounded-circle p-3 me-3">
+                            <i class="fas fa-percentage fa-lg"></i>
+                        </div>
+                        <div>
+                            @{
+                                var totalProjects = Model.TotalSupervisedProjects + Model.TotalEvaluatedProjects;
+                                var completedProjects = Model.CompletedSupervisedProjects + Model.CompletedEvaluatedProjects;
+                                var successRate = totalProjects > 0 ? Math.Round((double)completedProjects / totalProjects * 100, 1) : 0;
+                            }
+                            <h4 class="mb-1 text-info">@successRate%</h4>
+                            <p class="text-muted mb-0 small">Completion Rate</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Main Content Row -->
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <!-- Recent Supervised Projects with Enhanced Design -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-bottom-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="fas fa-user-graduate text-primary me-2"></i>Projects I Supervise
+                        </h5>
+                        <a href="@Url.Action("SupervisedProjects")" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-arrow-right me-1"></i>View All
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.RecentSupervisedProjects.Any())
+                    {
+                        @foreach (var project in Model.RecentSupervisedProjects)
+                        {
+                            <div class="border-bottom p-3 hover-bg-light">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1 fw-bold">@project.Title</h6>
+                                        <div class="d-flex align-items-center text-muted small mb-2">
+                                            <i class="fas fa-user me-1"></i>
+                                            <span class="me-3">@project.Student.FullName</span>
+                                            <i class="fas fa-calendar me-1"></i>
+                                            <span>@project.SubmissionDate.ToString("MMM dd, yyyy")</span>
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(project.Keywords))
+                                        {
+                                            <div class="mb-2">
+                                                @foreach (var keyword in project.Keywords.Split(',', StringSplitOptions.RemoveEmptyEntries).Take(3))
+                                                {
+                                                    <span class="badge bg-light text-dark me-1">@keyword.Trim()</span>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge badge-status bg-@(project.Status switch {
+                                            ProjectStatus.Completed => "success",
+                                            ProjectStatus.Defended => "success",
+                                            ProjectStatus.InProgress => "warning",
+                                            ProjectStatus.Approved => "info",
+                                            ProjectStatus.Proposed => "secondary",
+                                            ProjectStatus.SubmittedForReview => "primary",
+                                            ProjectStatus.ReviewApproved => "success",
+                                            ProjectStatus.ReviewRejected => "danger",
+                                            ProjectStatus.Published => "dark",
+                                            _ => "secondary"
+                                        })">
+                                            @project.Status.ToString().Replace("Status", "")
+                                        </span>
+                                        <div class="mt-2">
+                                            @if (project.Status == ProjectStatus.Proposed)
+                                            {
+                                                <button class="btn btn-success btn-xs me-1" onclick="approveProject(@project.Id)">
+                                                    <i class="fas fa-check me-1"></i>Approve
+                                                </button>
+                                                <button class="btn btn-danger btn-xs" onclick="rejectProject(@project.Id)">
+                                                    <i class="fas fa-times me-1"></i>Reject
+                                                </button>
+                                            }
+                                            else if (project.Status == ProjectStatus.InProgress)
+                                            {
+                                                <button class="btn btn-primary btn-xs" onclick="markCompleted(@project.Id)">
+                                                    <i class="fas fa-flag-checkered me-1"></i>Mark Complete
+                                                </button>
+                                            }
+                                            else if (project.Status == ProjectStatus.Completed || project.Status == ProjectStatus.ReviewApproved)
+                                            {
+                                                <button class="btn btn-info btn-xs" onclick="scheduleDefense(@project.Id)">
+                                                    <i class="fas fa-calendar-plus me-1"></i>Schedule Defense
+                                                </button>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-chalkboard-teacher fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">No supervised projects</h6>
+                            <p class="text-muted">Projects you supervise will appear here</p>
+                        </div>
+                    }
+                </div>
+            </div>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Student</th>
+                                    <th>Status</th>
+                                    <th>Submission Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var project in Model.RecentSupervisedProjects)
+                                {
+                                    <tr>
+                                        <td>
+                                            <strong>@project.Title</strong>
+                                            @if (!string.IsNullOrEmpty(project.Keywords))
+                                            {
+                                                <br>
+                                                <small class="text-muted">@project.Keywords</small>
+                                            }
+                                        </td>
+                                        <td>@project.Student.DisplayName</td>
+                                        <td>
+                                            <span class="badge bg-@(project.Status switch {
+                                                ProjectStatus.Completed => "success",
+                                                ProjectStatus.Defended => "success",
+                                                ProjectStatus.InProgress => "warning",
+                                                ProjectStatus.Approved => "info",
+                                                _ => "secondary"
+                                            })">
+                                                @project.Status
+                                            </span>
+                                        </td>
+                                        <td>@project.SubmissionDate.ToString("MMM dd, yyyy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted text-center py-4">No supervised projects found.</p>
+                }
+            </div>
+        </div>
+
+        <!-- Recent Evaluated Projects -->
+        @if (Model.Professor.Role == ProfessorRole.Evaluator || Model.Professor.Role == ProfessorRole.Both)
+        {
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Projects I Evaluate</h5>
+                    <a href="@Url.Action("EvaluatedProjects")" class="btn btn-sm btn-outline-success">View All</a>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentEvaluatedProjects.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Student</th>
+                                        <th>Status</th>
+                                        <th>Submission Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var project in Model.RecentEvaluatedProjects)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@project.Title</strong>
+                                                @if (!string.IsNullOrEmpty(project.Keywords))
+                                                {
+                                                    <br>
+                                                    <small class="text-muted">@project.Keywords</small>
+                                                }
+                                            </td>
+                                            <td>@project.Student.DisplayName</td>
+                                            <td>
+                                                <span class="badge bg-@(project.Status switch {
+                                                    ProjectStatus.Completed => "success",
+                                                    ProjectStatus.Defended => "success",
+                                                    ProjectStatus.InProgress => "warning",
+                                                    ProjectStatus.Approved => "info",
+                                                    _ => "secondary"
+                                                })">
+                                                    @project.Status
+                                                </span>
+                                            </td>
+                                            <td>@project.SubmissionDate.ToString("MMM dd, yyyy")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center py-4">No evaluation projects found.</p>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Professor Information</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-5">Professor ID:</dt>
+                    <dd class="col-7">@Model.Professor.ProfessorId</dd>
+                    
+                    <dt class="col-5">Name:</dt>
+                    <dd class="col-7">@Model.Professor.DisplayName</dd>
+                    
+                    <dt class="col-5">Email:</dt>
+                    <dd class="col-7">@Model.Professor.Email</dd>
+                    
+                    <dt class="col-5">Department:</dt>
+                    <dd class="col-7">@Model.Professor.Department?.Name</dd>
+                    
+                    <dt class="col-5">Role:</dt>
+                    <dd class="col-7">
+                        <span class="badge bg-info">@Model.Professor.Role</span>
+                    </dd>
+                    
+                    @if (!string.IsNullOrEmpty(Model.Professor.Specialization))
+                    {
+                        <dt class="col-5">Specialization:</dt>
+                        <dd class="col-7">@Model.Professor.Specialization</dd>
+                    }
+                    
+                    @if (Model.Professor.LastLogin.HasValue)
+                    {
+                        <dt class="col-5">Last Login:</dt>
+                        <dd class="col-7">@Model.Professor.LastLogin.Value.ToString("MMM dd, yyyy")</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="@Url.Action("SupervisedProjects")" class="btn btn-primary">Projects I Supervise</a>
+                    @if (Model.Professor.Role == ProfessorRole.Evaluator || Model.Professor.Role == ProfessorRole.Both)
+                    {
+                        <a href="@Url.Action("EvaluatedProjects")" class="btn btn-success">Projects I Evaluate</a>
+                    }
+                    <a href="@Url.Action("Profile")" class="btn btn-outline-secondary">Edit Profile</a>
+                    <a href="@Url.Action("ChangePassword", "Auth")" class="btn btn-outline-warning">Change Password</a>
+                    <hr>
+                    <a href="@Url.Action("Logout", "Auth")" class="btn btn-danger">Sign Out</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
