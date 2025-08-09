@@ -26,6 +26,21 @@ public class HomeController : BaseController
             return RedirectToAction("Dashboard", "Guest");
         }
 
+        // Redirect authenticated users to their role-specific dashboard
+        var userRole = HttpContext.Session.GetString("UserRole");
+        switch (userRole)
+        {
+            case "Student":
+                return RedirectToAction("Index", "Student");
+            case "Professor":
+                return RedirectToAction("Index", "Professor");
+            case "Admin":
+                break; // Continue to admin dashboard below
+            default:
+                return RedirectToAction("Dashboard", "Guest");
+        }
+
+        // Admin dashboard
         var dashboardData = new DashboardViewModel
         {
             TotalProjects = await _context.Projects.CountAsync(),

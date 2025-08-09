@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using LibraryApp.Data;
 using LibraryApp.Services;
+using LibraryApp.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,10 +53,20 @@ using (var scope = app.Services.CreateScope())
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    // Use custom error handling for production
+    app.UseStatusCodePagesWithRedirects("/Error/{0}");
+    app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
+else
+{
+    // Development error handling
+    app.UseDeveloperExceptionPage();
+    app.UseStatusCodePagesWithRedirects("/Error/{0}");
+}
+
+// Add global error handling middleware
+app.UseGlobalErrorHandling();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

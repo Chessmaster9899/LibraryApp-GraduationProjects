@@ -1,0 +1,106 @@
+@{
+    ViewData["Title"] = "Access Denied";
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="text-center">
+                <div class="access-denied-illustration mb-4">
+                    <i class="fas fa-shield-alt" style="font-size: 6rem; color: var(--warning-color); opacity: 0.8;"></i>
+                    <h1 class="display-4 fw-bold text-white-shadow mt-3">Access Denied</h1>
+                    <p class="lead text-white-shadow mb-4">
+                        You don't have the required permissions to access this resource.
+                    </p>
+                </div>
+
+                <div class="card bg-light border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title text-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Permission Required
+                        </h5>
+                        <p class="card-text">
+                            This page requires specific user permissions that your account doesn't have. 
+                            If you believe this is an error, please contact your system administrator.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="btn-group" role="group">
+                    <a href="javascript:history.back()" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-arrow-left me-2"></i>Go Back
+                    </a>
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-lg">
+                        <i class="fas fa-home me-2"></i>Home
+                    </a>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        @if (User.IsInRole("Student"))
+                        {
+                            <a asp-controller="Student" asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-user-graduate me-2"></i>My Dashboard
+                            </a>
+                        }
+                        else if (User.IsInRole("Professor"))
+                        {
+                            <a asp-controller="Professor" asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-chalkboard-teacher me-2"></i>My Dashboard
+                            </a>
+                        }
+                    }
+                    else
+                    {
+                        <a asp-controller="Auth" asp-action="Login" class="btn btn-success btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                        </a>
+                    }
+                </div>
+
+                <div class="mt-5">
+                    <p class="text-white-shadow mb-3">
+                        <strong>Need assistance?</strong>
+                    </p>
+                    @if (!string.IsNullOrEmpty(ViewBag.UniversitySettings?.ContactEmail))
+                    {
+                        <a href="mailto:@ViewBag.UniversitySettings.ContactEmail" class="btn btn-outline-light me-2">
+                            <i class="fas fa-envelope me-2"></i>Contact Support
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .access-denied-illustration i {
+            animation: pulse 2s infinite;
+        }
+        
+        @@keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+        }
+        
+        @@media (max-width: 768px) {
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .btn-group .btn {
+                margin-bottom: 0.5rem;
+            }
+        }
+    </style>
+}
