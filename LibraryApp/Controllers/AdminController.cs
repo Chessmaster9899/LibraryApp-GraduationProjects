@@ -535,6 +535,164 @@ public class AdminController : BaseController
         return Json(new { success, message });
     }
 
+    [HttpPost]
+    public async Task<IActionResult> SendStudentMessage(string[] Recipients, string Subject, string Message, bool IsUrgent = false)
+    {
+        try
+        {
+            var notifications = new List<Notification>();
+            
+            foreach (var recipient in Recipients)
+            {
+                if (recipient == "all")
+                {
+                    // Send to all students
+                    var allStudents = await _context.Students.Select(s => s.StudentNumber).ToListAsync();
+                    foreach (var studentId in allStudents)
+                    {
+                        notifications.Add(new Notification
+                        {
+                            UserId = studentId,
+                            UserRole = UserRole.Student,
+                            Title = Subject,
+                            Message = Message,
+                            RelatedUrl = "/Student/Index",
+                            RelatedEntityType = "Announcement",
+                            RelatedEntityId = 0
+                        });
+                    }
+                }
+                else if (recipient.StartsWith("dept-"))
+                {
+                    // Send to specific department
+                    var deptName = recipient.Substring(5);
+                    var deptStudents = await _context.Students
+                        .Include(s => s.Department)
+                        .Where(s => s.Department.Name == deptName)
+                        .Select(s => s.StudentNumber)
+                        .ToListAsync();
+                    
+                    foreach (var studentId in deptStudents)
+                    {
+                        notifications.Add(new Notification
+                        {
+                            UserId = studentId,
+                            UserRole = UserRole.Student,
+                            Title = Subject,
+                            Message = Message,
+                            RelatedUrl = "/Student/Index",
+                            RelatedEntityType = "Announcement",
+                            RelatedEntityId = 0
+                        });
+                    }
+                }
+            }
+
+            _context.Notifications.AddRange(notifications);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = $"Message sent successfully to {notifications.Count} students.";
+            return RedirectToAction("Index", "Students");
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = "Failed to send message: " + ex.Message;
+            return RedirectToAction("Index", "Students");
+        }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> SendProfessorMessage(string[] Recipients, string Subject, string Message, bool IsUrgent = false)
+    {
+        try
+        {
+            var notifications = new List<Notification>();
+            
+            foreach (var recipient in Recipients)
+            {
+                if (recipient == "all")
+                {
+                    // Send to all professors
+                    var allProfessors = await _context.Professors.Select(p => p.ProfessorId).ToListAsync();
+                    foreach (var professorId in allProfessors)
+                    {
+                        notifications.Add(new Notification
+                        {
+                            UserId = professorId,
+                            UserRole = UserRole.Professor,
+                            Title = Subject,
+                            Message = Message,
+                            RelatedUrl = "/Professor/Index",
+                            RelatedEntityType = "Announcement",
+                            RelatedEntityId = 0
+                        });
+                    }
+                }
+                else if (recipient.StartsWith("dept-"))
+                {
+                    // Send to specific department
+                    var deptName = recipient.Substring(5);
+                    var deptProfessors = await _context.Professors
+                        .Include(p => p.Department)
+                        .Where(p => p.Department.Name == deptName)
+                        .Select(p => p.ProfessorId)
+                        .ToListAsync();
+                    
+                    foreach (var professorId in deptProfessors)
+                    {
+                        notifications.Add(new Notification
+                        {
+                            UserId = professorId,
+                            UserRole = UserRole.Professor,
+                            Title = Subject,
+                            Message = Message,
+                            RelatedUrl = "/Professor/Index",
+                            RelatedEntityType = "Announcement",
+                            RelatedEntityId = 0
+                        });
+                    }
+                }
+                else if (recipient.StartsWith("role-"))
+                {
+                    // Send to specific role
+                    var roleName = recipient.Substring(5);
+                    if (Enum.TryParse<ProfessorRole>(roleName, out var role))
+                    {
+                        var roleProfessors = await _context.Professors
+                            .Where(p => p.Role == role)
+                            .Select(p => p.ProfessorId)
+                            .ToListAsync();
+                        
+                        foreach (var professorId in roleProfessors)
+                        {
+                            notifications.Add(new Notification
+                            {
+                                UserId = professorId,
+                                UserRole = UserRole.Professor,
+                                Title = Subject,
+                                Message = Message,
+                                RelatedUrl = "/Professor/Index",
+                                RelatedEntityType = "Announcement",
+                                RelatedEntityId = 0
+                            });
+                        }
+                    }
+                }
+            }
+
+            _context.Notifications.AddRange(notifications);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = $"Message sent successfully to {notifications.Count} professors.";
+            return RedirectToAction("Index", "Professors");
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = "Failed to send message: " + ex.Message;
+            return RedirectToAction("Index", "Professors");
+        }
+    }
+
     // Report generation helper methods
     private async Task<List<object>> GenerateProjectReport(ReportsViewModel model)
     {

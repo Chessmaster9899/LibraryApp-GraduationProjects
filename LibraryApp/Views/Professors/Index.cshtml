@@ -1,19 +1,45 @@
 @model IEnumerable<LibraryApp.Models.Professor>
 
 @{
-    ViewData["Title"] = "Professors";
+    ViewData["Title"] = "Professor Management";
 }
 
-<div class="row">
-    <div class="col-md-12">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2>@ViewData["Title"]</h2>
-            <a asp-action="Create" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Add New Professor
-            </a>
-        </div>
-    </div>
+<!-- Professor Management Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-chalkboard-teacher me-2"></i>Professor Management</h1>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Add New Professor
+    </a>
 </div>
+
+<!-- Navigation Tabs for Professor Features -->
+<ul class="nav nav-tabs mb-4" id="professorTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="professors-list-tab" data-bs-toggle="tab" data-bs-target="#professors-list" type="button" role="tab">
+            <i class="fas fa-list me-1"></i>All Professors
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="professor-analytics-tab" data-bs-toggle="tab" data-bs-target="#professor-analytics" type="button" role="tab">
+            <i class="fas fa-chart-bar me-1"></i>Analytics
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="professor-workload-tab" data-bs-toggle="tab" data-bs-target="#professor-workload" type="button" role="tab">
+            <i class="fas fa-tasks me-1"></i>Workload
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="professor-communications-tab" data-bs-toggle="tab" data-bs-target="#professor-communications" type="button" role="tab">
+            <i class="fas fa-envelope me-1"></i>Communications
+        </button>
+    </li>
+</ul>
+
+<!-- Tab Content -->
+<div class="tab-content" id="professorTabContent">
+    <!-- Professors List Tab -->
+    <div class="tab-pane fade show active" id="professors-list" role="tabpanel" aria-labelledby="professors-list-tab">
 
 <div class="row">
     <div class="col-md-12">
@@ -30,6 +56,7 @@
                                 <th>@Html.DisplayNameFor(model => model.Department)</th>
                                 <th>@Html.DisplayNameFor(model => model.Email)</th>
                                 <th>@Html.DisplayNameFor(model => model.Role)</th>
+                                <th>Projects</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -44,6 +71,10 @@
                                     <td>@Html.DisplayFor(modelItem => item.Department.Name)</td>
                                     <td>@Html.DisplayFor(modelItem => item.Email)</td>
                                     <td>@Html.DisplayFor(modelItem => item.Role)</td>
+                                    <td>
+                                        <span class="badge bg-primary">@(item.SupervisedProjects?.Count ?? 0) Supervised</span>
+                                        <span class="badge bg-secondary">@(item.EvaluatedProjects?.Count ?? 0) Evaluated</span>
+                                    </td>
                                     <td>
                                         <div class="btn-group" role="group">
                                             <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">
@@ -74,3 +105,268 @@
         </div>
     </div>
 </div>
+
+    </div>
+
+    <!-- Professor Analytics Tab -->
+    <div class="tab-pane fade" id="professor-analytics" role="tabpanel" aria-labelledby="professor-analytics-tab">
+        <div class="row">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card bg-primary text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">@Model.Count()</h4>
+                                <p class="card-text">Total Professors</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-chalkboard-teacher fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card bg-success text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">@Model.Where(p => p.LastLogin >= DateTime.Now.AddDays(-30)).Count()</h4>
+                                <p class="card-text">Active Professors</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-user-check fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card bg-info text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">@Model.Sum(p => p.SupervisedProjects?.Count ?? 0)</h4>
+                                <p class="card-text">Total Supervised</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-project-diagram fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card bg-warning text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">@Model.GroupBy(p => p.Department).Count()</h4>
+                                <p class="card-text">Departments</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-building fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Department Distribution and Top Supervisors -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Professors by Department</h5>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var dept in Model.GroupBy(p => p.Department?.Name ?? "No Department"))
+                        {
+                            var percentage = (double)dept.Count() / Model.Count() * 100;
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>@dept.Key</span>
+                                    <span>@dept.Count() professors</span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar" role="progressbar" style="width: @percentage%" aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Top Supervisors</h5>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var prof in Model.OrderByDescending(p => p.SupervisedProjects?.Count ?? 0).Take(5))
+                        {
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="avatar avatar-sm me-3">
+                                    <div class="avatar-title bg-light rounded-circle">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-0">@prof.DisplayName</h6>
+                                    <small class="text-muted">@prof.Department?.Name</small>
+                                </div>
+                                <span class="badge bg-primary">@(prof.SupervisedProjects?.Count ?? 0) projects</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Professor Workload Tab -->
+    <div class="tab-pane fade" id="professor-workload" role="tabpanel" aria-labelledby="professor-workload-tab">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Professor Workload Analysis</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Professor</th>
+                                <th>Department</th>
+                                <th>Supervised Projects</th>
+                                <th>Evaluated Projects</th>
+                                <th>Total Workload</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var prof in Model.OrderByDescending(p => (p.SupervisedProjects?.Count ?? 0) + (p.EvaluatedProjects?.Count ?? 0)))
+                            {
+                                var supervised = prof.SupervisedProjects?.Count ?? 0;
+                                var evaluated = prof.EvaluatedProjects?.Count ?? 0;
+                                var total = supervised + evaluated;
+                                var status = total > 10 ? "high" : total > 5 ? "medium" : "low";
+                                var statusClass = total > 10 ? "bg-danger" : total > 5 ? "bg-warning" : "bg-success";
+                                
+                                <tr>
+                                    <td>
+                                        <strong>@prof.DisplayName</strong><br>
+                                        <small class="text-muted">@prof.Title</small>
+                                    </td>
+                                    <td>@prof.Department?.Name</td>
+                                    <td><span class="badge bg-primary">@supervised</span></td>
+                                    <td><span class="badge bg-secondary">@evaluated</span></td>
+                                    <td><span class="badge @statusClass">@total</span></td>
+                                    <td>
+                                        @if (total > 10)
+                                        {
+                                            <span class="text-danger"><i class="fas fa-exclamation-triangle"></i> High</span>
+                                        }
+                                        else if (total > 5)
+                                        {
+                                            <span class="text-warning"><i class="fas fa-clock"></i> Medium</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-success"><i class="fas fa-check"></i> Normal</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Professor Communications Tab -->
+    <div class="tab-pane fade" id="professor-communications" role="tabpanel" aria-labelledby="professor-communications-tab">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Send Message to Professors</h5>
+                    </div>
+                    <div class="card-body">
+                        <form asp-controller="Admin" asp-action="SendProfessorMessage" method="post">
+                            <div class="mb-3">
+                                <label for="recipients" class="form-label">Recipients</label>
+                                <select class="form-select" id="recipients" name="Recipients" multiple>
+                                    <option value="all">All Professors</option>
+                                    @foreach (var dept in Model.GroupBy(p => p.Department?.Name ?? "No Department"))
+                                    {
+                                        <option value="dept-@dept.Key">@dept.Key (@dept.Count() professors)</option>
+                                    }
+                                    @foreach (var role in Model.GroupBy(p => p.Role))
+                                    {
+                                        <option value="role-@role.Key">@role.Key (@role.Count() professors)</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="subject" class="form-label">Subject</label>
+                                <input type="text" class="form-control" id="subject" name="Subject" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="message" class="form-label">Message</label>
+                                <textarea class="form-control" id="message" name="Message" rows="4" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="urgent" name="IsUrgent">
+                                    <label class="form-check-label" for="urgent">
+                                        Mark as urgent
+                                    </label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-1"></i>Send Message
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">Quick Actions</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary btn-sm" onclick="sendReminderToProfessors()">
+                                <i class="fas fa-bell me-1"></i>Send Workload Reminders
+                            </button>
+                            <button class="btn btn-outline-info btn-sm" onclick="exportProfessorList()">
+                                <i class="fas fa-download me-1"></i>Export Professor List
+                            </button>
+                            <button class="btn btn-outline-warning btn-sm" onclick="generateWorkloadReport()">
+                                <i class="fas fa-chart-line me-1"></i>Generate Workload Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function sendReminderToProfessors() {
+    if (confirm('Send workload reminder emails to professors?')) {
+        alert('Workload reminder emails would be sent here');
+    }
+}
+
+function exportProfessorList() {
+    window.location.href = '@Url.Action("ExportProfessors", "Professors")';
+}
+
+function generateWorkloadReport() {
+    alert('Workload report would be generated here');
+}
+</script>

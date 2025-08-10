@@ -169,5 +169,75 @@ namespace LibraryApp.Controllers
         {
             return _context.Students.Any(e => e.Id == id);
         }
+
+        // Export Students to CSV
+        [HttpGet]
+        public async Task<IActionResult> ExportStudents()
+        {
+            var students = await _context.Students
+                .Include(s => s.Department)
+                .Include(s => s.Projects)
+                .OrderBy(s => s.LastName)
+                .ToListAsync();
+
+            var csv = new System.Text.StringBuilder();
+            csv.AppendLine("Student Number,First Name,Last Name,Email,Phone,Department,Enrollment Date,Last Login,Projects Count");
+
+            foreach (var student in students)
+            {
+                csv.AppendLine($"{student.StudentNumber},{student.FirstName},{student.LastName},{student.Email},{student.Phone},{student.Department?.Name},{student.EnrollmentDate:yyyy-MM-dd},{student.LastLogin:yyyy-MM-dd},{student.Projects?.Count ?? 0}");
+            }
+
+            var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
+            return File(bytes, "text/csv", $"students_export_{DateTime.Now:yyyyMMdd}.csv");
+        }
+
+        // Get Student Activities (AJAX endpoint)
+        [HttpGet]
+        public async Task<IActionResult> GetStudentActivities()
+        {
+            var activities = await _context.SystemAuditLogs
+                .Where(a => a.UserRole == UserRole.Student)
+                .OrderByDescending(a => a.Timestamp)
+                .Take(50)
+                .Select(a => new
+                {
+                    a.UserId,
+                    a.Action,
+                    a.EntityType,
+                    a.Timestamp,
+                    a.Details
+                })
+                .ToListAsync();
+
+            return Json(activities);
+        }
+
+        // Student Analytics (AJAX endpoint)
+        [HttpGet]
+        public async Task<IActionResult> GetStudentAnalytics()
+        {
+            var analytics = new
+            {
+                TotalStudents = await _context.Students.CountAsync(),
+                ActiveStudents = await _context.Students.Where(s => s.LastLogin >= DateTime.Now.AddDays(-30)).CountAsync(),
+                NewStudentsThisMonth = await _context.Students.Where(s => s.EnrollmentDate >= DateTime.Now.AddDays(-30)).CountAsync(),
+                DepartmentDistribution = await _context.Students
+                    .Include(s => s.Department)
+                    .GroupBy(s => s.Department.Name)
+                    .Select(g => new { Department = g.Key, Count = g.Count() })
+                    .ToListAsync(),
+                EnrollmentTrend = await _context.Students
+                    .Where(s => s.EnrollmentDate >= DateTime.Now.AddMonths(-12))
+                    .GroupBy(s => new { s.EnrollmentDate.Year, s.EnrollmentDate.Month })
+                    .Select(g => new { 
+                        Period = $"{g.Key.Year}-{g.Key.Month:D2}", 
+                        Count = g.Count() 
+                    })
+                    .ToListAsync()
+            };
+
+            return Json(analytics);
+        }
     }
 }

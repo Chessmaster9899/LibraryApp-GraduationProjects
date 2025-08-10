@@ -21,8 +21,12 @@ namespace LibraryApp.Controllers
         // GET: Professors
         public async Task<IActionResult> Index()
         {
-            var professors = _context.Professors.Include(s => s.Department);
-            return View(await professors.ToListAsync());
+            var professors = await _context.Professors
+                .Include(p => p.Department)
+                .Include(p => p.SupervisedProjects)
+                .Include(p => p.EvaluatedProjects)
+                .ToListAsync();
+            return View(professors);
         }
 
         // GET: Professors/Details/5
@@ -169,6 +173,29 @@ namespace LibraryApp.Controllers
         private bool ProfessorExists(int id)
         {
             return _context.Professors.Any(e => e.Id == id);
+        }
+
+        // Export Professors to CSV
+        [HttpGet]
+        public async Task<IActionResult> ExportProfessors()
+        {
+            var professors = await _context.Professors
+                .Include(p => p.Department)
+                .Include(p => p.SupervisedProjects)
+                .Include(p => p.EvaluatedProjects)
+                .OrderBy(p => p.LastName)
+                .ToListAsync();
+
+            var csv = new System.Text.StringBuilder();
+            csv.AppendLine("Professor ID,First Name,Last Name,Title,Email,Department,Role,Supervised Projects,Evaluated Projects,Last Login");
+
+            foreach (var prof in professors)
+            {
+                csv.AppendLine($"{prof.ProfessorId},{prof.FirstName},{prof.LastName},{prof.Title},{prof.Email},{prof.Department?.Name},{prof.Role},{prof.SupervisedProjects?.Count ?? 0},{prof.EvaluatedProjects?.Count ?? 0},{prof.LastLogin:yyyy-MM-dd}");
+            }
+
+            var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
+            return File(bytes, "text/csv", $"professors_export_{DateTime.Now:yyyyMMdd}.csv");
         }
     }
 }

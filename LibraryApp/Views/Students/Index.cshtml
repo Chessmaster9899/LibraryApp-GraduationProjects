@@ -1,15 +1,45 @@
 @model IEnumerable<LibraryApp.Models.Student>
 
 @{
-    ViewData["Title"] = "Students";
+    ViewData["Title"] = "Student Management";
 }
 
+<!-- Student Management Header -->
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>Students</h1>
+    <h1><i class="fas fa-user-graduate me-2"></i>Student Management</h1>
     <a asp-action="Create" class="btn btn-primary">
-        <i class="fas fa-user-plus"></i> Create New Student
+        <i class="fas fa-user-plus"></i> Add New Student
     </a>
 </div>
+
+<!-- Navigation Tabs for Student Features -->
+<ul class="nav nav-tabs mb-4" id="studentTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="students-list-tab" data-bs-toggle="tab" data-bs-target="#students-list" type="button" role="tab">
+            <i class="fas fa-list me-1"></i>All Students
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="student-analytics-tab" data-bs-toggle="tab" data-bs-target="#student-analytics" type="button" role="tab">
+            <i class="fas fa-chart-bar me-1"></i>Analytics
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="student-activities-tab" data-bs-toggle="tab" data-bs-target="#student-activities" type="button" role="tab">
+            <i class="fas fa-history me-1"></i>Activities
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="student-communications-tab" data-bs-toggle="tab" data-bs-target="#student-communications" type="button" role="tab">
+            <i class="fas fa-envelope me-1"></i>Communications
+        </button>
+    </li>
+</ul>
+
+<!-- Tab Content -->
+<div class="tab-content" id="studentTabContent">
+    <!-- Students List Tab -->
+    <div class="tab-pane fade show active" id="students-list" role="tabpanel" aria-labelledby="students-list-tab">
 
 @if (Model.Any())
 {
@@ -93,3 +123,231 @@ else
         </div>
     </div>
 }
+
+    </div>
+
+    <!-- Student Analytics Tab -->
+    <div class="tab-pane fade" id="student-analytics" role="tabpanel" aria-labelledby="student-analytics-tab">
+        <div class="row">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card bg-primary text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">@Model.Count()</h4>
+                                <p class="card-text">Total Students</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-users fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card bg-success text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">@Model.Where(s => s.LastLogin >= DateTime.Now.AddDays(-30)).Count()</h4>
+                                <p class="card-text">Active Students</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-user-check fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card bg-info text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">@Model.Where(s => s.EnrollmentDate >= DateTime.Now.AddDays(-30)).Count()</h4>
+                                <p class="card-text">New This Month</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-user-plus fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card bg-warning text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">@Model.GroupBy(s => s.Department).Count()</h4>
+                                <p class="card-text">Departments</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-building fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Department Distribution Chart -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Students by Department</h5>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var dept in Model.GroupBy(s => s.Department?.Name ?? "No Department"))
+                        {
+                            var percentage = (double)dept.Count() / Model.Count() * 100;
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>@dept.Key</span>
+                                    <span>@dept.Count() students</span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar" role="progressbar" style="width: @percentage%" aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Recent Enrollments</h5>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var student in Model.OrderByDescending(s => s.EnrollmentDate).Take(5))
+                        {
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="avatar avatar-sm me-3">
+                                    <div class="avatar-title bg-light rounded-circle">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-0">@student.FullName</h6>
+                                    <small class="text-muted">@student.Department?.Name</small>
+                                </div>
+                                <small class="text-muted">@student.EnrollmentDate.ToString("MMM dd")</small>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Activities Tab -->
+    <div class="tab-pane fade" id="student-activities" role="tabpanel" aria-labelledby="student-activities-tab">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Recent Student Activities</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center py-5">
+                    <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                    <h5>Student Activity Tracking</h5>
+                    <p class="text-muted">This section will display recent student login activities, project submissions, and other important actions.</p>
+                    <button class="btn btn-primary" onclick="loadStudentActivities()">Load Activities</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Communications Tab -->
+    <div class="tab-pane fade" id="student-communications" role="tabpanel" aria-labelledby="student-communications-tab">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Send Message to Students</h5>
+                    </div>
+                    <div class="card-body">
+                        <form asp-controller="Admin" asp-action="SendStudentMessage" method="post">
+                            <div class="mb-3">
+                                <label for="recipients" class="form-label">Recipients</label>
+                                <select class="form-select" id="recipients" name="Recipients" multiple>
+                                    <option value="all">All Students</option>
+                                    @foreach (var dept in Model.GroupBy(s => s.Department?.Name ?? "No Department"))
+                                    {
+                                        <option value="dept-@dept.Key">@dept.Key (@dept.Count() students)</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="subject" class="form-label">Subject</label>
+                                <input type="text" class="form-control" id="subject" name="Subject" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="message" class="form-label">Message</label>
+                                <textarea class="form-control" id="message" name="Message" rows="4" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="urgent" name="IsUrgent">
+                                    <label class="form-check-label" for="urgent">
+                                        Mark as urgent
+                                    </label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-1"></i>Send Message
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">Quick Actions</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary btn-sm" onclick="sendWelcomeEmails()">
+                                <i class="fas fa-envelope me-1"></i>Send Welcome Emails
+                            </button>
+                            <button class="btn btn-outline-info btn-sm" onclick="sendReminderEmails()">
+                                <i class="fas fa-bell me-1"></i>Send Reminder Emails
+                            </button>
+                            <button class="btn btn-outline-warning btn-sm" onclick="exportStudentList()">
+                                <i class="fas fa-download me-1"></i>Export Student List
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function loadStudentActivities() {
+    // This would load student activities via AJAX
+    alert('Student activities would be loaded here via AJAX call to Admin/GetStudentActivities');
+}
+
+function sendWelcomeEmails() {
+    if (confirm('Send welcome emails to all new students?')) {
+        // AJAX call to send welcome emails
+        alert('Welcome emails would be sent here');
+    }
+}
+
+function sendReminderEmails() {
+    if (confirm('Send reminder emails to inactive students?')) {
+        // AJAX call to send reminder emails
+        alert('Reminder emails would be sent here');
+    }
+}
+
+function exportStudentList() {
+    // Export student list to CSV
+    window.location.href = '@Url.Action("ExportStudents", "Students")';
+}
+</script>

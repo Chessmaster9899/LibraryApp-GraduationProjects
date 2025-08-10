@@ -1,53 +1,77 @@
 @model IEnumerable<LibraryApp.Models.Project>
 
 @{
-    ViewData["Title"] = "Projects";
+    ViewData["Title"] = "Project Management";
 }
 
-<!-- Professional Projects Management -->
-<div class="dashboard-container">
-    <!-- Header Section -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="dashboard-title text-on-light">All Projects</h1>
-            <p class="text-muted-professional">Manage and monitor graduation projects</p>
-        </div>
-        <a asp-action="Create" class="btn btn-primary btn-professional">
-            <i class="fas fa-plus me-2"></i>Create New Project
-        </a>
-    </div>
+<!-- Project Management Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-project-diagram me-2"></i>Project Management</h1>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Create New Project
+    </a>
+</div>
 
-    <!-- Search and Filter Section -->
-    <div class="content-card mb-4">
-        <div class="card-header">
-            <h5 class="card-title-professional">
-                <i class="fas fa-filter text-primary me-2"></i>Search & Filter
-            </h5>
-        </div>
-        <div class="card-body">
-            <form method="get">
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label for="searchTitle" class="form-label text-professional">Search by Title</label>
-                        <input type="text" class="form-control" id="searchTitle" name="searchTitle" 
-                               placeholder="Enter project title..." value="@ViewData["SearchTitle"]">
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label for="statusFilter" class="form-label text-professional">Filter by Status</label>
-                        <select class="form-select" id="statusFilter" name="statusFilter">
-                            <option value="">All Statuses</option>
-                            @foreach (var status in Enum.GetValues<LibraryApp.Models.ProjectStatus>())
-                            {
-                                <option value="@status" selected="@(ViewData["StatusFilter"]?.ToString() == status.ToString())">
-                                    @status
-                                </option>
-                            }
-                        </select>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label for="supervisorFilter" class="form-label text-professional">Filter by Supervisor</label>
-                        <select class="form-select" id="supervisorFilter" name="supervisorFilter">
-                            <option value="">All Supervisors</option>
+<!-- Navigation Tabs for Project Features -->
+<ul class="nav nav-tabs mb-4" id="projectTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="projects-list-tab" data-bs-toggle="tab" data-bs-target="#projects-list" type="button" role="tab">
+            <i class="fas fa-list me-1"></i>All Projects
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="project-submissions-tab" data-bs-toggle="tab" data-bs-target="#project-submissions" type="button" role="tab">
+            <i class="fas fa-upload me-1"></i>Submissions
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="project-analytics-tab" data-bs-toggle="tab" data-bs-target="#project-analytics" type="button" role="tab">
+            <i class="fas fa-chart-bar me-1"></i>Analytics
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="project-workflow-tab" data-bs-toggle="tab" data-bs-target="#project-workflow" type="button" role="tab">
+            <i class="fas fa-tasks me-1"></i>Workflow
+        </button>
+    </li>
+</ul>
+
+<!-- Tab Content -->
+<div class="tab-content" id="projectTabContent">
+    <!-- Projects List Tab -->
+    <div class="tab-pane fade show active" id="projects-list" role="tabpanel" aria-labelledby="projects-list-tab">
+
+<!-- Search and Filter Section -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-filter text-primary me-2"></i>Search & Filter
+        </h5>
+    </div>
+    <div class="card-body">
+        <form method="get">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="searchTitle" class="form-label">Search by Title</label>
+                    <input type="text" class="form-control" id="searchTitle" name="searchTitle" 
+                           placeholder="Enter project title..." value="@ViewData["SearchTitle"]">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="statusFilter" class="form-label">Filter by Status</label>
+                    <select class="form-select" id="statusFilter" name="statusFilter">
+                        <option value="">All Statuses</option>
+                        @foreach (var status in Enum.GetValues<LibraryApp.Models.ProjectStatus>())
+                        {
+                            <option value="@status" selected="@(ViewData["StatusFilter"]?.ToString() == status.ToString())">
+                                @status
+                            </option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="supervisorFilter" class="form-label">Filter by Supervisor</label>
+                    <select class="form-select" id="supervisorFilter" name="supervisorFilter">
+                        <option value="">All Supervisors</option>
                             @if (ViewData["Supervisors"] is IEnumerable<dynamic> supervisors)
                             {
                                 @foreach (var supervisor in supervisors)
