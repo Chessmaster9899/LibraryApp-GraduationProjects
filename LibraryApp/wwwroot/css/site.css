@@ -119,10 +119,27 @@ dt, dd {
   color: #6b7280 !important;
 }
 
-/* Fix white text over white background issues */
-h1.text-white, h2.text-white, h3.text-white, h4.text-white, h5.text-white, h6.text-white {
+/* Fix white text over white background issues - IMPROVED VERSION */
+/* Only allow white text on dark backgrounds */
+.text-white {
   color: #1f2937 !important;
-  text-shadow: none !important;
+}
+
+/* Allow white text only on dark backgrounds */
+.bg-primary .text-white,
+.bg-dark .text-white,
+.bg-secondary .text-white,
+.bg-success .text-white,
+.bg-info .text-white,
+.bg-warning .text-white,
+.bg-danger .text-white,
+.btn .text-white,
+.badge .text-white,
+.navbar .text-white,
+.alert-primary .text-white,
+.alert-dark .text-white,
+.alert-secondary .text-white {
+  color: white !important;
 }
 
 /* Ensure page headers have proper contrast */
@@ -131,8 +148,8 @@ h1.text-white, h2.text-white, h3.text-white, h4.text-white, h5.text-white, h6.te
   text-shadow: none !important;
 }
 
-/* Override white text where it's problematic */
-.text-white:not(.btn):not(.badge):not(.navbar *):not(.bg-primary *):not(.bg-dark *) {
+/* Ensure card headers on light backgrounds use dark text */
+.card .text-white:not(.bg-primary *):not(.bg-dark *):not(.bg-secondary *):not(.bg-success *):not(.bg-info *):not(.bg-warning *):not(.bg-danger *) {
   color: #1f2937 !important;
 }
 
