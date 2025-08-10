@@ -139,3 +139,19 @@ public class GalleryAdminSettingsViewModel
     public int FeaturedProjects { get; set; }
     public int RecentlyAdded { get; set; }
 }
+
+// Project Workflow ViewModels
+public class ProjectWorkflowViewModel
+{
+    public Dictionary<ProjectStatus, List<Project>> ProjectsByStatus { get; set; } = new();
+    public Dictionary<ProjectStatus, int> StatusCounts { get; set; } = new();
+    public List<ProjectActivityLog> RecentActivity { get; set; } = new();
+}
+
+public class ProjectWorkflowDetailsViewModel
+{
+    public Project Project { get; set; } = null!;
+    public List<string> AvailableActions { get; set; } = new();
+    public List<ProjectStatus> NextStatuses { get; set; } = new();
+    public List<ProjectActivityLog> ActivityLog { get; set; } = new();
+}

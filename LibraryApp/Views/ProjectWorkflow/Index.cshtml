@@ -1,0 +1,620 @@
+@model ProjectWorkflowViewModel
+@{
+    ViewData["Title"] = "Project Workflow Management";
+}
+
+<div class="content-wrapper">
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">Project Workflow Management</h1>
+            <p class="page-description">Monitor and manage project lifecycle from start to completion</p>
+        </div>
+        <div class="page-actions">
+            <a href="@Url.Action("Index", "Projects")" class="btn btn-outline-secondary">
+                <i class="fas fa-list"></i> All Projects
+            </a>
+        </div>
+    </div>
+
+    <!-- Status Overview Cards -->
+    <div class="status-overview">
+        @foreach (var status in Enum.GetValues<ProjectStatus>())
+        {
+            var count = Model.StatusCounts.ContainsKey(status) ? Model.StatusCounts[status] : 0;
+            var statusClass = GetStatusClass(status);
+            
+            <div class="status-card @statusClass">
+                <div class="status-icon">
+                    <i class="@GetStatusIcon(status)"></i>
+                </div>
+                <div class="status-info">
+                    <h3 class="status-count">@count</h3>
+                    <p class="status-name">@GetStatusDisplayName(status)</p>
+                </div>
+                <div class="status-actions">
+                    @if (count > 0)
+                    {
+                        <button type="button" class="btn btn-sm btn-outline-light" onclick="filterByStatus('@status')">
+                            View Projects
+                        </button>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Project Lists by Status -->
+    <div class="workflow-sections">
+        @foreach (var statusGroup in Model.ProjectsByStatus.OrderBy(g => (int)g.Key))
+        {
+            <div class="workflow-section" data-status="@statusGroup.Key">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="@GetStatusIcon(statusGroup.Key)"></i>
+                        @GetStatusDisplayName(statusGroup.Key)
+                        <span class="project-count">(@statusGroup.Value.Count)</span>
+                    </h3>
+                    @if (statusGroup.Value.Any())
+                    {
+                        <div class="section-actions">
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="expandSection('@statusGroup.Key')">
+                                <i class="fas fa-expand-alt"></i> Expand All
+                            </button>
+                        </div>
+                    }
+                </div>
+
+                @if (statusGroup.Value.Any())
+                {
+                    <div class="projects-list">
+                        @foreach (var project in statusGroup.Value.Take(5))
+                        {
+                            <div class="project-item">
+                                <div class="project-info">
+                                    <h4 class="project-title">@project.Title</h4>
+                                    <div class="project-meta">
+                                        <span class="student">@project.Student.FullName</span>
+                                        <span class="separator">•</span>
+                                        <span class="supervisor">@project.Supervisor.DisplayName</span>
+                                        <span class="separator">•</span>
+                                        <span class="date">@project.SubmissionDate.ToString("MMM d, yyyy")</span>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(project.Grade))
+                                    {
+                                        <div class="project-grade">
+                                            <span class="grade-label">Grade:</span>
+                                            <span class="grade-value">@project.Grade</span>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="project-actions">
+                                    <a href="@Url.Action("ProjectDetails", new { id = project.Id })" 
+                                       class="btn btn-sm btn-primary">
+                                        <i class="fas fa-cog"></i> Manage
+                                    </a>
+                                    <a href="@Url.Action("Details", "Projects", new { id = project.Id })" 
+                                       class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                        
+                        @if (statusGroup.Value.Count > 5)
+                        {
+                            <div class="show-more">
+                                <button type="button" class="btn btn-link" onclick="showMoreProjects('@statusGroup.Key')">
+                                    Show @(statusGroup.Value.Count - 5) more projects
+                                </button>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-section">
+                        <p class="empty-message">No projects in this status</p>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Recent Activity -->
+    @if (Model.RecentActivity.Any())
+    {
+        <div class="recent-activity">
+            <h3 class="activity-title">Recent Activity</h3>
+            <div class="activity-list">
+                @foreach (var activity in Model.RecentActivity)
+                {
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p class="activity-text">@activity.Activity</p>
+                            <div class="activity-meta">
+                                <span class="project-title">@activity.Project.Title</span>
+                                <span class="separator">•</span>
+                                <span class="performer">@activity.PerformedBy</span>
+                                <span class="separator">•</span>
+                                <span class="timestamp">@activity.PerformedAt.ToString("MMM d, yyyy HH:mm")</span>
+                            </div>
+                            @if (!string.IsNullOrEmpty(activity.Details))
+                            {
+                                <p class="activity-details">@activity.Details</p>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@functions {
+    private string GetStatusClass(ProjectStatus status)
+    {
+        return status switch
+        {
+            ProjectStatus.Proposed => "status-proposed",
+            ProjectStatus.Approved => "status-approved", 
+            ProjectStatus.InProgress => "status-progress",
+            ProjectStatus.Completed => "status-completed",
+            ProjectStatus.SubmittedForReview => "status-review",
+            ProjectStatus.ReviewApproved => "status-review-approved",
+            ProjectStatus.ReviewRejected => "status-review-rejected",
+            ProjectStatus.Defended => "status-defended",
+            ProjectStatus.Published => "status-published",
+            _ => "status-default"
+        };
+    }
+
+    private string GetStatusIcon(ProjectStatus status)
+    {
+        return status switch
+        {
+            ProjectStatus.Proposed => "fas fa-lightbulb",
+            ProjectStatus.Approved => "fas fa-check-circle",
+            ProjectStatus.InProgress => "fas fa-spinner",
+            ProjectStatus.Completed => "fas fa-flag-checkered",
+            ProjectStatus.SubmittedForReview => "fas fa-paper-plane",
+            ProjectStatus.ReviewApproved => "fas fa-thumbs-up",
+            ProjectStatus.ReviewRejected => "fas fa-thumbs-down",
+            ProjectStatus.Defended => "fas fa-shield-alt",
+            ProjectStatus.Published => "fas fa-globe",
+            _ => "fas fa-question-circle"
+        };
+    }
+
+    private string GetStatusDisplayName(ProjectStatus status)
+    {
+        return status switch
+        {
+            ProjectStatus.Proposed => "Proposed",
+            ProjectStatus.Approved => "Approved",
+            ProjectStatus.InProgress => "In Progress",
+            ProjectStatus.Completed => "Completed",
+            ProjectStatus.SubmittedForReview => "Under Review",
+            ProjectStatus.ReviewApproved => "Review Approved",
+            ProjectStatus.ReviewRejected => "Review Rejected",
+            ProjectStatus.Defended => "Defended",
+            ProjectStatus.Published => "Published",
+            _ => status.ToString()
+        };
+    }
+}
+
+<script>
+function filterByStatus(status) {
+    document.querySelector(`[data-status="${status}"]`).scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+    });
+}
+
+function expandSection(status) {
+    // Implementation for expanding all projects in a section
+    console.log('Expanding section:', status);
+}
+
+function showMoreProjects(status) {
+    // Implementation for showing more projects
+    console.log('Show more projects for status:', status);
+}
+</script>
+
+<style>
+.content-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.header-content {
+    flex: 1;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.page-description {
+    font-size: 1.1rem;
+    color: #6c757d;
+    margin-bottom: 0;
+}
+
+.page-actions {
+    margin-top: 1rem;
+}
+
+.status-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.status-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: transform 0.2s ease;
+}
+
+.status-card:hover {
+    transform: translateY(-2px);
+}
+
+.status-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.status-proposed .status-icon { background: #ffc107; }
+.status-approved .status-icon { background: #28a745; }
+.status-progress .status-icon { background: #007bff; }
+.status-completed .status-icon { background: #17a2b8; }
+.status-review .status-icon { background: #fd7e14; }
+.status-review-approved .status-icon { background: #20c997; }
+.status-review-rejected .status-icon { background: #dc3545; }
+.status-defended .status-icon { background: #6f42c1; }
+.status-published .status-icon { background: #198754; }
+
+.status-info {
+    flex: 1;
+}
+
+.status-count {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #495057;
+    margin: 0 0 0.25rem 0;
+}
+
+.status-name {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.workflow-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.workflow-section {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.section-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.project-count {
+    font-weight: 400;
+    opacity: 0.8;
+}
+
+.projects-list {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.project-item {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    transition: border-color 0.2s ease;
+}
+
+.project-item:hover {
+    border-color: var(--primary-color);
+}
+
+.project-info {
+    flex: 1;
+}
+
+.project-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #495057;
+    margin: 0 0 0.5rem 0;
+}
+
+.project-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6c757d;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.separator {
+    opacity: 0.5;
+}
+
+.project-grade {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.grade-label {
+    color: #6c757d;
+}
+
+.grade-value {
+    background: #28a745;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.project-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.empty-section {
+    padding: 3rem;
+    text-align: center;
+    color: #6c757d;
+}
+
+.empty-message {
+    font-style: italic;
+    margin: 0;
+}
+
+.show-more {
+    text-align: center;
+    padding-top: 1rem;
+    border-top: 1px solid #f1f3f4;
+}
+
+.recent-activity {
+    margin-top: 3rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.activity-title {
+    background: linear-gradient(135deg, #343a40, #495057);
+    color: white;
+    padding: 1.5rem;
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.activity-list {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.activity-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-text {
+    font-weight: 500;
+    color: #495057;
+    margin: 0 0 0.5rem 0;
+}
+
+.activity-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6c757d;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.activity-details {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin: 0;
+    font-style: italic;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+}
+
+.btn-outline-secondary {
+    border: 1px solid #6c757d;
+    color: #6c757d;
+    background: transparent;
+}
+
+.btn-outline-secondary:hover {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-outline-light {
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    color: white;
+    background: transparent;
+}
+
+.btn-outline-light:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-outline-primary {
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-link {
+    color: var(--primary-color);
+    background: transparent;
+    border: none;
+    text-decoration: underline;
+}
+
+.btn-link:hover {
+    color: var(--primary-dark);
+}
+
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8125rem;
+}
+
+@@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .page-actions {
+        margin-top: 1rem;
+    }
+    
+    .status-overview {
+        grid-template-columns: 1fr;
+    }
+    
+    .project-item {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .project-actions {
+        justify-content: center;
+        margin-top: 1rem;
+    }
+    
+    .activity-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+</style>
