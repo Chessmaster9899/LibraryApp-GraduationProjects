@@ -720,5 +720,57 @@ namespace LibraryApp.Controllers
 
             return Json(new { success = true });
         }
+
+        [HttpGet]
+        public async Task<IActionResult> ExportDashboardData()
+        {
+            var userId = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var professor = await _context.Professors
+                .Include(p => p.Department)
+                .Include(p => p.SupervisedProjects)
+                .ThenInclude(proj => proj.Student)
+                .Include(p => p.EvaluatedProjects)
+                .ThenInclude(proj => proj.Student)
+                .FirstOrDefaultAsync(p => p.ProfessorId == userId);
+
+            if (professor == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            // Generate CSV content
+            var csv = new System.Text.StringBuilder();
+            csv.AppendLine("Professor Dashboard Report");
+            csv.AppendLine($"Generated on: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+            csv.AppendLine($"Professor: {professor.Title} {professor.FirstName} {professor.LastName}");
+            csv.AppendLine($"Department: {professor.Department?.Name}");
+            csv.AppendLine($"Specialization: {professor.Specialization}");
+            csv.AppendLine();
+            
+            csv.AppendLine("Supervised Projects");
+            csv.AppendLine("Title,Student,Status,Submission Date");
+            foreach (var project in professor.SupervisedProjects)
+            {
+                csv.AppendLine($"\"{project.Title}\",\"{project.Student?.FullName}\",\"{project.Status}\",\"{project.SubmissionDate:yyyy-MM-dd}\"");
+            }
+            
+            csv.AppendLine();
+            csv.AppendLine("Evaluated Projects");
+            csv.AppendLine("Title,Student,Status,Submission Date");
+            foreach (var project in professor.EvaluatedProjects)
+            {
+                csv.AppendLine($"\"{project.Title}\",\"{project.Student?.FullName}\",\"{project.Status}\",\"{project.SubmissionDate:yyyy-MM-dd}\"");
+            }
+
+            var fileName = $"professor_dashboard_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+            var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
+            
+            return File(bytes, "text/csv", fileName);
+        }
     }
 }

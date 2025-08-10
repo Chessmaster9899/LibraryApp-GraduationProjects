@@ -19,7 +19,7 @@ body {
   line-height: 1.6;
   letter-spacing: -0.01em;
   color: #1a1a1a;
-  margin-bottom: 60px;
+  margin-bottom: 40px;
   background-image: url('/images/university/background.png');
   background-size: cover;
   background-position: center;
@@ -95,9 +95,70 @@ body::before {
   }
 }
 
+/* Improved text visibility */
+.card {
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+}
+
+.card-body {
+  color: #374151 !important;
+}
+
+.card-header {
+  background-color: rgba(248, 250, 252, 0.9);
+  color: #1f2937 !important;
+}
+
+/* Ensure proper text contrast in all contexts */
+dt, dd {
+  color: #374151 !important;
+}
+
+.text-muted {
+  color: #6b7280 !important;
+}
+
+/* Fix white text over white background issues */
+h1.text-white, h2.text-white, h3.text-white, h4.text-white, h5.text-white, h6.text-white {
+  color: #1f2937 !important;
+  text-shadow: none !important;
+}
+
+/* Ensure page headers have proper contrast */
+.container h1, .container-fluid h1 {
+  color: #1f2937 !important;
+  text-shadow: none !important;
+}
+
+/* Override white text where it's problematic */
+.text-white:not(.btn):not(.badge):not(.navbar *):not(.bg-primary *):not(.bg-dark *) {
+  color: #1f2937 !important;
+}
+
+/* Professor interface specific fixes */
+.timeline-content {
+  background: rgba(248, 250, 252, 0.95) !important;
+  color: #374151 !important;
+}
+
+.timeline-content h6 {
+  color: #1f2937 !important;
+}
+
+/* Pipeline items contrast fix */
+.pipeline-item {
+  color: #374151 !important;
+}
+
+.pipeline-item h6 {
+  color: #1f2937 !important;
+}
+
 /* Elegant fallback background */
 body {
   background-color: #f8fafc;
+}
 }
 
 /* Modern Color System */
@@ -762,9 +823,10 @@ body {
 .footer {
   background: linear-gradient(135deg, var(--gray-50) 0%, white 100%);
   border-top: 1px solid var(--gray-200);
-  padding: 2rem 0;
-  margin-top: 3rem;
+  padding: 1rem 0;
+  margin-top: 2rem;
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+  font-size: 0.875rem;
 }
 
 .footer a {

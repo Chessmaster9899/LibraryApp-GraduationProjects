@@ -143,6 +143,11 @@
                                         <i class="fas fa-building me-1"></i>Departments
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="RoleManagement" asp-action="Index">
+                                        <i class="fas fa-user-shield me-1"></i>Permissions
+                                    </a>
+                                </li>
                             }
                             else if (userRole == "Student")
                             {
@@ -169,6 +174,11 @@
                                         <i class="fas fa-clipboard-check me-1"></i>Evaluated Projects
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Notifications" asp-action="Index">
+                                        <i class="fas fa-bell me-1"></i>Notifications
+                                    </a>
+                                </li>
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" href="#" id="professorDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         <i class="fas fa-users me-1"></i>Students
@@ -184,11 +194,6 @@
                                 </li>
                             }
                         }
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">
-                                <i class="fas fa-shield-alt me-1"></i>Privacy
-                            </a>
-                        </li>
                     </ul>
                     
                     <!-- User Authentication Section -->
