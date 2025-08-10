@@ -64,9 +64,9 @@ public class RoleManagementController : BaseController
     {
         var users = await _context.Users
             .Include(u => u.Student)
-                .ThenInclude(s => s.Department)
+                .ThenInclude(s => s!.Department)
             .Include(u => u.Professor)
-                .ThenInclude(p => p.Department)
+                .ThenInclude(p => p!.Department)
             .OrderBy(u => u.Role)
             .ThenBy(u => u.UserId)
             .ToListAsync();

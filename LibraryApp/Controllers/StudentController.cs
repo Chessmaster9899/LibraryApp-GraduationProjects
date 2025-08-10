@@ -366,14 +366,4 @@ namespace LibraryApp.Controllers
             }
         }
     }
-
-    public class StudentDashboardViewModel
-    {
-        public Student Student { get; set; } = null!;
-        public int TotalProjects { get; set; }
-        public int CompletedProjects { get; set; }
-        public int InProgressProjects { get; set; }
-        public List<Project> RecentProjects { get; set; } = new();
-        public UniversitySettings UniversitySettings { get; set; } = null!;
-    }
 }

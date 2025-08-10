@@ -249,37 +249,3 @@ public class GalleryController : BaseController
         };
     }
 }
-
-// View Models for Gallery
-public class EnhancedGalleryViewModel
-{
-    public List<Project> Projects { get; set; } = new();
-    public List<Project> FeaturedProjects { get; set; } = new();
-    public List<Department> Departments { get; set; } = new();
-    public GalleryStatsViewModel Stats { get; set; } = new();
-    public string? CurrentDepartment { get; set; }
-    public string? CurrentSearch { get; set; }
-    public string? CurrentSort { get; set; }
-    public int CurrentPage { get; set; } = 1;
-    public int TotalPages { get; set; }
-    public int TotalProjects { get; set; }
-    public bool IsAdmin { get; set; }
-}
-
-public class GalleryStatsViewModel
-{
-    public int TotalProjects { get; set; }
-    public int TotalStudents { get; set; }
-    public int TotalSupervisors { get; set; }
-    public int TotalDepartments { get; set; }
-    public Dictionary<string, int> ProjectsByDepartment { get; set; } = new();
-    public int RecentProjects { get; set; }
-}
-
-public class ProjectDetailViewModel
-{
-    public Project Project { get; set; } = null!;
-    public List<Project> RelatedProjects { get; set; } = new();
-    public bool CanManage { get; set; }
-    public bool ShowComments { get; set; }
-}

@@ -524,30 +524,4 @@ namespace LibraryApp.Controllers
             }
         }
     }
-
-    public class ProfessorDashboardViewModel
-    {
-        public Professor Professor { get; set; } = null!;
-        public int TotalSupervisedProjects { get; set; }
-        public int TotalEvaluatedProjects { get; set; }
-        public int CompletedSupervisedProjects { get; set; }
-        public int CompletedEvaluatedProjects { get; set; }
-        public List<Project> RecentSupervisedProjects { get; set; } = new();
-        public List<Project> RecentEvaluatedProjects { get; set; } = new();
-        public UniversitySettings UniversitySettings { get; set; } = null!;
-    }
-
-    public class StudentEqualityComparer : IEqualityComparer<Student>
-    {
-        public bool Equals(Student? x, Student? y)
-        {
-            if (x == null || y == null) return false;
-            return x.Id == y.Id;
-        }
-
-        public int GetHashCode(Student obj)
-        {
-            return obj.Id.GetHashCode();
-        }
-    }
 }

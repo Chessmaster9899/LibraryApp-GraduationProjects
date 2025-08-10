@@ -155,3 +155,120 @@ public class ProjectWorkflowDetailsViewModel
     public List<ProjectStatus> NextStatuses { get; set; } = new();
     public List<ProjectActivityLog> ActivityLog { get; set; } = new();
 }
+
+// Dashboard ViewModels
+public class StudentDashboardViewModel
+{
+    public Student Student { get; set; } = null!;
+    public int TotalProjects { get; set; }
+    public int CompletedProjects { get; set; }
+    public int InProgressProjects { get; set; }
+    public List<Project> RecentProjects { get; set; } = new();
+    public UniversitySettings UniversitySettings { get; set; } = null!;
+}
+
+public class ProfessorDashboardViewModel
+{
+    public Professor Professor { get; set; } = null!;
+    public int TotalSupervisedProjects { get; set; }
+    public int TotalEvaluatedProjects { get; set; }
+    public int CompletedSupervisedProjects { get; set; }
+    public int CompletedEvaluatedProjects { get; set; }
+    public List<Project> RecentSupervisedProjects { get; set; } = new();
+    public List<Project> RecentEvaluatedProjects { get; set; } = new();
+    public UniversitySettings UniversitySettings { get; set; } = null!;
+}
+
+// Gallery ViewModels
+public class EnhancedGalleryViewModel
+{
+    public List<Project> Projects { get; set; } = new();
+    public List<Project> FeaturedProjects { get; set; } = new();
+    public List<Project> RecentProjects { get; set; } = new();
+    public List<Project> AllProjects { get; set; } = new();
+    public List<Department> Departments { get; set; } = new();
+    public List<Professor> Supervisors { get; set; } = new();
+    public GalleryStatsViewModel Stats { get; set; } = new();
+    public Dictionary<string, int> ProjectsByDepartment { get; set; } = new();
+    public Dictionary<ProjectStatus, int> ProjectsByStatus { get; set; } = new();
+    
+    // Filter properties
+    public string? SelectedDepartment { get; set; }
+    public string? SelectedSupervisor { get; set; }
+    public string? SelectedStatus { get; set; }
+    public string? SearchQuery { get; set; }
+    
+    // Current state properties for controller compatibility
+    public string? CurrentDepartment { get; set; }
+    public string? CurrentSearch { get; set; }
+    public string? CurrentSort { get; set; }
+    public int CurrentPage { get; set; } = 1;
+    public int TotalPages { get; set; }
+    public int TotalProjects { get; set; }
+    public bool IsAdmin { get; set; }
+}
+
+public class GalleryStatsViewModel
+{
+    public int TotalProjects { get; set; }
+    public int PublishedProjects { get; set; }
+    public int TotalStudents { get; set; }
+    public int TotalSupervisors { get; set; }
+    public int TotalDepartments { get; set; }
+    public Dictionary<string, int> ProjectsByYear { get; set; } = new();
+    public Dictionary<string, int> ProjectsByDepartment { get; set; } = new();
+    public int RecentProjects { get; set; }
+}
+
+public class ProjectDetailViewModel
+{
+    public Project Project { get; set; } = null!;
+    public List<Project> RelatedProjects { get; set; } = new();
+    public List<Project> SupervisorOtherProjects { get; set; } = new();
+    public bool CanViewFiles { get; set; }
+    public bool CanEdit { get; set; }
+    public bool CanManage { get; set; }
+    public bool ShowComments { get; set; }
+    public string? UserRole { get; set; }
+}
+
+// Search ViewModels
+public class SearchResultsViewModel
+{
+    public string SearchQuery { get; set; } = "";
+    public string Query { get; set; } = "";
+    public string SearchType { get; set; } = "all";
+    public string Department { get; set; } = "";
+    public string Status { get; set; } = "";
+    public int CurrentPage { get; set; } = 1;
+    public int PageSize { get; set; } = 20;
+    
+    public List<Project> Projects { get; set; } = new();
+    public List<Student> Students { get; set; } = new();
+    public List<Professor> Professors { get; set; } = new();
+    
+    public int TotalProjects { get; set; }
+    public int TotalStudents { get; set; }
+    public int TotalProfessors { get; set; }
+    public int TotalResults => TotalProjects + TotalStudents + TotalProfessors;
+    
+    public List<Department> Departments { get; set; } = new();
+    public List<object> ProjectStatuses { get; set; } = new();
+    public Dictionary<string, int> FilterCounts { get; set; } = new();
+    public List<string> SearchSuggestions { get; set; } = new();
+}
+
+// Utility Classes
+public class StudentEqualityComparer : IEqualityComparer<Student>
+{
+    public bool Equals(Student? x, Student? y)
+    {
+        if (x == null || y == null) return false;
+        return x.Id == y.Id;
+    }
+
+    public int GetHashCode(Student obj)
+    {
+        return obj.Id.GetHashCode();
+    }
+}
