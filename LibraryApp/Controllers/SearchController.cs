@@ -313,26 +313,3 @@ public class SearchController : BaseController
         return await professorsQuery.CountAsync();
     }
 }
-
-public class SearchResultsViewModel
-{
-    public string Query { get; set; } = string.Empty;
-    public string SearchType { get; set; } = "all";
-    public string Department { get; set; } = string.Empty;
-    public string Status { get; set; } = string.Empty;
-    public int CurrentPage { get; set; } = 1;
-    public int PageSize { get; set; } = 20;
-
-    public List<Project> Projects { get; set; } = new();
-    public List<Student> Students { get; set; } = new();
-    public List<Professor> Professors { get; set; } = new();
-
-    public int TotalProjects { get; set; }
-    public int TotalStudents { get; set; }
-    public int TotalProfessors { get; set; }
-
-    public List<Department> Departments { get; set; } = new();
-    public List<object> ProjectStatuses { get; set; } = new();
-
-    public int TotalResults => TotalProjects + TotalStudents + TotalProfessors;
-}

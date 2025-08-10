@@ -29,6 +29,9 @@ public class LibraryContext : DbContext
     
     // Comment System
     public DbSet<ProjectComment> ProjectComments { get; set; }
+    
+    // Project Workflow
+    public DbSet<ProjectActivityLog> ProjectActivityLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

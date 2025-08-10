@@ -58,6 +58,9 @@ using (var scope = app.Services.CreateScope())
     
     // Seed sample data
     await SeedDataService.SeedAsync(context, authService);
+    
+    // Ensure User entries exist for the permission system
+    await SeedDataService.CreateUserEntriesForPermissionSystem(context);
 }
 
 // Configure the HTTP request pipeline.

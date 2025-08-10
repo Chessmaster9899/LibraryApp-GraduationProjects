@@ -365,15 +365,126 @@ namespace LibraryApp.Controllers
                 return View(project);
             }
         }
-    }
 
-    public class StudentDashboardViewModel
-    {
-        public Student Student { get; set; } = null!;
-        public int TotalProjects { get; set; }
-        public int CompletedProjects { get; set; }
-        public int InProgressProjects { get; set; }
-        public List<Project> RecentProjects { get; set; } = new();
-        public UniversitySettings UniversitySettings { get; set; } = null!;
+        // Additional Student functionality
+        public async Task<IActionResult> ProjectHistory()
+        {
+            var userId = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var student = await _context.Students
+                .Include(s => s.Projects)
+                    .ThenInclude(p => p.Supervisor)
+                .FirstOrDefaultAsync(s => s.StudentNumber == userId);
+
+            if (student == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            ViewBag.PageTitle = "Project History";
+            return View(student.Projects.OrderByDescending(p => p.SubmissionDate));
+        }
+
+        public async Task<IActionResult> Notifications()
+        {
+            var userId = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var notifications = await _context.Notifications
+                .Where(n => n.UserId == userId && n.UserRole == UserRole.Student)
+                .OrderByDescending(n => n.CreatedDate)
+                .Take(50)
+                .ToListAsync();
+
+            ViewBag.PageTitle = "My Notifications";
+            return View(notifications);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> MarkNotificationRead(int notificationId)
+        {
+            var userId = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Json(new { success = false, message = "Authentication required" });
+            }
+
+            var notification = await _context.Notifications
+                .FirstOrDefaultAsync(n => n.Id == notificationId && n.UserId == userId);
+
+            if (notification == null)
+            {
+                return Json(new { success = false, message = "Notification not found" });
+            }
+
+            notification.IsRead = true;
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true });
+        }
+
+        public async Task<IActionResult> ViewProjectDocument(int projectId, string documentType)
+        {
+            var userId = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var project = await _context.Projects
+                .Include(p => p.Student)
+                .FirstOrDefaultAsync(p => p.Id == projectId);
+
+            if (project == null || project.Student.StudentNumber != userId)
+            {
+                this.AddError("Access Denied", "You can only view your own project documents");
+                return RedirectToAction("Index");
+            }
+
+            string? filePath = documentType switch
+            {
+                "document" => project.DocumentPath,
+                "poster" => project.PosterPath,
+                "report" => project.ReportPath,
+                "code" => project.CodePath,
+                _ => null
+            };
+
+            if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
+            {
+                this.AddError("File Not Found", "The requested document could not be found");
+                return RedirectToAction("Index");
+            }
+
+            var fileName = Path.GetFileName(filePath);
+            var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
+            var contentType = GetContentType(filePath);
+
+            return File(fileBytes, contentType, fileName);
+        }
+
+        private string GetContentType(string filePath)
+        {
+            var extension = Path.GetExtension(filePath).ToLowerInvariant();
+            return extension switch
+            {
+                ".pdf" => "application/pdf",
+                ".doc" => "application/msword",
+                ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                ".txt" => "text/plain",
+                ".jpg" => "image/jpeg",
+                ".jpeg" => "image/jpeg",
+                ".png" => "image/png",
+                ".gif" => "image/gif",
+                _ => "application/octet-stream"
+            };
+        }
     }
 }

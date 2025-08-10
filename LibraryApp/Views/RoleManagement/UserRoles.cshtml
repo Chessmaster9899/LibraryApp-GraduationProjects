@@ -1,0 +1,469 @@
+@model UserRoleManagementViewModel
+@{
+    ViewData["Title"] = "User Role Assignment";
+}
+
+<div class="content-wrapper">
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">User Role Assignment</h1>
+            <p class="page-description">Assign and manage roles for system users</p>
+        </div>
+        <div class="page-actions">
+            <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Roles
+            </a>
+        </div>
+    </div>
+
+    <div class="users-container">
+        @foreach (var userGroup in Model.Users.GroupBy(u => u.Role))
+        {
+            <div class="user-group">
+                <div class="group-header">
+                    <h3 class="group-title">@userGroup.Key.ToString()s</h3>
+                    <span class="group-count">@userGroup.Count() users</span>
+                </div>
+
+                <div class="users-grid">
+                    @foreach (var user in userGroup)
+                    {
+                        <div class="user-card" data-user-id="@user.Id">
+                            <div class="user-info">
+                                <div class="user-avatar">
+                                    @{
+                                        var initials = "";
+                                        var displayName = "";
+                                        if (user.Student != null)
+                                        {
+                                            initials = (user.Student.FirstName.Substring(0, 1) + user.Student.LastName.Substring(0, 1)).ToUpper();
+                                            displayName = $"{user.Student.FirstName} {user.Student.LastName}";
+                                        }
+                                        else if (user.Professor != null)
+                                        {
+                                            initials = (user.Professor.FirstName.Substring(0, 1) + user.Professor.LastName.Substring(0, 1)).ToUpper();
+                                            displayName = $"{user.Professor.Title} {user.Professor.FirstName} {user.Professor.LastName}";
+                                        }
+                                        else
+                                        {
+                                            initials = "AD";
+                                            displayName = "System Administrator";
+                                        }
+                                    }
+                                    <span class="avatar-text">@initials</span>
+                                </div>
+                                <div class="user-details">
+                                    <h4 class="user-name">@displayName</h4>
+                                    <p class="user-id">ID: @user.UserId</p>
+                                    @if (user.Student?.Department != null)
+                                    {
+                                        <p class="user-department">@user.Student.Department.Name</p>
+                                    }
+                                    else if (user.Professor?.Department != null)
+                                    {
+                                        <p class="user-department">@user.Professor.Department.Name</p>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="user-roles">
+                                <h5 class="roles-title">Assigned Roles</h5>
+                                <div class="current-roles">
+                                    @{
+                                        var userRoles = Model.UserRoleAssignments.ContainsKey(user.Id) 
+                                            ? Model.UserRoleAssignments[user.Id] 
+                                            : new List<Role>();
+                                    }
+                                    @if (userRoles.Any())
+                                    {
+                                        @foreach (var role in userRoles)
+                                        {
+                                            <div class="role-badge">
+                                                <span class="role-name">@role.Name</span>
+                                                @if (!role.IsSystemRole)
+                                                {
+                                                    <button type="button" class="remove-role-btn" 
+                                                            onclick="removeRole(@user.Id, @role.Id, '@role.Name')"
+                                                            title="Remove role">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                }
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="no-roles">No additional roles assigned</span>
+                                    }
+                                </div>
+
+                                <div class="role-assignment">
+                                    <select class="role-select" data-user-id="@user.Id">
+                                        <option value="">Select a role to assign...</option>
+                                        @foreach (var role in Model.AllRoles.Where(r => !userRoles.Any(ur => ur.Id == r.Id)))
+                                        {
+                                            <option value="@role.Id">@role.Name</option>
+                                        }
+                                    </select>
+                                    <button type="button" class="btn btn-sm btn-primary assign-role-btn" 
+                                            onclick="assignRole(@user.Id)">
+                                        <i class="fas fa-plus"></i> Assign
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+function assignRole(userId) {
+    const select = document.querySelector(`[data-user-id="${userId}"]`);
+    const roleId = select.value;
+    
+    if (!roleId) {
+        showToast('Please select a role to assign', 'warning');
+        return;
+    }
+
+    fetch('@Url.Action("AssignRole")', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+        },
+        body: JSON.stringify({ userId: userId, roleId: parseInt(roleId) })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast(data.message, 'success');
+            location.reload(); // Reload to show updated roles
+        } else {
+            showToast(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        showToast('An error occurred while assigning the role', 'error');
+    });
+}
+
+function removeRole(userId, roleId, roleName) {
+    if (confirm(`Are you sure you want to remove the role "${roleName}" from this user?`)) {
+        fetch('@Url.Action("RemoveRole")', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+            },
+            body: JSON.stringify({ userId: userId, roleId: roleId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast(data.message, 'success');
+                location.reload(); // Reload to show updated roles
+            } else {
+                showToast(data.message, 'error');
+            }
+        })
+        .catch(error => {
+            showToast('An error occurred while removing the role', 'error');
+        });
+    }
+}
+</script>
+
+<style>
+.content-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.header-content {
+    flex: 1;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.page-description {
+    font-size: 1.1rem;
+    color: #6c757d;
+    margin-bottom: 0;
+}
+
+.page-actions {
+    margin-top: 1rem;
+}
+
+.user-group {
+    margin-bottom: 3rem;
+}
+
+.group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.group-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.group-count {
+    background: var(--primary-color);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+.users-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+}
+
+.user-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.2s ease;
+}
+
+.user-card:hover {
+    transform: translateY(-2px);
+}
+
+.user-info {
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.user-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.avatar-text {
+    color: white;
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+.user-details {
+    flex: 1;
+}
+
+.user-name {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #495057;
+    margin: 0 0 0.25rem 0;
+}
+
+.user-id {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin: 0 0 0.25rem 0;
+    font-family: monospace;
+}
+
+.user-department {
+    font-size: 0.875rem;
+    color: var(--primary-color);
+    margin: 0;
+    font-weight: 500;
+}
+
+.user-roles {
+    padding: 1.5rem;
+}
+
+.roles-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 1rem;
+}
+
+.current-roles {
+    margin-bottom: 1.5rem;
+    min-height: 3rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.role-badge {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.role-name {
+    font-weight: 500;
+    color: #495057;
+}
+
+.remove-role-btn {
+    background: none;
+    border: none;
+    color: #dc3545;
+    padding: 0.25rem;
+    cursor: pointer;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.remove-role-btn:hover {
+    background: #dc3545;
+    color: white;
+}
+
+.no-roles {
+    color: #6c757d;
+    font-style: italic;
+    font-size: 0.875rem;
+}
+
+.role-assignment {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.role-select {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    background: white;
+}
+
+.role-select:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.assign-role-btn {
+    white-space: nowrap;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+}
+
+.btn-outline-secondary {
+    border: 1px solid #6c757d;
+    color: #6c757d;
+    background: transparent;
+}
+
+.btn-outline-secondary:hover {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8125rem;
+}
+
+@@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .page-actions {
+        margin-top: 1rem;
+    }
+    
+    .users-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .group-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .user-info {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .role-assignment {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+</style>
