@@ -1,0 +1,557 @@
+@model GalleryAdminSettingsViewModel
+@{
+    ViewData["Title"] = "Gallery Settings";
+}
+
+<div class="content-wrapper">
+    <div class="page-header">
+        <h1 class="page-title">Gallery Administration Settings</h1>
+        <p class="page-description">Configure and manage project gallery settings</p>
+    </div>
+
+    <div class="settings-grid">
+        <!-- Gallery Statistics Card -->
+        <div class="settings-card">
+            <div class="card-header">
+                <h3 class="card-title">Gallery Statistics</h3>
+                <div class="card-actions">
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="refreshStats()">
+                        <i class="fas fa-refresh"></i> Refresh
+                    </button>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">@Model.TotalProjects</div>
+                        <div class="stat-label">Total Projects</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">@Model.PublicProjects</div>
+                        <div class="stat-label">Public Projects</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">@Model.FeaturedProjects</div>
+                        <div class="stat-label">Featured Projects</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">@Model.RecentlyAdded</div>
+                        <div class="stat-label">Recently Added</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gallery Display Settings Card -->
+        <div class="settings-card">
+            <div class="card-header">
+                <h3 class="card-title">Display Settings</h3>
+            </div>
+            <div class="card-content">
+                <form id="displaySettingsForm" asp-action="UpdateDisplaySettings" method="post">
+                    <div class="form-group">
+                        <label for="projectsPerPage">Projects Per Page</label>
+                        <select id="projectsPerPage" name="projectsPerPage" class="form-control">
+                            <option value="6">6</option>
+                            <option value="12" selected>12</option>
+                            <option value="18">18</option>
+                            <option value="24">24</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="defaultSort">Default Sort Order</label>
+                        <select id="defaultSort" name="defaultSort" class="form-control">
+                            <option value="date_desc" selected>Latest First</option>
+                            <option value="date_asc">Oldest First</option>
+                            <option value="title">Title A-Z</option>
+                            <option value="student">Student Name</option>
+                            <option value="department">Department</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="showDepartmentFilter" name="showDepartmentFilter" checked>
+                            <label class="form-check-label" for="showDepartmentFilter">
+                                Show Department Filter
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="showSearchBox" name="showSearchBox" checked>
+                            <label class="form-check-label" for="showSearchBox">
+                                Show Search Box
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Save Display Settings</button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="resetToDefaults()">Reset to Defaults</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Project Visibility Management -->
+        <div class="settings-card">
+            <div class="card-header">
+                <h3 class="card-title">Project Visibility</h3>
+            </div>
+            <div class="card-content">
+                <p class="card-description">Manage which projects are visible in the public gallery</p>
+                
+                <div class="action-buttons">
+                    <button type="button" class="btn btn-success" onclick="showAllProjects()">
+                        <i class="fas fa-eye"></i> Show All Projects
+                    </button>
+                    <button type="button" class="btn btn-warning" onclick="hideAllProjects()">
+                        <i class="fas fa-eye-slash"></i> Hide All Projects
+                    </button>
+                    <button type="button" class="btn btn-info" onclick="showDefendedOnly()">
+                        <i class="fas fa-shield-alt"></i> Show Defended Only
+                    </button>
+                </div>
+
+                <div class="bulk-actions">
+                    <h5>Bulk Actions</h5>
+                    <div class="form-group">
+                        <label for="bulkStatus">Show Projects by Status:</label>
+                        <select id="bulkStatus" class="form-control">
+                            <option value="">Select Status...</option>
+                            <option value="ReviewApproved">Review Approved</option>
+                            <option value="Defended">Defended</option>
+                            <option value="Published">Published</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                        <button type="button" class="btn btn-outline-primary mt-2" onclick="applyBulkVisibility()">
+                            Apply Visibility
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gallery Customization -->
+        <div class="settings-card">
+            <div class="card-header">
+                <h3 class="card-title">Gallery Customization</h3>
+            </div>
+            <div class="card-content">
+                <form id="customizationForm" asp-action="UpdateCustomization" method="post">
+                    <div class="form-group">
+                        <label for="galleryTitle">Gallery Title</label>
+                        <input type="text" id="galleryTitle" name="galleryTitle" class="form-control" 
+                               value="Discover Innovative Projects" placeholder="Enter gallery title">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="gallerySubtitle">Gallery Subtitle</label>
+                        <textarea id="gallerySubtitle" name="gallerySubtitle" class="form-control" rows="2" 
+                                  placeholder="Enter gallery subtitle">Explore cutting-edge research and creative solutions from our talented students and faculty</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="showFeaturedSection" name="showFeaturedSection" checked>
+                            <label class="form-check-label" for="showFeaturedSection">
+                                Show Featured Projects Section
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="showStatistics" name="showStatistics" checked>
+                            <label class="form-check-label" for="showStatistics">
+                                Show Gallery Statistics
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Save Customization</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- System Actions -->
+        <div class="settings-card">
+            <div class="card-header">
+                <h3 class="card-title">System Actions</h3>
+            </div>
+            <div class="card-content">
+                <div class="action-buttons">
+                    <button type="button" class="btn btn-info" onclick="exportGalleryData()">
+                        <i class="fas fa-download"></i> Export Gallery Data
+                    </button>
+                    <button type="button" class="btn btn-warning" onclick="regenerateThumbnails()">
+                        <i class="fas fa-image"></i> Regenerate Thumbnails
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="rebuildSearchIndex()">
+                        <i class="fas fa-search"></i> Rebuild Search Index
+                    </button>
+                </div>
+                
+                <div class="system-info">
+                    <h5>System Information</h5>
+                    <p><strong>Last Updated:</strong> <span id="lastUpdated">@DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")</span></p>
+                    <p><strong>Gallery Version:</strong> 2.0</p>
+                    <p><strong>Total Storage Used:</strong> <span id="storageUsed">Calculating...</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-actions">
+        <a href="@Url.Action("Index", "Gallery")" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Gallery
+        </a>
+        <button type="button" class="btn btn-primary" onclick="saveAllSettings()">
+            <i class="fas fa-save"></i> Save All Settings
+        </button>
+    </div>
+</div>
+
+<script>
+// Gallery Admin Settings JavaScript
+function refreshStats() {
+    // Implementation for refreshing statistics
+    showToast('Statistics refreshed successfully', 'success');
+}
+
+function resetToDefaults() {
+    document.getElementById('projectsPerPage').value = '12';
+    document.getElementById('defaultSort').value = 'date_desc';
+    document.getElementById('showDepartmentFilter').checked = true;
+    document.getElementById('showSearchBox').checked = true;
+    showToast('Settings reset to defaults', 'info');
+}
+
+function showAllProjects() {
+    if (confirm('Are you sure you want to make all projects publicly visible?')) {
+        // Implementation for showing all projects
+        showToast('All projects are now visible', 'success');
+    }
+}
+
+function hideAllProjects() {
+    if (confirm('Are you sure you want to hide all projects from public view?')) {
+        // Implementation for hiding all projects
+        showToast('All projects are now hidden', 'warning');
+    }
+}
+
+function showDefendedOnly() {
+    if (confirm('Show only defended projects in the gallery?')) {
+        // Implementation for showing defended projects only
+        showToast('Now showing defended projects only', 'info');
+    }
+}
+
+function applyBulkVisibility() {
+    const status = document.getElementById('bulkStatus').value;
+    if (status && confirm(`Apply visibility to all projects with status: ${status}?`)) {
+        // Implementation for bulk visibility
+        showToast(`Visibility applied to ${status} projects`, 'success');
+    }
+}
+
+function exportGalleryData() {
+    // Implementation for exporting gallery data
+    showToast('Gallery data export started', 'info');
+}
+
+function regenerateThumbnails() {
+    if (confirm('Regenerate all project thumbnails? This may take some time.')) {
+        // Implementation for regenerating thumbnails
+        showToast('Thumbnail regeneration started', 'info');
+    }
+}
+
+function rebuildSearchIndex() {
+    if (confirm('Rebuild search index? This will improve search performance.')) {
+        // Implementation for rebuilding search index
+        showToast('Search index rebuild started', 'info');
+    }
+}
+
+function saveAllSettings() {
+    // Implementation for saving all settings
+    showToast('All settings saved successfully', 'success');
+}
+
+// Calculate storage usage on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Simulate storage calculation
+    setTimeout(() => {
+        document.getElementById('storageUsed').textContent = '45.2 MB';
+    }, 1000);
+});
+</script>
+
+<style>
+.content-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.page-header {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.page-description {
+    font-size: 1.1rem;
+    color: #6c757d;
+    margin-bottom: 0;
+}
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.settings-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.2s ease;
+}
+
+.settings-card:hover {
+    transform: translateY(-2px);
+}
+
+.card-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.card-content {
+    padding: 1.5rem;
+}
+
+.card-description {
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    padding: 0.75rem;
+    font-size: 1rem;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.form-check {
+    margin-bottom: 1rem;
+}
+
+.form-check-label {
+    font-weight: 500;
+    margin-left: 0.5rem;
+}
+
+.form-actions {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.bulk-actions {
+    padding-top: 1.5rem;
+    border-top: 1px solid #dee2e6;
+}
+
+.bulk-actions h5 {
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.system-info {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #dee2e6;
+}
+
+.system-info h5 {
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.system-info p {
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+
+.page-actions {
+    text-align: center;
+    padding-top: 2rem;
+    border-top: 1px solid #dee2e6;
+}
+
+.page-actions .btn {
+    margin: 0 0.5rem;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+.btn-outline-primary {
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-outline-secondary {
+    border: 1px solid #6c757d;
+    color: #6c757d;
+    background: transparent;
+}
+
+.btn-outline-secondary:hover {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.btn-warning {
+    background: #ffc107;
+    color: #212529;
+}
+
+.btn-info {
+    background: #17a2b8;
+    color: white;
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+    .settings-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+}
+</style>

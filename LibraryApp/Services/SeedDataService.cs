@@ -1,6 +1,7 @@
 using LibraryApp.Data;
 using LibraryApp.Models;
 using LibraryApp.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace LibraryApp.Services
 {
@@ -278,6 +279,118 @@ namespace LibraryApp.Services
             };
 
             context.SystemAuditLogs.AddRange(auditLogs);
+            await context.SaveChangesAsync();
+
+            // Create User entries for the permission system if they don't exist
+            await CreateUserEntriesForPermissionSystem(context);
+        }
+
+        public static async Task CreateUserEntriesForPermissionSystem(LibraryContext context)
+        {
+            // Create User entry for Admin if it doesn't exist
+            var adminUser = await context.Users.FirstOrDefaultAsync(u => u.UserId == "Admin" && u.Role == UserRole.Admin);
+            if (adminUser == null)
+            {
+                var admin = await context.Admins.FirstOrDefaultAsync(a => a.Username == "Admin");
+                if (admin != null)
+                {
+                    var user = new User
+                    {
+                        UserId = admin.Username,
+                        Password = admin.Password, // Same password hash
+                        Role = UserRole.Admin,
+                        MustChangePassword = false,
+                        LastLogin = admin.LastLogin,
+                        IsActive = admin.IsActive
+                    };
+                    context.Users.Add(user);
+                    await context.SaveChangesAsync();
+
+                    // Assign Admin role to the user
+                    var adminRole = await context.Roles.FirstOrDefaultAsync(r => r.Name == "Admin");
+                    if (adminRole != null)
+                    {
+                        var userRoleAssignment = new UserRoleAssignment
+                        {
+                            UserId = user.Id,
+                            RoleId = adminRole.Id,
+                            AssignedBy = "System"
+                        };
+                        context.UserRoles.Add(userRoleAssignment);
+                    }
+                }
+            }
+
+            // Create User entries for Students
+            var students = await context.Students.ToListAsync();
+            foreach (var student in students)
+            {
+                var userExists = await context.Users.AnyAsync(u => u.StudentId == student.Id);
+                if (!userExists)
+                {
+                    var user = new User
+                    {
+                        UserId = student.StudentNumber,
+                        Password = student.Password ?? "", // Use existing password or empty
+                        Role = UserRole.Student,
+                        MustChangePassword = student.MustChangePassword,
+                        LastLogin = student.LastLogin,
+                        IsActive = true,
+                        StudentId = student.Id
+                    };
+                    context.Users.Add(user);
+                    await context.SaveChangesAsync();
+
+                    // Assign Student role to the user
+                    var studentRole = await context.Roles.FirstOrDefaultAsync(r => r.Name == "Student");
+                    if (studentRole != null)
+                    {
+                        var userRoleAssignment = new UserRoleAssignment
+                        {
+                            UserId = user.Id,
+                            RoleId = studentRole.Id,
+                            AssignedBy = "System"
+                        };
+                        context.UserRoles.Add(userRoleAssignment);
+                    }
+                }
+            }
+
+            // Create User entries for Professors
+            var professors = await context.Professors.ToListAsync();
+            foreach (var professor in professors)
+            {
+                var userExists = await context.Users.AnyAsync(u => u.ProfessorId == professor.Id);
+                if (!userExists)
+                {
+                    var user = new User
+                    {
+                        UserId = professor.ProfessorId,
+                        Password = professor.Password ?? "", // Use existing password or empty
+                        Role = UserRole.Professor,
+                        MustChangePassword = professor.MustChangePassword,
+                        LastLogin = professor.LastLogin,
+                        IsActive = true,
+                        ProfessorId = professor.Id
+                    };
+                    context.Users.Add(user);
+                    await context.SaveChangesAsync();
+
+                    // Assign Professor role to the user
+                    var professorRole = await context.Roles.FirstOrDefaultAsync(r => r.Name == "Professor");
+                    if (professorRole != null)
+                    {
+                        var userRoleAssignment = new UserRoleAssignment
+                        {
+                            UserId = user.Id,
+                            RoleId = professorRole.Id,
+                            AssignedBy = "System"
+                        };
+                        context.UserRoles.Add(userRoleAssignment);
+                    }
+                }
+            }
+
             await context.SaveChangesAsync();
         }
     }
