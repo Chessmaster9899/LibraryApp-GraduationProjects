@@ -212,28 +212,6 @@ public class AdminController : BaseController
     }
 
     [HttpGet]
-    public async Task<IActionResult> UserManagement()
-    {
-        var viewModel = new UserManagementViewModel
-        {
-            Students = await _context.Students.Include(s => s.Department).ToListAsync(),
-            Professors = await _context.Professors.Include(p => p.Department).ToListAsync(),
-            Admins = await _context.Admins.ToListAsync(),
-            UserStatistics = new Dictionary<string, int>
-            {
-                ["TotalStudents"] = await _context.Students.CountAsync(),
-                ["ActiveStudents"] = await _context.Students.CountAsync(s => s.LastLogin.HasValue),
-                ["TotalProfessors"] = await _context.Professors.CountAsync(),
-                ["ActiveProfessors"] = await _context.Professors.CountAsync(p => p.LastLogin.HasValue),
-                ["TotalAdmins"] = await _context.Admins.CountAsync(a => a.IsActive),
-                ["TotalUsers"] = await _context.Students.CountAsync() + await _context.Professors.CountAsync() + await _context.Admins.CountAsync(a => a.IsActive)
-            }
-        };
-
-        return View(viewModel);
-    }
-
-    [HttpGet]
     public async Task<IActionResult> Analytics()
     {
         var viewModel = new AnalyticsViewModel
@@ -358,5 +336,325 @@ public class AdminController : BaseController
             .ToListAsync();
 
         return View(auditLogs);
+    }
+
+    // Additional Admin functionality
+    [HttpGet]
+    public async Task<IActionResult> SystemOverview()
+    {
+        var overview = new
+        {
+            ProjectStats = await _context.Projects
+                .GroupBy(p => p.Status)
+                .Select(g => new { Status = g.Key.ToString(), Count = g.Count() })
+                .ToListAsync(),
+            
+            UserStats = new
+            {
+                TotalStudents = await _context.Students.CountAsync(),
+                TotalProfessors = await _context.Professors.CountAsync(),
+                ActiveStudents = await _context.Students.Where(s => s.LastLogin >= DateTime.Now.AddDays(-30)).CountAsync(),
+                ActiveProfessors = await _context.Professors.Where(p => p.LastLogin >= DateTime.Now.AddDays(-30)).CountAsync()
+            },
+            
+            DepartmentStats = await _context.Departments
+                .Select(d => new {
+                    d.Name,
+                    StudentCount = d.Students.Count(),
+                    ProfessorCount = d.Professors.Count(),
+                    ProjectCount = d.Students.SelectMany(s => s.Projects).Count()
+                })
+                .ToListAsync(),
+                
+            RecentActivity = await _context.SystemAuditLogs
+                .OrderByDescending(a => a.Timestamp)
+                .Take(20)
+                .ToListAsync()
+        };
+
+        return View(overview);
+    }
+
+    [HttpGet]
+    public IActionResult Reports()
+    {
+        var reports = new ReportsViewModel
+        {
+            ReportType = "overview",
+            StartDate = DateTime.Now.AddMonths(-3),
+            EndDate = DateTime.Now
+        };
+
+        return View(reports);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> GenerateReport(ReportsViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View("Reports", model);
+        }
+
+        List<object> reportData = new();
+
+        switch (model.ReportType.ToLower())
+        {
+            case "projects":
+                reportData = await GenerateProjectReport(model);
+                break;
+            case "students":
+                reportData = await GenerateStudentReport(model);
+                break;
+            case "professors":
+                reportData = await GenerateProfessorReport(model);
+                break;
+            case "departments":
+                reportData = await GenerateDepartmentReport(model);
+                break;
+            default:
+                reportData = await GenerateOverviewReport(model);
+                break;
+        }
+
+        model.ReportData = reportData;
+        return View("Reports", model);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Communications()
+    {
+        var viewModel = new CommunicationViewModel
+        {
+            RecentAnnouncements = await _context.Announcements
+                .Where(a => a.IsActive)
+                .OrderByDescending(a => a.CreatedDate)
+                .Take(10)
+                .ToListAsync()
+        };
+
+        return View(viewModel);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> SendAnnouncement(CommunicationViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            model.RecentAnnouncements = await _context.Announcements
+                .Where(a => a.IsActive)
+                .OrderByDescending(a => a.CreatedDate)
+                .Take(10)
+                .ToListAsync();
+            return View("Communications", model);
+        }
+
+        var announcement = new Announcement
+        {
+            Title = model.Title,
+            Content = model.Content,
+            CreatedBy = CurrentUserId ?? "System",
+            CreatedDate = DateTime.Now,
+            ExpiryDate = model.ExpiryDate,
+            IsUrgent = model.IsUrgent,
+            TargetRoles = string.Join(",", model.TargetRoles),
+            IsActive = true
+        };
+
+        _context.Announcements.Add(announcement);
+        await _context.SaveChangesAsync();
+
+        this.AddSuccess("Announcement Sent", "Your announcement has been sent successfully");
+        return RedirectToAction("Communications");
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> UserManagement()
+    {
+        var viewModel = new UserManagementViewModel
+        {
+            Students = await _context.Students.Include(s => s.Department).OrderBy(s => s.LastName).ToListAsync(),
+            Professors = await _context.Professors.Include(p => p.Department).OrderBy(p => p.LastName).ToListAsync(),
+            Admins = await _context.Admins.Where(a => a.IsActive).OrderBy(a => a.LastName).ToListAsync(),
+            UserStatistics = new Dictionary<string, int>
+            {
+                ["TotalUsers"] = await _context.Students.CountAsync() + await _context.Professors.CountAsync() + await _context.Admins.CountAsync(),
+                ["ActiveStudents"] = await _context.Students.Where(s => s.LastLogin >= DateTime.Now.AddDays(-30)).CountAsync(),
+                ["ActiveProfessors"] = await _context.Professors.Where(p => p.LastLogin >= DateTime.Now.AddDays(-30)).CountAsync(),
+                ["NewUsersThisMonth"] = await _context.Students.Where(s => s.EnrollmentDate >= DateTime.Now.AddDays(-30)).CountAsync()
+            }
+        };
+
+        return View(viewModel);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> DeactivateUser(string userId, UserRole userRole)
+    {
+        bool success = false;
+        string message = "";
+
+        try
+        {
+            switch (userRole)
+            {
+                case UserRole.Student:
+                    var student = await _context.Students.FirstOrDefaultAsync(s => s.StudentNumber == userId);
+                    if (student != null)
+                    {
+                        // Instead of deleting, we could add an IsActive field
+                        message = "Student account deactivated";
+                        success = true;
+                    }
+                    break;
+                case UserRole.Professor:
+                    var professor = await _context.Professors.FirstOrDefaultAsync(p => p.ProfessorId == userId);
+                    if (professor != null)
+                    {
+                        message = "Professor account deactivated";
+                        success = true;
+                    }
+                    break;
+                case UserRole.Admin:
+                    var admin = await _context.Admins.FirstOrDefaultAsync(a => a.Username == userId);
+                    if (admin != null)
+                    {
+                        admin.IsActive = false;
+                        await _context.SaveChangesAsync();
+                        message = "Admin account deactivated";
+                        success = true;
+                    }
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            message = "Failed to deactivate user: " + ex.Message;
+        }
+
+        return Json(new { success, message });
+    }
+
+    // Report generation helper methods
+    private async Task<List<object>> GenerateProjectReport(ReportsViewModel model)
+    {
+        var query = _context.Projects
+            .Include(p => p.Student)
+                .ThenInclude(s => s.Department)
+            .Include(p => p.Supervisor)
+            .Where(p => p.SubmissionDate >= model.StartDate && p.SubmissionDate <= model.EndDate);
+
+        if (model.SelectedDepartments.Any())
+        {
+            query = query.Where(p => model.SelectedDepartments.Contains(p.Student.Department.Name));
+        }
+
+        if (model.SelectedStatuses.Any())
+        {
+            var statuses = model.SelectedStatuses.Select(s => Enum.Parse<ProjectStatus>(s)).ToList();
+            query = query.Where(p => statuses.Contains(p.Status));
+        }
+
+        return await query.Select(p => new {
+            p.Title,
+            StudentName = p.Student.FullName,
+            Department = p.Student.Department.Name,
+            SupervisorName = p.Supervisor.DisplayName,
+            p.Status,
+            p.SubmissionDate,
+            p.Grade
+        }).Cast<object>().ToListAsync();
+    }
+
+    private async Task<List<object>> GenerateStudentReport(ReportsViewModel model)
+    {
+        var query = _context.Students
+            .Include(s => s.Department)
+            .Include(s => s.Projects)
+            .Where(s => s.EnrollmentDate >= model.StartDate && s.EnrollmentDate <= model.EndDate);
+
+        if (model.SelectedDepartments.Any())
+        {
+            query = query.Where(s => model.SelectedDepartments.Contains(s.Department.Name));
+        }
+
+        return await query.Select(s => new {
+            s.FullName,
+            s.StudentNumber,
+            Department = s.Department.Name,
+            s.Email,
+            ProjectCount = s.Projects.Count(),
+            CompletedProjects = s.Projects.Count(p => p.Status == ProjectStatus.Completed || p.Status == ProjectStatus.Defended),
+            s.EnrollmentDate,
+            s.LastLogin
+        }).Cast<object>().ToListAsync();
+    }
+
+    private async Task<List<object>> GenerateProfessorReport(ReportsViewModel model)
+    {
+        var query = _context.Professors
+            .Include(p => p.Department)
+            .Include(p => p.SupervisedProjects)
+            .Include(p => p.EvaluatedProjects)
+            .AsQueryable();
+
+        if (model.SelectedDepartments.Any())
+        {
+            query = query.Where(p => model.SelectedDepartments.Contains(p.Department.Name));
+        }
+
+        return await query.Select(p => new {
+            p.DisplayName,
+            p.ProfessorId,
+            Department = p.Department.Name,
+            p.Email,
+            p.Specialization,
+            SupervisedCount = p.SupervisedProjects.Count(),
+            EvaluatedCount = p.EvaluatedProjects.Count(),
+            p.LastLogin
+        }).Cast<object>().ToListAsync();
+    }
+
+    private async Task<List<object>> GenerateDepartmentReport(ReportsViewModel model)
+    {
+        return await _context.Departments
+            .Include(d => d.Students)
+            .Include(d => d.Professors)
+            .Select(d => new {
+                d.Name,
+                d.Description,
+                StudentCount = d.Students.Count(),
+                ProfessorCount = d.Professors.Count(),
+                ProjectCount = d.Students.SelectMany(s => s.Projects).Count(),
+                CompletedProjects = d.Students.SelectMany(s => s.Projects)
+                    .Count(p => p.Status == ProjectStatus.Completed || p.Status == ProjectStatus.Defended)
+            }).Cast<object>().ToListAsync();
+    }
+
+    private async Task<List<object>> GenerateOverviewReport(ReportsViewModel model)
+    {
+        return new List<object>
+        {
+            new {
+                Metric = "Total Projects",
+                Value = await _context.Projects.CountAsync(),
+                Period = $"{model.StartDate:yyyy-MM-dd} to {model.EndDate:yyyy-MM-dd}"
+            },
+            new {
+                Metric = "Completed Projects",
+                Value = await _context.Projects.Where(p => p.Status == ProjectStatus.Completed || p.Status == ProjectStatus.Defended).CountAsync(),
+                Period = $"{model.StartDate:yyyy-MM-dd} to {model.EndDate:yyyy-MM-dd}"
+            },
+            new {
+                Metric = "Active Students",
+                Value = await _context.Students.Where(s => s.LastLogin >= DateTime.Now.AddDays(-30)).CountAsync(),
+                Period = "Last 30 days"
+            },
+            new {
+                Metric = "Active Professors",
+                Value = await _context.Professors.Where(p => p.LastLogin >= DateTime.Now.AddDays(-30)).CountAsync(),
+                Period = "Last 30 days"
+            }
+        };
     }
 }

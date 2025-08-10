@@ -523,5 +523,202 @@ namespace LibraryApp.Controllers
                 return View(project);
             }
         }
+
+        // Additional Professor functionality
+        public async Task<IActionResult> EvaluationTasks()
+        {
+            var userId = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var professor = await _context.Professors
+                .Include(p => p.EvaluatedProjects)
+                    .ThenInclude(p => p.Student)
+                        .ThenInclude(s => s.Department)
+                .Include(p => p.EvaluatedProjects)
+                    .ThenInclude(p => p.Supervisor)
+                .FirstOrDefaultAsync(p => p.ProfessorId == userId);
+
+            if (professor == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            // Get projects that need evaluation
+            var pendingEvaluations = professor.EvaluatedProjects
+                .Where(p => p.Status == ProjectStatus.SubmittedForReview || p.Status == ProjectStatus.ReviewApproved)
+                .OrderBy(p => p.SubmissionForReviewDate)
+                .ToList();
+
+            ViewBag.PageTitle = "Evaluation Tasks";
+            return View(pendingEvaluations);
+        }
+
+        public async Task<IActionResult> ProjectEvaluation(int projectId)
+        {
+            var userId = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var project = await _context.Projects
+                .Include(p => p.Student)
+                    .ThenInclude(s => s.Department)
+                .Include(p => p.Supervisor)
+                    .ThenInclude(s => s.Department)
+                .Include(p => p.Evaluator)
+                .FirstOrDefaultAsync(p => p.Id == projectId);
+
+            if (project == null)
+            {
+                return NotFound();
+            }
+
+            var professor = await _context.Professors
+                .FirstOrDefaultAsync(p => p.ProfessorId == userId);
+
+            if (professor == null || project.EvaluatorId != professor.Id)
+            {
+                this.AddError("Access Denied", "You can only evaluate projects assigned to you");
+                return RedirectToAction("Index");
+            }
+
+            ViewBag.PageTitle = $"Evaluate: {project.Title}";
+            return View(project);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SubmitEvaluation(int projectId, string evaluationComments, string grade, bool approve)
+        {
+            var userId = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Json(new { success = false, message = "Authentication required" });
+            }
+
+            var project = await _context.Projects
+                .Include(p => p.Student)
+                .Include(p => p.Evaluator)
+                .FirstOrDefaultAsync(p => p.Id == projectId);
+
+            if (project == null)
+            {
+                return Json(new { success = false, message = "Project not found" });
+            }
+
+            var professor = await _context.Professors
+                .FirstOrDefaultAsync(p => p.ProfessorId == userId);
+
+            if (professor == null || project.EvaluatorId != professor.Id)
+            {
+                return Json(new { success = false, message = "Access denied" });
+            }
+
+            project.ReviewComments = evaluationComments;
+            project.Grade = grade;
+            project.ReviewDate = DateTime.Now;
+            project.ReviewedBy = userId;
+            project.Status = approve ? ProjectStatus.ReviewApproved : ProjectStatus.ReviewRejected;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                
+                string message = approve ? 
+                    $"Project '{project.Title}' has been approved with grade {grade}" :
+                    $"Project '{project.Title}' has been rejected";
+                    
+                return Json(new { success = true, message = message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Failed to submit evaluation: " + ex.Message });
+            }
+        }
+
+        public async Task<IActionResult> StudentProgress(int studentId)
+        {
+            var userId = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var student = await _context.Students
+                .Include(s => s.Department)
+                .Include(s => s.Projects)
+                    .ThenInclude(p => p.Supervisor)
+                .FirstOrDefaultAsync(s => s.Id == studentId);
+
+            if (student == null)
+            {
+                return NotFound();
+            }
+
+            var professor = await _context.Professors
+                .FirstOrDefaultAsync(p => p.ProfessorId == userId);
+
+            if (professor == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            // Check if professor supervises or evaluates any project for this student
+            var hasAccess = student.Projects.Any(p => 
+                p.SupervisorId == professor.Id || p.EvaluatorId == professor.Id);
+
+            if (!hasAccess)
+            {
+                this.AddError("Access Denied", "You can only view progress for students you supervise or evaluate");
+                return RedirectToAction("Index");
+            }
+
+            ViewBag.PageTitle = $"Progress: {student.FullName}";
+            return View(student);
+        }
+
+        public async Task<IActionResult> Notifications()
+        {
+            var userId = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var notifications = await _context.Notifications
+                .Where(n => n.UserId == userId && n.UserRole == UserRole.Professor)
+                .OrderByDescending(n => n.CreatedDate)
+                .Take(50)
+                .ToListAsync();
+
+            ViewBag.PageTitle = "My Notifications";
+            return View(notifications);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> MarkNotificationRead(int notificationId)
+        {
+            var userId = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Json(new { success = false, message = "Authentication required" });
+            }
+
+            var notification = await _context.Notifications
+                .FirstOrDefaultAsync(n => n.Id == notificationId && n.UserId == userId);
+
+            if (notification == null)
+            {
+                return Json(new { success = false, message = "Notification not found" });
+            }
+
+            notification.IsRead = true;
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true });
+        }
     }
 }

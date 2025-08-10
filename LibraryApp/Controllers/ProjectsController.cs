@@ -90,22 +90,11 @@ namespace LibraryApp.Controllers
 
         // GET: Projects/Create
         [AdminOnly]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            var students = _context.Students.Include(s => s.Department)
-                .Select(s => new { 
-                    Id = s.Id, 
-                    DisplayText = s.FirstName + " " + s.LastName + " (" + s.StudentNumber + ")"
-                }).ToList();
-                
-            var professors = _context.Professors.Include(s => s.Department)
-                .Select(s => new { 
-                    Id = s.Id, 
-                    DisplayText = s.Title + " " + s.FirstName + " " + s.LastName + " - " + s.Department.Name
-                }).ToList();
-                
-            ViewData["StudentId"] = new SelectList(students, "Id", "DisplayText");
-            ViewData["SupervisorId"] = new SelectList(professors, "Id", "DisplayText");
+            ViewData["StudentId"] = await GetStudentsSelectListAsync();
+            ViewData["SupervisorId"] = await GetProfessorsSelectListAsync(role: ProfessorRole.Supervisor);
+            ViewData["EvaluatorId"] = await GetProfessorsSelectListAsync(role: ProfessorRole.Evaluator);
             return View();
         }
 
@@ -156,20 +145,9 @@ namespace LibraryApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
             
-            var students = _context.Students.Include(s => s.Department)
-                .Select(s => new { 
-                    Id = s.Id, 
-                    DisplayText = s.FirstName + " " + s.LastName + " (" + s.StudentNumber + ")"
-                }).ToList();
-                
-            var professors = _context.Professors.Include(s => s.Department)
-                .Select(s => new { 
-                    Id = s.Id, 
-                    DisplayText = s.Title + " " + s.FirstName + " " + s.LastName + " - " + s.Department.Name
-                }).ToList();
-                
-            ViewData["StudentId"] = new SelectList(students, "Id", "DisplayText", project.StudentId);
-            ViewData["SupervisorId"] = new SelectList(professors, "Id", "DisplayText", project.SupervisorId);
+            ViewData["StudentId"] = await GetStudentsSelectListAsync(project.StudentId);
+            ViewData["SupervisorId"] = await GetProfessorsSelectListAsync(project.SupervisorId, ProfessorRole.Supervisor);
+            ViewData["EvaluatorId"] = await GetProfessorsSelectListAsync(project.EvaluatorId, ProfessorRole.Evaluator);
             return View(project);
         }
 
@@ -188,20 +166,9 @@ namespace LibraryApp.Controllers
                 return NotFound();
             }
             
-            var students = _context.Students.Include(s => s.Department)
-                .Select(s => new { 
-                    Id = s.Id, 
-                    DisplayText = s.FirstName + " " + s.LastName + " (" + s.StudentNumber + ")"
-                }).ToList();
-                
-            var professors = _context.Professors.Include(s => s.Department)
-                .Select(s => new { 
-                    Id = s.Id, 
-                    DisplayText = s.Title + " " + s.FirstName + " " + s.LastName + " - " + s.Department.Name
-                }).ToList();
-                
-            ViewData["StudentId"] = new SelectList(students, "Id", "DisplayText", project.StudentId);
-            ViewData["SupervisorId"] = new SelectList(professors, "Id", "DisplayText", project.SupervisorId);
+            ViewData["StudentId"] = await GetStudentsSelectListAsync(project.StudentId);
+            ViewData["SupervisorId"] = await GetProfessorsSelectListAsync(project.SupervisorId, ProfessorRole.Supervisor);
+            ViewData["EvaluatorId"] = await GetProfessorsSelectListAsync(project.EvaluatorId, ProfessorRole.Evaluator);
             return View(project);
         }
 
@@ -290,8 +257,10 @@ namespace LibraryApp.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["StudentId"] = new SelectList(_context.Students.Include(s => s.Department), "Id", "FirstName", project.StudentId);
-            ViewData["SupervisorId"] = new SelectList(_context.Professors.Include(s => s.Department), "Id", "FirstName", project.SupervisorId);
+            
+            ViewData["StudentId"] = await GetStudentsSelectListAsync(project.StudentId);
+            ViewData["SupervisorId"] = await GetProfessorsSelectListAsync(project.SupervisorId, ProfessorRole.Supervisor);
+            ViewData["EvaluatorId"] = await GetProfessorsSelectListAsync(project.EvaluatorId, ProfessorRole.Evaluator);
             return View(project);
         }
 
@@ -335,6 +304,102 @@ namespace LibraryApp.Controllers
         private bool ProjectExists(int id)
         {
             return _context.Projects.Any(e => e.Id == id);
+        }
+
+        // Helper methods for building dropdown lists
+        private async Task<SelectList> GetStudentsSelectListAsync(int? selectedValue = null)
+        {
+            var students = await _context.Students
+                .Include(s => s.Department)
+                .OrderBy(s => s.LastName)
+                .ThenBy(s => s.FirstName)
+                .Select(s => new { 
+                    Id = s.Id, 
+                    DisplayText = $"{s.FirstName} {s.LastName} ({s.StudentNumber}) - {s.Department.Name}"
+                })
+                .ToListAsync();
+                
+            return new SelectList(students, "Id", "DisplayText", selectedValue);
+        }
+
+        private async Task<SelectList> GetProfessorsSelectListAsync(int? selectedValue = null, ProfessorRole? role = null)
+        {
+            var query = _context.Professors.Include(p => p.Department).AsQueryable();
+            
+            if (role.HasValue)
+            {
+                query = query.Where(p => p.Role == role.Value || p.Role == ProfessorRole.Both);
+            }
+
+            var professors = await query
+                .OrderBy(p => p.LastName)
+                .ThenBy(p => p.FirstName)
+                .Select(p => new { 
+                    Id = p.Id, 
+                    DisplayText = $"{p.Title} {p.FirstName} {p.LastName} - {p.Department.Name}"
+                })
+                .ToListAsync();
+                
+            return new SelectList(professors, "Id", "DisplayText", selectedValue);
+        }
+
+        // Additional action methods for enhanced functionality
+        [HttpPost]
+        [AdminOnly]
+        public async Task<IActionResult> UpdateStatus(int id, ProjectStatus status)
+        {
+            var project = await _context.Projects
+                .Include(p => p.Student)
+                .Include(p => p.Supervisor)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (project == null)
+            {
+                return Json(new { success = false, message = "Project not found" });
+            }
+
+            var oldStatus = project.Status;
+            project.Status = status;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                
+                // Log the status change if ProjectActivityLog service is available
+                // This would be better implemented with the workflow controller
+                
+                return Json(new { 
+                    success = true, 
+                    message = $"Project status updated from {oldStatus} to {status}",
+                    newStatus = status.ToString()
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Failed to update status: " + ex.Message });
+            }
+        }
+
+        [HttpGet]
+        [AdminOnly]
+        public async Task<IActionResult> GetProjectsByStatus(ProjectStatus status)
+        {
+            var projects = await _context.Projects
+                .Include(p => p.Student)
+                .Include(p => p.Supervisor)
+                .Where(p => p.Status == status)
+                .OrderByDescending(p => p.SubmissionDate)
+                .Select(p => new {
+                    p.Id,
+                    p.Title,
+                    StudentName = p.Student.FullName,
+                    SupervisorName = p.Supervisor.DisplayName,
+                    p.SubmissionDate,
+                    p.Status
+                })
+                .ToListAsync();
+
+            return Json(projects);
         }
     }
 }
