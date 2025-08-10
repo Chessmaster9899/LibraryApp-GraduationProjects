@@ -1,4 +1,5 @@
 using LibraryApp.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace LibraryApp.Models;
 
@@ -92,4 +93,49 @@ public class CommunicationViewModel
     public DateTime? ExpiryDate { get; set; }
     public bool IsUrgent { get; set; }
     public List<Announcement> RecentAnnouncements { get; set; } = new();
+}
+
+// Role Management ViewModels
+public class UserRoleManagementViewModel
+{
+    public List<User> Users { get; set; } = new();
+    public List<Role> AllRoles { get; set; } = new();
+    public Dictionary<int, List<Role>> UserRoleAssignments { get; set; } = new();
+}
+
+public class CreateRoleViewModel
+{
+    [Required]
+    [StringLength(50)]
+    public string Name { get; set; } = "";
+    
+    [StringLength(500)]
+    public string? Description { get; set; }
+    
+    public List<Permission> AllPermissions { get; set; } = new();
+    public List<PermissionType> SelectedPermissions { get; set; } = new();
+}
+
+public class EditRoleViewModel
+{
+    public int Id { get; set; }
+    
+    [Required]
+    [StringLength(50)]
+    public string Name { get; set; } = "";
+    
+    [StringLength(500)]
+    public string? Description { get; set; }
+    
+    public List<Permission> AllPermissions { get; set; } = new();
+    public List<PermissionType> SelectedPermissions { get; set; } = new();
+    public bool IsSystemRole { get; set; }
+}
+
+public class GalleryAdminSettingsViewModel
+{
+    public int TotalProjects { get; set; }
+    public int PublicProjects { get; set; }
+    public int FeaturedProjects { get; set; }
+    public int RecentlyAdded { get; set; }
 }

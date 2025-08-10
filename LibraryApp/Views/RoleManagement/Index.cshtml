@@ -1,0 +1,419 @@
+@model RoleManagementViewModel
+@{
+    ViewData["Title"] = "Role Management";
+}
+
+<div class="content-wrapper">
+    <div class="page-header">
+        <h1 class="page-title">Role & Permission Management</h1>
+        <p class="page-description">Manage system roles and permissions</p>
+        <div class="page-actions">
+            <a href="@Url.Action("CreateRole")" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create New Role
+            </a>
+            <a href="@Url.Action("UserRoles")" class="btn btn-outline-primary">
+                <i class="fas fa-users"></i> Manage User Roles
+            </a>
+        </div>
+    </div>
+
+    <div class="roles-grid">
+        @foreach (var role in Model.Roles)
+        {
+            <div class="role-card" data-role-id="@role.Id">
+                <div class="role-header">
+                    <div class="role-info">
+                        <h3 class="role-name">@role.Name</h3>
+                        @if (role.IsSystemRole)
+                        {
+                            <span class="role-badge system-role">System Role</span>
+                        }
+                        else
+                        {
+                            <span class="role-badge custom-role">Custom Role</span>
+                        }
+                    </div>
+                    <div class="role-actions">
+                        <a href="@Url.Action("EditRole", new { id = role.Id })" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        @if (!role.IsSystemRole)
+                        {
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteRole(@role.Id, '@role.Name')">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <div class="role-description">
+                    <p>@(role.Description ?? "No description provided")</p>
+                </div>
+
+                <div class="role-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">@Model.RolePermissions[role.Id].Count</span>
+                        <span class="stat-label">Permissions</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">@role.UserRoles.Count</span>
+                        <span class="stat-label">Users</span>
+                    </div>
+                </div>
+
+                <div class="permissions-section">
+                    <h5 class="permissions-title">Permissions</h5>
+                    <div class="permissions-grid">
+                        @{
+                            var permissions = Model.RolePermissions[role.Id].GroupBy(p => p.Category);
+                        }
+                        @foreach (var categoryGroup in permissions)
+                        {
+                            <div class="permission-category">
+                                <h6 class="category-title">@categoryGroup.Key</h6>
+                                <div class="permission-list">
+                                    @foreach (var permission in categoryGroup.Take(3))
+                                    {
+                                        <span class="permission-tag">@permission.Name</span>
+                                    }
+                                    @if (categoryGroup.Count() > 3)
+                                    {
+                                        <span class="more-permissions">+@(categoryGroup.Count() - 3) more</span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (!Model.Roles.Any())
+    {
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <h3>No Roles Found</h3>
+            <p>Create your first custom role to get started with role management.</p>
+            <a href="@Url.Action("CreateRole")" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create First Role
+            </a>
+        </div>
+    }
+</div>
+
+<script>
+function deleteRole(roleId, roleName) {
+    if (confirm(`Are you sure you want to delete the role "${roleName}"? This action cannot be undone.`)) {
+        fetch('@Url.Action("DeleteRole")', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+            },
+            body: JSON.stringify({ id: roleId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast(data.message, 'success');
+                document.querySelector(`[data-role-id="${roleId}"]`).remove();
+            } else {
+                showToast(data.message, 'error');
+            }
+        })
+        .catch(error => {
+            showToast('An error occurred while deleting the role', 'error');
+        });
+    }
+}
+</script>
+
+<style>
+.content-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.page-header .page-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.page-description {
+    font-size: 1.1rem;
+    color: #6c757d;
+    margin-bottom: 0;
+}
+
+.roles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+}
+
+.role-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.role-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+.role-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.role-info {
+    flex: 1;
+}
+
+.role-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+}
+
+.role-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.system-role {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.custom-role {
+    background: rgba(255, 193, 7, 0.9);
+    color: #212529;
+}
+
+.role-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.role-description {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.role-description p {
+    margin: 0;
+    color: #6c757d;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.role-stats {
+    padding: 1rem 1.5rem;
+    display: flex;
+    gap: 2rem;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.permissions-section {
+    padding: 1.5rem;
+}
+
+.permissions-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 1rem;
+}
+
+.permissions-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.permission-category {
+    border-left: 3px solid var(--primary-color);
+    padding-left: 1rem;
+}
+
+.category-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.permission-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.permission-tag {
+    background: #f8f9fa;
+    color: #495057;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border: 1px solid #dee2e6;
+}
+
+.more-permissions {
+    color: var(--primary-color);
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.25rem 0.5rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #6c757d;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: #dee2e6;
+    margin-bottom: 2rem;
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #495057;
+}
+
+.empty-state p {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+.btn-outline-primary {
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-outline-danger {
+    border: 1px solid #dc3545;
+    color: #dc3545;
+    background: transparent;
+}
+
+.btn-outline-danger:hover {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+@@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .page-header .page-actions {
+        flex-direction: column;
+        margin-top: 1rem;
+    }
+    
+    .roles-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .role-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .role-actions {
+        align-self: stretch;
+        justify-content: center;
+    }
+}
+</style>

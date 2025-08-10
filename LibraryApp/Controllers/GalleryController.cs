@@ -283,11 +283,3 @@ public class ProjectDetailViewModel
     public bool CanManage { get; set; }
     public bool ShowComments { get; set; }
 }
-
-public class GalleryAdminSettingsViewModel
-{
-    public int TotalProjects { get; set; }
-    public int PublicProjects { get; set; }
-    public int FeaturedProjects { get; set; }
-    public int RecentlyAdded { get; set; }
-}
