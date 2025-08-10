@@ -1,15 +1,45 @@
 @model IEnumerable<LibraryApp.Models.Department>
 
 @{
-    ViewData["Title"] = "Departments";
+    ViewData["Title"] = "Department Management";
 }
 
+<!-- Department Management Header -->
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>Departments</h1>
+    <h1><i class="fas fa-building me-2"></i>Department Management</h1>
     <a asp-action="Create" class="btn btn-primary">
         <i class="fas fa-plus me-2"></i>Add New Department
     </a>
 </div>
+
+<!-- Navigation Tabs for Department Features -->
+<ul class="nav nav-tabs mb-4" id="departmentTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="departments-list-tab" data-bs-toggle="tab" data-bs-target="#departments-list" type="button" role="tab">
+            <i class="fas fa-list me-1"></i>All Departments
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="department-analytics-tab" data-bs-toggle="tab" data-bs-target="#department-analytics" type="button" role="tab">
+            <i class="fas fa-chart-bar me-1"></i>Analytics
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="department-structure-tab" data-bs-toggle="tab" data-bs-target="#department-structure" type="button" role="tab">
+            <i class="fas fa-sitemap me-1"></i>Structure
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="department-reports-tab" data-bs-toggle="tab" data-bs-target="#department-reports" type="button" role="tab">
+            <i class="fas fa-file-alt me-1"></i>Reports
+        </button>
+    </li>
+</ul>
+
+<!-- Tab Content -->
+<div class="tab-content" id="departmentTabContent">
+    <!-- Departments List Tab -->
+    <div class="tab-pane fade show active" id="departments-list" role="tabpanel" aria-labelledby="departments-list-tab">
 
 <div class="row">
     @foreach (var department in Model)
@@ -26,13 +56,17 @@
                     }
                     <hr>
                     <div class="row text-center">
-                        <div class="col-6">
+                        <div class="col-4">
                             <h6 class="text-primary">@department.Students.Count</h6>
                             <small class="text-muted">Students</small>
                         </div>
-                        <div class="col-6">
+                        <div class="col-4">
                             <h6 class="text-success">@department.Professors.Count</h6>
                             <small class="text-muted">Professors</small>
+                        </div>
+                        <div class="col-4">
+                            <h6 class="text-info">@department.Students.SelectMany(s => s.Projects).Count()</h6>
+                            <small class="text-muted">Projects</small>
                         </div>
                     </div>
                 </div>
@@ -59,3 +93,262 @@
         </a>
     </div>
 }
+
+    </div>
+
+    <!-- Department Analytics Tab -->
+    <div class="tab-pane fade" id="department-analytics" role="tabpanel" aria-labelledby="department-analytics-tab">
+        <div class="row">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card bg-primary text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">@Model.Count()</h4>
+                                <p class="card-text">Total Departments</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-building fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card bg-success text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">@Model.Sum(d => d.Students.Count)</h4>
+                                <p class="card-text">Total Students</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-user-graduate fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card bg-info text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">@Model.Sum(d => d.Professors.Count)</h4>
+                                <p class="card-text">Total Professors</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-chalkboard-teacher fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card bg-warning text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">@Model.Sum(d => d.Students.SelectMany(s => s.Projects).Count())</h4>
+                                <p class="card-text">Total Projects</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-project-diagram fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Department Distribution Charts -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Student Distribution by Department</h5>
+                    </div>
+                    <div class="card-body">
+                        @{
+                            var totalStudents = Model.Sum(d => d.Students.Count);
+                        }
+                        @foreach (var dept in Model.OrderByDescending(d => d.Students.Count))
+                        {
+                            var percentage = totalStudents > 0 ? (double)dept.Students.Count / totalStudents * 100 : 0;
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>@dept.Name</span>
+                                    <span>@dept.Students.Count students</span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar" role="progressbar" style="width: @percentage%" aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Professor Distribution by Department</h5>
+                    </div>
+                    <div class="card-body">
+                        @{
+                            var totalProfessors = Model.Sum(d => d.Professors.Count);
+                        }
+                        @foreach (var dept in Model.OrderByDescending(d => d.Professors.Count))
+                        {
+                            var percentage = totalProfessors > 0 ? (double)dept.Professors.Count / totalProfessors * 100 : 0;
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>@dept.Name</span>
+                                    <span>@dept.Professors.Count professors</span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: @percentage%" aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Department Structure Tab -->
+    <div class="tab-pane fade" id="department-structure" role="tabpanel" aria-labelledby="department-structure-tab">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">University Organizational Structure</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Department</th>
+                                <th>Description</th>
+                                <th>Students</th>
+                                <th>Professors</th>
+                                <th>Projects</th>
+                                <th>Student/Professor Ratio</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var dept in Model.OrderBy(d => d.Name))
+                            {
+                                var studentCount = dept.Students.Count;
+                                var professorCount = dept.Professors.Count;
+                                var ratio = professorCount > 0 ? (double)studentCount / professorCount : 0;
+                                
+                                <tr>
+                                    <td>
+                                        <strong>@dept.Name</strong>
+                                    </td>
+                                    <td>@dept.Description</td>
+                                    <td><span class="badge bg-primary">@studentCount</span></td>
+                                    <td><span class="badge bg-success">@professorCount</span></td>
+                                    <td><span class="badge bg-info">@dept.Students.SelectMany(s => s.Projects).Count()</span></td>
+                                    <td>
+                                        <span class="badge @(ratio > 15 ? "bg-danger" : ratio > 10 ? "bg-warning" : "bg-success")">
+                                            @ratio.ToString("F1"):1
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Department Reports Tab -->
+    <div class="tab-pane fade" id="department-reports" role="tabpanel" aria-labelledby="department-reports-tab">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Generate Department Reports</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="reportForm">
+                            <div class="mb-3">
+                                <label for="reportType" class="form-label">Report Type</label>
+                                <select class="form-select" id="reportType" name="reportType">
+                                    <option value="overview">Department Overview</option>
+                                    <option value="detailed">Detailed Analysis</option>
+                                    <option value="comparison">Department Comparison</option>
+                                    <option value="trends">Enrollment Trends</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="departments" class="form-label">Select Departments</label>
+                                <select class="form-select" id="departments" name="departments" multiple>
+                                    <option value="all">All Departments</option>
+                                    @foreach (var dept in Model)
+                                    {
+                                        <option value="@dept.Id">@dept.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="format" class="form-label">Export Format</label>
+                                <select class="form-select" id="format" name="format">
+                                    <option value="csv">CSV</option>
+                                    <option value="pdf">PDF</option>
+                                    <option value="excel">Excel</option>
+                                </select>
+                            </div>
+                            <button type="button" class="btn btn-primary" onclick="generateReport()">
+                                <i class="fas fa-file-export me-1"></i>Generate Report
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">Quick Actions</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary btn-sm" onclick="exportDepartmentList()">
+                                <i class="fas fa-download me-1"></i>Export Department List
+                            </button>
+                            <button class="btn btn-outline-info btn-sm" onclick="generateSummary()">
+                                <i class="fas fa-chart-pie me-1"></i>Generate Summary
+                            </button>
+                            <button class="btn btn-outline-success btn-sm" onclick="checkStructure()">
+                                <i class="fas fa-check-circle me-1"></i>Validate Structure
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function generateReport() {
+    const form = document.getElementById('reportForm');
+    const formData = new FormData(form);
+    // This would generate the report
+    alert('Report would be generated based on selected parameters');
+}
+
+function exportDepartmentList() {
+    window.location.href = '@Url.Action("Export", "Departments")';
+}
+
+function generateSummary() {
+    alert('Department summary would be generated here');
+}
+
+function checkStructure() {
+    alert('Department structure validation would be performed here');
+}
+</script>
