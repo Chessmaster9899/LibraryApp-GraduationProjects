@@ -119,13 +119,13 @@ dt, dd {
   color: #6b7280 !important;
 }
 
-/* Fix white text over white background issues - IMPROVED VERSION */
-/* Only allow white text on dark backgrounds */
+/* Fix white text over white background issues - COMPREHENSIVE VERSION */
+/* Default: Make text-white use dark color instead */
 .text-white {
   color: #1f2937 !important;
 }
 
-/* Allow white text only on dark backgrounds */
+/* Allow white text ONLY on explicitly dark backgrounds */
 .bg-primary .text-white,
 .bg-dark .text-white,
 .bg-secondary .text-white,
@@ -138,7 +138,16 @@ dt, dd {
 .navbar .text-white,
 .alert-primary .text-white,
 .alert-dark .text-white,
-.alert-secondary .text-white {
+.alert-secondary .text-white,
+/* Hero sections and similar with dark backgrounds */
+.hero-section .text-white,
+.hero-content .text-white,
+/* Cards with explicit dark backgrounds */
+[style*="background-color: #"] .text-white,
+[style*="background: linear-gradient"] .text-white,
+/* Dark overlays and similar */
+.overlay .text-white,
+.bg-overlay .text-white {
   color: white !important;
 }
 
@@ -151,6 +160,23 @@ dt, dd {
 /* Ensure card headers on light backgrounds use dark text */
 .card .text-white:not(.bg-primary *):not(.bg-dark *):not(.bg-secondary *):not(.bg-success *):not(.bg-info *):not(.bg-warning *):not(.bg-danger *) {
   color: #1f2937 !important;
+}
+
+/* Additional safeguards for common scenarios */
+.container .text-white:not(.bg-primary *):not(.bg-dark *):not(.bg-secondary *):not(.bg-success *):not(.bg-info *):not(.bg-warning *):not(.bg-danger *):not(.hero-section *):not(.hero-content *) {
+  color: #1f2937 !important;
+}
+
+/* Ensure proper contrast for buttons */
+.btn-outline-light {
+  color: #2563eb !important;
+  border-color: #2563eb !important;
+}
+
+.btn-outline-light:hover {
+  background-color: #2563eb !important;
+  border-color: #2563eb !important;
+  color: white !important;
 }
 
 /* Professor interface specific fixes */
@@ -874,16 +900,53 @@ body {
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/* Enhanced text visibility on background */
-h1:not(.card h1):not(.card-header h1):not(.card-body h1),
-h2:not(.card h2):not(.card-header h2):not(.card-body h2),
-h3:not(.card h3):not(.card-header h3):not(.card-body h3),
-h4:not(.card h4):not(.card-header h4):not(.card-body h4),
-h5:not(.card h5):not(.card-header h5):not(.card-body h5),
-h6:not(.card h6):not(.card-header h6):not(.card-body h6) {
+/* Hero Section Styling - Ensure dark background for white text */
+.hero-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 100%);
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+}
+
+.gallery-container .hero-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Enhanced text visibility on background - more specific */
+.container h1:not(.card h1):not(.card-header h1):not(.card-body h1):not(.navbar h1),
+.container h2:not(.card h2):not(.card-header h2):not(.card-body h2):not(.navbar h2),
+.container h3:not(.card h3):not(.card-header h3):not(.card-body h3):not(.navbar h3),
+.container h4:not(.card h4):not(.card-header h4):not(.card-body h4):not(.navbar h4),
+.container h5:not(.card h5):not(.card-header h5):not(.card-body h5):not(.navbar h5),
+.container h6:not(.card h6):not(.card-header h6):not(.card-body h6):not(.navbar h6) {
+  color: #1f2937 !important;
+  font-weight: 600 !important;
+  text-shadow: none !important;
+}
+
+/* Hero sections should have white text with shadow */
+.hero-section h1, .hero-section h2, .hero-section h3, .hero-section h4, .hero-section h5, .hero-section h6,
+.hero-content h1, .hero-content h2, .hero-content h3, .hero-content h4, .hero-content h5, .hero-content h6 {
   color: white !important;
   font-weight: 600 !important;
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5) !important;
 }
 
 /* Form labels and text on background */
