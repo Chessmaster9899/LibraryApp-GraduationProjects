@@ -22,6 +22,7 @@ namespace LibraryApp.Controllers
         {
             var departments = await _context.Departments
                 .Include(d => d.Students)
+                    .ThenInclude(s => s.Projects)
                 .Include(d => d.Professors)
                 .ToListAsync();
             return View(departments);
@@ -156,6 +157,33 @@ namespace LibraryApp.Controllers
         private bool DepartmentExists(int id)
         {
             return _context.Departments.Any(e => e.Id == id);
+        }
+
+        // Export Departments to CSV
+        [HttpGet]
+        public async Task<IActionResult> Export()
+        {
+            var departments = await _context.Departments
+                .Include(d => d.Students)
+                .Include(d => d.Professors)
+                .OrderBy(d => d.Name)
+                .ToListAsync();
+
+            var csv = new System.Text.StringBuilder();
+            csv.AppendLine("Department Name,Description,Student Count,Professor Count,Projects Count,Student/Professor Ratio");
+
+            foreach (var dept in departments)
+            {
+                var studentCount = dept.Students.Count;
+                var professorCount = dept.Professors.Count;
+                var projectCount = dept.Students.SelectMany(s => s.Projects).Count();
+                var ratio = professorCount > 0 ? (double)studentCount / professorCount : 0;
+
+                csv.AppendLine($"{dept.Name},{dept.Description},{studentCount},{professorCount},{projectCount},{ratio:F1}");
+            }
+
+            var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
+            return File(bytes, "text/csv", $"departments_export_{DateTime.Now:yyyyMMdd}.csv");
         }
     }
 }

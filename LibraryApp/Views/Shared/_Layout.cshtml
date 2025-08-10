@@ -118,6 +118,19 @@
                             var userRole = Context.Session.GetString("UserRole");
                             if (userRole == "Admin")
                             {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="adminSystemDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-cogs me-1"></i>System
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="adminSystemDropdown">
+                                        <li><a class="dropdown-item" asp-controller="Home" asp-action="Index"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Analytics"><i class="fas fa-chart-line me-2"></i>Analytics</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="AuditTrail"><i class="fas fa-history me-2"></i>Audit Trail</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Communication"><i class="fas fa-bullhorn me-2"></i>Communications</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" asp-controller="RoleManagement" asp-action="Index"><i class="fas fa-user-shield me-2"></i>Role Management</a></li>
+                                    </ul>
+                                </li>
                                 <li class="nav-item">
                                     <a class="nav-link" asp-area="" asp-controller="Students" asp-action="Index">
                                         <i class="fas fa-user-graduate me-1"></i>Students
@@ -130,12 +143,7 @@
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" asp-area="" asp-controller="Projects" asp-action="Index">
-                                        <i class="fas fa-project-diagram me-1"></i>All Projects
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-area="" asp-controller="ProjectWorkflow" asp-action="Index">
-                                        <i class="fas fa-tasks me-1"></i>Project Workflow
+                                        <i class="fas fa-project-diagram me-1"></i>Projects
                                     </a>
                                 </li>
                                 <li class="nav-item">
@@ -169,6 +177,11 @@
                                         <i class="fas fa-clipboard-check me-1"></i>Evaluated Projects
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Notifications" asp-action="Index">
+                                        <i class="fas fa-bell me-1"></i>Notifications
+                                    </a>
+                                </li>
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" href="#" id="professorDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         <i class="fas fa-users me-1"></i>Students
@@ -184,11 +197,6 @@
                                 </li>
                             }
                         }
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">
-                                <i class="fas fa-shield-alt me-1"></i>Privacy
-                            </a>
-                        </li>
                     </ul>
                     
                     <!-- User Authentication Section -->

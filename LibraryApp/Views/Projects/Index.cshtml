@@ -1,53 +1,77 @@
 @model IEnumerable<LibraryApp.Models.Project>
 
 @{
-    ViewData["Title"] = "Projects";
+    ViewData["Title"] = "Project Management";
 }
 
-<!-- Professional Projects Management -->
-<div class="dashboard-container">
-    <!-- Header Section -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="dashboard-title text-on-light">All Projects</h1>
-            <p class="text-muted-professional">Manage and monitor graduation projects</p>
-        </div>
-        <a asp-action="Create" class="btn btn-primary btn-professional">
-            <i class="fas fa-plus me-2"></i>Create New Project
-        </a>
-    </div>
+<!-- Project Management Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-project-diagram me-2"></i>Project Management</h1>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Create New Project
+    </a>
+</div>
 
-    <!-- Search and Filter Section -->
-    <div class="content-card mb-4">
-        <div class="card-header">
-            <h5 class="card-title-professional">
-                <i class="fas fa-filter text-primary me-2"></i>Search & Filter
-            </h5>
-        </div>
-        <div class="card-body">
-            <form method="get">
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label for="searchTitle" class="form-label text-professional">Search by Title</label>
-                        <input type="text" class="form-control" id="searchTitle" name="searchTitle" 
-                               placeholder="Enter project title..." value="@ViewData["SearchTitle"]">
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label for="statusFilter" class="form-label text-professional">Filter by Status</label>
-                        <select class="form-select" id="statusFilter" name="statusFilter">
-                            <option value="">All Statuses</option>
-                            @foreach (var status in Enum.GetValues<LibraryApp.Models.ProjectStatus>())
-                            {
-                                <option value="@status" selected="@(ViewData["StatusFilter"]?.ToString() == status.ToString())">
-                                    @status
-                                </option>
-                            }
-                        </select>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label for="supervisorFilter" class="form-label text-professional">Filter by Supervisor</label>
-                        <select class="form-select" id="supervisorFilter" name="supervisorFilter">
-                            <option value="">All Supervisors</option>
+<!-- Navigation Tabs for Project Features -->
+<ul class="nav nav-tabs mb-4" id="projectTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="projects-list-tab" data-bs-toggle="tab" data-bs-target="#projects-list" type="button" role="tab">
+            <i class="fas fa-list me-1"></i>All Projects
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="project-submissions-tab" data-bs-toggle="tab" data-bs-target="#project-submissions" type="button" role="tab">
+            <i class="fas fa-upload me-1"></i>Submissions
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="project-analytics-tab" data-bs-toggle="tab" data-bs-target="#project-analytics" type="button" role="tab">
+            <i class="fas fa-chart-bar me-1"></i>Analytics
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="project-workflow-tab" data-bs-toggle="tab" data-bs-target="#project-workflow" type="button" role="tab">
+            <i class="fas fa-tasks me-1"></i>Workflow
+        </button>
+    </li>
+</ul>
+
+<!-- Tab Content -->
+<div class="tab-content" id="projectTabContent">
+    <!-- Projects List Tab -->
+    <div class="tab-pane fade show active" id="projects-list" role="tabpanel" aria-labelledby="projects-list-tab">
+
+<!-- Search and Filter Section -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-filter text-primary me-2"></i>Search & Filter
+        </h5>
+    </div>
+    <div class="card-body">
+        <form method="get">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="searchTitle" class="form-label">Search by Title</label>
+                    <input type="text" class="form-control" id="searchTitle" name="searchTitle" 
+                           placeholder="Enter project title..." value="@ViewData["SearchTitle"]">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="statusFilter" class="form-label">Filter by Status</label>
+                    <select class="form-select" id="statusFilter" name="statusFilter">
+                        <option value="">All Statuses</option>
+                        @foreach (var status in Enum.GetValues<LibraryApp.Models.ProjectStatus>())
+                        {
+                            <option value="@status" selected="@(ViewData["StatusFilter"]?.ToString() == status.ToString())">
+                                @status
+                            </option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="supervisorFilter" class="form-label">Filter by Supervisor</label>
+                    <select class="form-select" id="supervisorFilter" name="supervisorFilter">
+                        <option value="">All Supervisors</option>
                             @if (ViewData["Supervisors"] is IEnumerable<dynamic> supervisors)
                             {
                                 @foreach (var supervisor in supervisors)
@@ -204,11 +228,201 @@
     }
 </div>
 
+    </div>
+
+    <!-- Project Submissions Tab -->
+    <div class="tab-pane fade" id="project-submissions" role="tabpanel" aria-labelledby="project-submissions-tab">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Pending Project Submissions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center py-4">
+                            <i class="fas fa-upload fa-3x text-muted mb-3"></i>
+                            <h5>Project Submissions Management</h5>
+                            <p class="text-muted">Review and manage project submissions from students.</p>
+                            <a href="@Url.Action("PendingSubmissions", "Admin")" class="btn btn-primary">
+                                <i class="fas fa-tasks me-1"></i>View Pending Submissions
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Analytics Tab -->
+    <div class="tab-pane fade" id="project-analytics" role="tabpanel" aria-labelledby="project-analytics-tab">
+        <div class="row">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card bg-primary text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">@Model.Count()</h4>
+                                <p class="card-text">Total Projects</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-project-diagram fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card bg-success text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">@Model.Where(p => p.Status == LibraryApp.Models.ProjectStatus.Completed).Count()</h4>
+                                <p class="card-text">Completed</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-check-circle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card bg-warning text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">@Model.Where(p => p.Status == LibraryApp.Models.ProjectStatus.InProgress).Count()</h4>
+                                <p class="card-text">In Progress</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-clock fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card bg-info text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">@Model.Where(p => p.Status == LibraryApp.Models.ProjectStatus.Defended).Count()</h4>
+                                <p class="card-text">Defended</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-graduation-cap fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Distribution Chart -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Projects by Status</h5>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var status in Enum.GetValues<LibraryApp.Models.ProjectStatus>())
+                        {
+                            var count = Model.Count(p => p.Status == status);
+                            var percentage = Model.Any() ? (double)count / Model.Count() * 100 : 0;
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>@status</span>
+                                    <span>@count projects</span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar" role="progressbar" style="width: @percentage%" aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Recent Project Activities</h5>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var project in Model.OrderByDescending(p => p.SubmissionDate).Take(5))
+                        {
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="avatar avatar-sm me-3">
+                                    <div class="avatar-title bg-light rounded-circle">
+                                        <i class="fas fa-project-diagram"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-0">@project.Title</h6>
+                                    <small class="text-muted">@project.Student?.FullName</small>
+                                </div>
+                                <small class="text-muted">@project.SubmissionDate.ToString("MMM dd")</small>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Workflow Tab -->
+    <div class="tab-pane fade" id="project-workflow" role="tabpanel" aria-labelledby="project-workflow-tab">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Project Workflow Management</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Workflow Actions</h6>
+                        <div class="d-grid gap-2">
+                            <a href="@Url.Action("Index", "ProjectWorkflow")" class="btn btn-outline-primary">
+                                <i class="fas fa-tasks me-1"></i>Manage Project Workflow
+                            </a>
+                            <a href="@Url.Action("PendingSubmissions", "Admin")" class="btn btn-outline-warning">
+                                <i class="fas fa-clock me-1"></i>Review Pending Submissions
+                            </a>
+                            <button class="btn btn-outline-success" onclick="exportProjectReport()">
+                                <i class="fas fa-download me-1"></i>Generate Project Report
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Workflow Statistics</h6>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Projects Awaiting Approval
+                                <span class="badge bg-primary rounded-pill">@Model.Count(p => p.Status == LibraryApp.Models.ProjectStatus.Approved)</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Projects Under Review
+                                <span class="badge bg-warning rounded-pill">@Model.Count(p => p.Status == LibraryApp.Models.ProjectStatus.InProgress)</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Completed Projects
+                                <span class="badge bg-success rounded-pill">@Model.Count(p => p.Status == LibraryApp.Models.ProjectStatus.Completed)</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         function exportProjects() {
-            console.log('Exporting projects...');
-            // Export functionality would be implemented here
+            window.location.href = '@Url.Action("Export", "Projects")';
+        }
+
+        function exportProjectReport() {
+            window.location.href = '@Url.Action("GenerateReport", "Admin")?reportType=projects';
         }
     </script>
 }

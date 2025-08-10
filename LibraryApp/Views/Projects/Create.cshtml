@@ -4,83 +4,245 @@
     ViewData["Title"] = "Create Project";
 }
 
-<h1>Create</h1>
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Modern Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h2 mb-1 fw-bold text-dark">Create New Project</h1>
+                    <p class="text-muted mb-0">Add a new graduation project to the system</p>
+                </div>
+                <div>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Projects
+                    </a>
+                </div>
+            </div>
 
-<h4>Project</h4>
-<hr />
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="Create" enctype="multipart/form-data">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Title" class="control-label"></label>
-                <input asp-for="Title" class="form-control" />
-                <span asp-validation-for="Title" class="text-danger"></span>
+            <!-- Modern Form Card -->
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-white border-bottom">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                            <i class="fas fa-plus-circle text-primary"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title mb-0 text-dark">Project Information</h5>
+                            <small class="text-muted">Fill in the details for the new project</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Create" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        
+                        <div class="row">
+                            <!-- Basic Information Section -->
+                            <div class="col-lg-8">
+                                <h6 class="text-muted mb-3 fw-semibold">
+                                    <i class="fas fa-info-circle me-2"></i>Basic Information
+                                </h6>
+                                
+                                <div class="mb-4">
+                                    <label asp-for="Title" class="form-label fw-semibold">Project Title <span class="text-danger">*</span></label>
+                                    <input asp-for="Title" class="form-control form-control-lg" placeholder="Enter the project title..." required />
+                                    <span asp-validation-for="Title" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label asp-for="Abstract" class="form-label fw-semibold">Abstract</label>
+                                    <textarea asp-for="Abstract" class="form-control" rows="6" 
+                                              placeholder="Provide a comprehensive description of the project goals, methodology, and expected outcomes..."></textarea>
+                                    <span asp-validation-for="Abstract" class="text-danger"></span>
+                                    <div class="form-text">Describe the project's purpose, approach, and significance.</div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label asp-for="Keywords" class="form-label fw-semibold">Keywords</label>
+                                    <input asp-for="Keywords" class="form-control" 
+                                           placeholder="Machine Learning, Database, Web Development, AI" />
+                                    <span asp-validation-for="Keywords" class="text-danger"></span>
+                                    <div class="form-text">Separate keywords with commas to help categorize the project.</div>
+                                </div>
+                            </div>
+
+                            <!-- Project Details Section -->
+                            <div class="col-lg-4">
+                                <h6 class="text-muted mb-3 fw-semibold">
+                                    <i class="fas fa-cogs me-2"></i>Project Details
+                                </h6>
+                                
+                                <div class="mb-3">
+                                    <label asp-for="Status" class="form-label fw-semibold">Status</label>
+                                    <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<ProjectStatus>()">
+                                        <option value="">Select Status</option>
+                                    </select>
+                                    <span asp-validation-for="Status" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="SubmissionDate" class="form-label fw-semibold">Submission Date</label>
+                                    <input asp-for="SubmissionDate" class="form-control" type="date" 
+                                           value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                                    <span asp-validation-for="SubmissionDate" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="DefenseDate" class="form-label fw-semibold">Defense Date</label>
+                                    <input asp-for="DefenseDate" class="form-control" type="date" />
+                                    <span asp-validation-for="DefenseDate" class="text-danger"></span>
+                                    <div class="form-text">Optional - can be set later</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Grade" class="form-label fw-semibold">Grade</label>
+                                    <input asp-for="Grade" class="form-control" placeholder="A, B+, 85/100..." />
+                                    <span asp-validation-for="Grade" class="text-danger"></span>
+                                    <div class="form-text">Optional - can be assigned later</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Participants Section -->
+                        <div class="row">
+                            <div class="col-12">
+                                <h6 class="text-muted mb-3 fw-semibold">
+                                    <i class="fas fa-users me-2"></i>Project Participants
+                                </h6>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="StudentId" class="form-label fw-semibold">Student <span class="text-danger">*</span></label>
+                                    <select asp-for="StudentId" class="form-select" asp-items="ViewBag.StudentId" required>
+                                        <option value="">Select Student</option>
+                                    </select>
+                                    <span asp-validation-for="StudentId" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="SupervisorId" class="form-label fw-semibold">Supervisor <span class="text-danger">*</span></label>
+                                    <select asp-for="SupervisorId" class="form-select" asp-items="ViewBag.SupervisorId" required>
+                                        <option value="">Select Supervisor</option>
+                                    </select>
+                                    <span asp-validation-for="SupervisorId" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="EvaluatorId" class="form-label fw-semibold">Evaluator</label>
+                                    <select asp-for="EvaluatorId" class="form-select" asp-items="ViewBag.EvaluatorId">
+                                        <option value="">Select Evaluator</option>
+                                    </select>
+                                    <span asp-validation-for="EvaluatorId" class="text-danger"></span>
+                                    <div class="form-text">Optional - can be assigned later</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- File Upload Section -->
+                        <div class="row">
+                            <div class="col-12">
+                                <h6 class="text-muted mb-3 fw-semibold">
+                                    <i class="fas fa-file-upload me-2"></i>Project Files
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Project Document</label>
+                                    <input type="file" name="documentFile" class="form-control" accept=".pdf,.doc,.docx,.txt" />
+                                    <div class="form-text">Accepted formats: PDF, DOC, DOCX, TXT (Max 50MB)</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Project Poster</label>
+                                    <input type="file" name="posterFile" class="form-control" accept=".jpg,.jpeg,.png,.gif,.pdf" />
+                                    <div class="form-text">Accepted formats: JPG, PNG, GIF, PDF (Max 20MB)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="mt-4 pt-3 border-top">
+                            <div class="d-flex gap-2 justify-content-end">
+                                <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                                    <i class="fas fa-times me-1"></i>Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-save me-1"></i>Create Project
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Abstract" class="control-label"></label>
-                <textarea asp-for="Abstract" class="form-control" rows="4" placeholder="Brief description of the project..."></textarea>
-                <span asp-validation-for="Abstract" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Keywords" class="control-label"></label>
-                <input asp-for="Keywords" class="form-control" placeholder="Machine Learning, Database, Web Development" />
-                <span asp-validation-for="Keywords" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Status" class="control-label"></label>
-                <select asp-for="Status" class="form-control" asp-items="Html.GetEnumSelectList<ProjectStatus>()"></select>
-                <span asp-validation-for="Status" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="SubmissionDate" class="control-label"></label>
-                <input asp-for="SubmissionDate" class="form-control" type="date" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
-                <span asp-validation-for="SubmissionDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DefenseDate" class="control-label"></label>
-                <input asp-for="DefenseDate" class="form-control" type="date" />
-                <span asp-validation-for="DefenseDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Grade" class="control-label"></label>
-                <input asp-for="Grade" class="form-control" placeholder="A, B+, 85/100, etc." />
-                <span asp-validation-for="Grade" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label for="documentFile" class="control-label">Document File</label>
-                <input type="file" name="documentFile" class="form-control" accept=".pdf,.doc,.docx,.txt" />
-                <small class="form-text text-muted">Upload a PDF, Word document, or text file (optional)</small>
-            </div>
-            <div class="form-group">
-                <label for="posterFile" class="control-label">Project Poster</label>
-                <input type="file" name="posterFile" class="form-control" accept=".jpg,.jpeg,.png,.pdf,.svg" />
-                <small class="form-text text-muted">Upload project poster (JPG, PNG, PDF, or SVG format, optional)</small>
-            </div>
-            <div class="form-group">
-                <label asp-for="StudentId" class="control-label">Student</label>
-                <select asp-for="StudentId" class ="form-control" asp-items="ViewBag.StudentId">
-                    <option value="">Please select a student</option>
-                </select>
-                <span asp-validation-for="StudentId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="SupervisorId" class="control-label">Supervisor</label>
-                <select asp-for="SupervisorId" class ="form-control" asp-items="ViewBag.SupervisorId">
-                    <option value="">Please select a supervisor</option>
-                </select>
-                <span asp-validation-for="SupervisorId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+<style>
+.card {
+    border-radius: 16px;
+}
+
+.card-header {
+    border-radius: 16px 16px 0 0 !important;
+    padding: 1.5rem;
+}
+
+.form-control, .form-select {
+    border-radius: 12px;
+    border: 2px solid #e5e7eb;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    transform: translateY(-1px);
+}
+
+.form-control-lg {
+    font-size: 1.1rem;
+    padding: 1rem 1.25rem;
+}
+
+.btn-lg {
+    padding: 0.875rem 2rem;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.form-text {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.5rem;
+}
+
+.text-danger {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+hr {
+    border-color: #e5e7eb;
+    margin: 2rem 0;
+}
+
+h6.text-muted {
+    color: #374151 !important;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+</style>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

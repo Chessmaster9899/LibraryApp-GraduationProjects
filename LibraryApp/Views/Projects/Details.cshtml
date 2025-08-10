@@ -4,50 +4,322 @@
     ViewData["Title"] = "Project Details";
 }
 
-<h1>Details</h1>
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Modern Header with Action Buttons -->
+            <div class="d-flex justify-content-between align-items-start mb-4">
+                <div>
+                    <h1 class="h2 mb-2 fw-bold text-dark">@Model.Title</h1>
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                        <span class="badge bg-@(Model.Status == LibraryApp.Models.ProjectStatus.Completed ? "success" : 
+                                               Model.Status == LibraryApp.Models.ProjectStatus.InProgress ? "primary" : 
+                                               Model.Status == LibraryApp.Models.ProjectStatus.Defended ? "success" :
+                                               Model.Status == LibraryApp.Models.ProjectStatus.SubmittedForReview ? "warning" : "secondary") fs-6 px-3 py-2">
+                            <i class="fas fa-@(Model.Status == LibraryApp.Models.ProjectStatus.Completed ? "check-circle" : 
+                                              Model.Status == LibraryApp.Models.ProjectStatus.InProgress ? "clock" : 
+                                              Model.Status == LibraryApp.Models.ProjectStatus.Defended ? "trophy" :
+                                              Model.Status == LibraryApp.Models.ProjectStatus.SubmittedForReview ? "eye" : "pause-circle") me-1"></i>
+                            @Model.Status
+                        </span>
+                        <small class="text-muted">
+                            <i class="fas fa-calendar me-1"></i>
+                            Submitted: @Model.SubmissionDate.ToString("MMMM dd, yyyy")
+                        </small>
+                        @if (Model.DefenseDate.HasValue)
+                        {
+                            <small class="text-muted">
+                                <i class="fas fa-calendar-check me-1"></i>
+                                Defense: @Model.DefenseDate.Value.ToString("MMMM dd, yyyy")
+                            </small>
+                        }
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Projects
+                    </a>
+                    @if (User.IsInRole("Admin") || (User.IsInRole("Professor") && Model.SupervisorId > 0))
+                    {
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                            <i class="fas fa-edit me-1"></i>Edit
+                        </a>
+                    }
+                </div>
+            </div>
 
-<div>
-    <h4>Project</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Abstract)
-        </dt>
-        <dd class="col-sm-10">
-            @if (!string.IsNullOrEmpty(Model.Abstract))
-            {
-                <p>@Html.DisplayFor(model => model.Abstract)</p>
-            }
-            else
-            {
-                <em>No abstract provided</em>
-            }
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Keywords)
-        </dt>
-        <dd class="col-sm-10">
-            @if (!string.IsNullOrEmpty(Model.Keywords))
-            {
-                @Html.DisplayFor(model => model.Keywords)
-            }
-            else
-            {
-                <em>No keywords provided</em>
-            }
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-        <dd class="col-sm-10">
-            <span class="badge badge-@(Model.Status == LibraryApp.Models.ProjectStatus.Completed ? "success" : 
-                                      Model.Status == LibraryApp.Models.ProjectStatus.InProgress ? "primary" : 
+            <!-- Project Information Grid -->
+            <div class="row g-4">
+                <!-- Main Content -->
+                <div class="col-lg-8">
+                    <!-- Abstract Section -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white border-bottom">
+                            <h5 class="card-title mb-0 text-dark">
+                                <i class="fas fa-file-alt text-primary me-2"></i>Project Abstract
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            @if (!string.IsNullOrEmpty(Model.Abstract))
+                            {
+                                <p class="mb-0 text-dark lh-lg">@Model.Abstract</p>
+                            }
+                            else
+                            {
+                                <div class="text-center py-4">
+                                    <i class="fas fa-file-alt text-muted fa-3x mb-3"></i>
+                                    <p class="text-muted mb-0">No abstract provided for this project.</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Keywords Section -->
+                    @if (!string.IsNullOrEmpty(Model.Keywords))
+                    {
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-white border-bottom">
+                                <h5 class="card-title mb-0 text-dark">
+                                    <i class="fas fa-tags text-primary me-2"></i>Keywords
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex flex-wrap gap-2">
+                                    @foreach (var keyword in Model.Keywords.Split(',').Select(k => k.Trim()))
+                                    {
+                                        <span class="badge bg-light text-dark border px-3 py-2">
+                                            <i class="fas fa-tag me-1"></i>@keyword
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Project Files Section -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-bottom">
+                            <h5 class="card-title mb-0 text-dark">
+                                <i class="fas fa-folder-open text-primary me-2"></i>Project Files
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    @if (!string.IsNullOrEmpty(Model.DocumentPath))
+                                    {
+                                        <div class="d-flex align-items-center p-3 bg-light rounded-3">
+                                            <div class="me-3">
+                                                <i class="fas fa-file-pdf text-danger fa-2x"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1 text-dark">Project Document</h6>
+                                                <small class="text-muted">PDF, DOC, or TXT file</small>
+                                            </div>
+                                            <div>
+                                                <a href="@Model.DocumentPath" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-download me-1"></i>Download
+                                                </a>
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="text-center p-4 bg-light rounded-3">
+                                            <i class="fas fa-file-upload text-muted fa-2x mb-2"></i>
+                                            <p class="text-muted mb-0 small">No document uploaded</p>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="col-md-6">
+                                    @if (!string.IsNullOrEmpty(Model.PosterPath))
+                                    {
+                                        <div class="d-flex align-items-center p-3 bg-light rounded-3">
+                                            <div class="me-3">
+                                                <i class="fas fa-image text-success fa-2x"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1 text-dark">Project Poster</h6>
+                                                <small class="text-muted">Image or PDF file</small>
+                                            </div>
+                                            <div>
+                                                <a href="@Model.PosterPath" target="_blank" class="btn btn-sm btn-outline-success">
+                                                    <i class="fas fa-eye me-1"></i>View
+                                                </a>
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="text-center p-4 bg-light rounded-3">
+                                            <i class="fas fa-image text-muted fa-2x mb-2"></i>
+                                            <p class="text-muted mb-0 small">No poster uploaded</p>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar Information -->
+                <div class="col-lg-4">
+                    <!-- Project Participants -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white border-bottom">
+                            <h5 class="card-title mb-0 text-dark">
+                                <i class="fas fa-users text-primary me-2"></i>Project Team
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="fw-semibold text-muted small">STUDENT</label>
+                                <div class="d-flex align-items-center mt-1">
+                                    <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                                        <i class="fas fa-user-graduate text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 text-dark">@(Model.Student?.FullName ?? "Not assigned")</h6>
+                                        @if (Model.Student != null)
+                                        {
+                                            <small class="text-muted">@Model.Student.StudentNumber</small>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="fw-semibold text-muted small">SUPERVISOR</label>
+                                <div class="d-flex align-items-center mt-1">
+                                    <div class="bg-success bg-opacity-10 rounded-circle p-2 me-3">
+                                        <i class="fas fa-chalkboard-teacher text-success"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 text-dark">@(Model.Supervisor?.FullName ?? "Not assigned")</h6>
+                                        @if (Model.Supervisor != null)
+                                        {
+                                            <small class="text-muted">@(Model.Supervisor.Title ?? "")</small>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if (Model.Evaluator != null)
+                            {
+                                <div class="mb-0">
+                                    <label class="fw-semibold text-muted small">EVALUATOR</label>
+                                    <div class="d-flex align-items-center mt-1">
+                                        <div class="bg-warning bg-opacity-10 rounded-circle p-2 me-3">
+                                            <i class="fas fa-clipboard-check text-warning"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 text-dark">@(Model.Evaluator?.FullName ?? "Not assigned")</h6>
+                                            <small class="text-muted">@(Model.Evaluator?.Title ?? "")</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Project Details -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-bottom">
+                            <h5 class="card-title mb-0 text-dark">
+                                <i class="fas fa-info-circle text-primary me-2"></i>Project Details
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="fw-semibold text-muted small">SUBMISSION DATE</label>
+                                    <p class="mb-0 text-dark">@Model.SubmissionDate.ToString("MMMM dd, yyyy")</p>
+                                </div>
+                                
+                                @if (Model.DefenseDate.HasValue)
+                                {
+                                    <div class="col-12">
+                                        <label class="fw-semibold text-muted small">DEFENSE DATE</label>
+                                        <p class="mb-0 text-dark">@Model.DefenseDate.Value.ToString("MMMM dd, yyyy")</p>
+                                    </div>
+                                }
+                                
+                                @if (!string.IsNullOrEmpty(Model.Grade))
+                                {
+                                    <div class="col-12">
+                                        <label class="fw-semibold text-muted small">GRADE</label>
+                                        <p class="mb-0">
+                                            <span class="badge bg-success fs-6 px-3 py-2">@Model.Grade</span>
+                                        </p>
+                                    </div>
+                                }
+                                
+                                <div class="col-12">
+                                    <label class="fw-semibold text-muted small">PROJECT ID</label>
+                                    <p class="mb-0 text-dark font-monospace">#@Model.Id.ToString("D6")</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border-radius: 16px;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1) !important;
+}
+
+.card-header {
+    border-radius: 16px 16px 0 0 !important;
+    padding: 1.25rem 1.5rem;
+}
+
+.badge {
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.bg-light {
+    background-color: #f8f9fa !important;
+}
+
+.rounded-3 {
+    border-radius: 12px !important;
+}
+
+.text-dark {
+    color: #1f2937 !important;
+}
+
+.lh-lg {
+    line-height: 1.8;
+}
+
+.font-monospace {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+}
+
+small.text-muted {
+    font-size: 0.85rem;
+}
+
+label.fw-semibold {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+}
+</style>
                                       Model.Status == LibraryApp.Models.ProjectStatus.Approved ? "info" : 
                                       Model.Status == LibraryApp.Models.ProjectStatus.Defended ? "success" :
                                       Model.Status == LibraryApp.Models.ProjectStatus.Published ? "success" : "secondary")">

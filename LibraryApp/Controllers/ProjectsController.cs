@@ -401,5 +401,30 @@ namespace LibraryApp.Controllers
 
             return Json(projects);
         }
+
+        // Export Projects to CSV
+        [HttpGet]
+        [AdminOnly]
+        public async Task<IActionResult> Export()
+        {
+            var projects = await _context.Projects
+                .Include(p => p.Student)
+                .ThenInclude(s => s.Department)
+                .Include(p => p.Supervisor)
+                .Include(p => p.Evaluator)
+                .OrderBy(p => p.Title)
+                .ToListAsync();
+
+            var csv = new System.Text.StringBuilder();
+            csv.AppendLine("Title,Student,Student Number,Department,Supervisor,Evaluator,Status,Submission Date,Defense Date,Grade,Keywords");
+
+            foreach (var project in projects)
+            {
+                csv.AppendLine($"{project.Title},{project.Student?.FullName},{project.Student?.StudentNumber},{project.Student?.Department?.Name},{project.Supervisor?.DisplayName},{project.Evaluator?.DisplayName},{project.Status},{project.SubmissionDate:yyyy-MM-dd},{project.DefenseDate:yyyy-MM-dd},{project.Grade},{project.Keywords}");
+            }
+
+            var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
+            return File(bytes, "text/csv", $"projects_export_{DateTime.Now:yyyyMMdd}.csv");
+        }
     }
 }
