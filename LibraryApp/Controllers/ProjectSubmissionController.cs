@@ -75,6 +75,7 @@ public class ProjectSubmissionController : BaseController
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     [SessionAuthorize(UserRole.Student, UserRole.Professor)]
     public async Task<IActionResult> Submit(ProjectSubmissionViewModel model)
     {

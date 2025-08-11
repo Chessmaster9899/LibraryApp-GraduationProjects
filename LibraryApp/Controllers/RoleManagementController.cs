@@ -101,6 +101,7 @@ public class RoleManagementController : BaseController
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> AssignRole(int userId, int roleId)
     {
         try
@@ -136,6 +137,7 @@ public class RoleManagementController : BaseController
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> RemoveRole(int userId, int roleId)
     {
         try
@@ -178,6 +180,7 @@ public class RoleManagementController : BaseController
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> CreateRole(CreateRoleViewModel model)
     {
         if (!ModelState.IsValid)
@@ -247,6 +250,7 @@ public class RoleManagementController : BaseController
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> EditRole(EditRoleViewModel model)
     {
         if (!ModelState.IsValid)
@@ -292,6 +296,7 @@ public class RoleManagementController : BaseController
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteRole(int id)
     {
         try

@@ -151,6 +151,7 @@ public class GalleryController : BaseController
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     [RequirePermission(PermissionType.ManageGallery)]
     public async Task<IActionResult> ToggleProjectVisibility(int projectId)
     {
@@ -171,6 +172,7 @@ public class GalleryController : BaseController
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     [RequirePermission(PermissionType.CustomizeGallery)]
     public async Task<IActionResult> FeatureProject(int projectId, bool featured = true)
     {

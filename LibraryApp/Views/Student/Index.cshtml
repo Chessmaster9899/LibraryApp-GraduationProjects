@@ -19,8 +19,8 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <h1 class="dashboard-title">Welcome back, @Model.Student.FirstName!</h1>
-                                    <p class="dashboard-subtitle">@Model.Student.Department?.Name • Student Progress Dashboard</p>
+                                    <h1 class="dashboard-title">Welcome back, @Model.Student?.FirstName!</h1>
+                                    <p class="dashboard-subtitle">@Model.Student?.Department?.Name • Student Progress Dashboard</p>
                                 </div>
                             </div>
                             <div class="row text-center">
@@ -337,22 +337,22 @@
                                         <div class="card-body">
                                             <dl class="row mb-0">
                                                 <dt class="col-5 small text-muted-professional">Student ID:</dt>
-                                                <dd class="col-7 small text-professional">@Model.Student.StudentNumber</dd>
+                                                <dd class="col-7 small text-professional">@Model.Student?.StudentNumber</dd>
                                                 
                                                 <dt class="col-5 small text-muted-professional">Name:</dt>
-                                                <dd class="col-7 small text-professional">@Model.Student.FullName</dd>
+                                                <dd class="col-7 small text-professional">@Model.Student?.FullName</dd>
                                                 
                                                 <dt class="col-5 small text-muted-professional">Email:</dt>
-                                                <dd class="col-7 small text-professional">@Model.Student.Email</dd>
+                                                <dd class="col-7 small text-professional">@Model.Student?.Email</dd>
                                                 
                                                 <dt class="col-5 small text-muted-professional">Department:</dt>
-                                                <dd class="col-7 small text-professional">@Model.Student.Department?.Name</dd>
+                                                <dd class="col-7 small text-professional">@Model.Student?.Department?.Name</dd>
                                                 
                                                 <dt class="col-5 small text-muted-professional">Enrolled:</dt>
-                                                <dd class="col-7 small text-professional">@Model.Student.EnrollmentDate.ToString("MMM yyyy")</dd>
+                                                <dd class="col-7 small text-professional">@Model.Student?.EnrollmentDate.ToString("MMM yyyy")</dd>
                                                 
                                                 <dt class="col-5 small text-muted-professional">Last Login:</dt>
-                                                <dd class="col-7 small text-professional">@(Model.Student.LastLogin?.ToString("MMM dd, yyyy") ?? "Never")</dd>
+                                                <dd class="col-7 small text-professional">@(Model.Student?.LastLogin?.ToString("MMM dd, yyyy") ?? "Never")</dd>
                                             </dl>
                                         </div>
                                     </div>

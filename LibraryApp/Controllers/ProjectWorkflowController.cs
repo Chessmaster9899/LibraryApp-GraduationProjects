@@ -75,6 +75,7 @@ public class ProjectWorkflowController : BaseController
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateProjectStatus(int projectId, ProjectStatus newStatus, string? comments = null)
     {
         try
@@ -143,6 +144,7 @@ public class ProjectWorkflowController : BaseController
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> ScheduleDefense(int projectId, DateTime defenseDate, string? location = null)
     {
         try
@@ -172,6 +174,7 @@ public class ProjectWorkflowController : BaseController
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> AssignGrade(int projectId, string grade, string? feedback = null)
     {
         try
@@ -208,6 +211,7 @@ public class ProjectWorkflowController : BaseController
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> AssignEvaluator(int projectId, int evaluatorId)
     {
         try

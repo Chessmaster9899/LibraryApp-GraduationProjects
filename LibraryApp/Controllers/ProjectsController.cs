@@ -345,6 +345,7 @@ namespace LibraryApp.Controllers
 
         // Additional action methods for enhanced functionality
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [AdminOnly]
         public async Task<IActionResult> UpdateStatus(int id, ProjectStatus status)
         {

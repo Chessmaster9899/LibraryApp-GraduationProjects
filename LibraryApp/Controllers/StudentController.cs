@@ -101,6 +101,7 @@ namespace LibraryApp.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateProfile(Student model)
         {
             var userId = HttpContext.Session.GetString("UserId");
@@ -143,6 +144,7 @@ namespace LibraryApp.Controllers
 
         // Workflow Actions for Students
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> SubmitProject(int projectId, string? comments = null)
         {
             var project = await _context.Projects
@@ -182,6 +184,7 @@ namespace LibraryApp.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> StartProject(int projectId)
         {
             var project = await _context.Projects
@@ -408,6 +411,7 @@ namespace LibraryApp.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> MarkNotificationRead(int notificationId)
         {
             var userId = HttpContext.Session.GetString("UserId");
