@@ -1,4 +1,4 @@
-@model LibraryApp.Models.Project
+@model Project
 
 @{
     ViewData["Title"] = "Edit Project";
@@ -34,7 +34,7 @@
             
             <div class="form-group">
                 <label asp-for="Status" class="control-label"></label>
-                <select asp-for="Status" class="form-control" asp-items="Html.GetEnumSelectList<LibraryApp.Models.ProjectStatus>()"></select>
+                <select asp-for="Status" class="form-control" asp-items="Html.GetEnumSelectList<ProjectStatus>()"></select>
                 <span asp-validation-for="Status" class="text-danger"></span>
             </div>
             
