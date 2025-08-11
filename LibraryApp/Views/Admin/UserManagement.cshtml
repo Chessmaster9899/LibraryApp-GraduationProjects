@@ -18,7 +18,7 @@
         @foreach (var stat in Model.UserStatistics)
         {
             <div class="col-md-2">
-                <div class="card bg-@(stat.Key.Contains("Active") ? "success" : stat.Key.Contains("Total") && !stat.Key.Contains("Users") ? "primary" : "info") text-dark">
+                <div class="card bg-@(stat.Key.Contains("Active") ? "success" : stat.Key.Contains("Total") && !stat.Key.Contains("Users") ? "primary" : "info") text-white">
                     <div class="card-body text-center">
                         <h3>@stat.Value</h3>
                         <p class="mb-0">@stat.Key.Replace("Total", "").Replace("Active", "Active ")</p>
