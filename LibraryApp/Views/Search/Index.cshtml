@@ -117,7 +117,7 @@
                 @if (Model.Projects.Any() || Model.SearchType == "projects" || Model.SearchType == "all")
                 {
                     <div class="card shadow-sm mb-4">
-                        <div class="card-header bg-primary text-light">
+                        <div class="card-header bg-primary text-white">
                             <h5 class="mb-0">
                                 <i class="fas fa-project-diagram"></i> Projects
                                 @if (Model.TotalProjects > 0)
@@ -190,7 +190,7 @@
                      (ViewBag.CurrentUserRole == "Admin" || ViewBag.CurrentUserRole == "Professor"))
                 {
                     <div class="card shadow-sm mb-4">
-                        <div class="card-header bg-success text-light">
+                        <div class="card-header bg-success text-white">
                             <h5 class="mb-0">
                                 <i class="fas fa-user-graduate"></i> Students
                                 @if (Model.TotalStudents > 0)

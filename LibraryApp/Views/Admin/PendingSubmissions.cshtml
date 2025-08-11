@@ -16,7 +16,7 @@
     <!-- Statistics -->
     <div class="row mb-4">
         <div class="col-md-3">
-            <div class="card bg-warning text-dark">
+            <div class="card bg-warning text-white">
                 <div class="card-body">
                     <h3>@Model.Count(s => s.Status == SubmissionStatus.Pending)</h3>
                     <p class="mb-0">Pending Review</p>
@@ -24,7 +24,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-info text-dark">
+            <div class="card bg-info text-white">
                 <div class="card-body">
                     <h3>@Model.Count(s => s.Status == SubmissionStatus.UnderReview)</h3>
                     <p class="mb-0">Under Review</p>
@@ -32,7 +32,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-success text-dark">
+            <div class="card bg-success text-white">
                 <div class="card-body">
                     <h3>@Model.Count(s => s.Status == SubmissionStatus.Approved)</h3>
                     <p class="mb-0">Approved</p>
@@ -40,7 +40,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-danger text-dark">
+            <div class="card bg-danger text-white">
                 <div class="card-body">
                     <h3>@Model.Count(s => s.Status == SubmissionStatus.Rejected)</h3>
                     <p class="mb-0">Rejected</p>
