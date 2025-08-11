@@ -226,20 +226,10 @@
                                                     <h6>@project.Title</h6>
                                                     <p class="text-professional">Supervisor: @project.Supervisor.DisplayName</p>
                                                     <div class="d-flex align-items-center justify-content-between">
-                                                        <span class="badge badge-professional bg-@(project.Status switch {
-                                                            ProjectStatus.Completed => "success",
-                                                            ProjectStatus.Defended => "success",
-                                                            ProjectStatus.InProgress => "warning",
-                                                            ProjectStatus.Approved => "info",
-                                                            ProjectStatus.Proposed => "secondary",
-                                                            ProjectStatus.SubmittedForReview => "primary",
-                                                            ProjectStatus.ReviewApproved => "success",
-                                                            ProjectStatus.ReviewRejected => "danger",
-                                                            ProjectStatus.Published => "dark",
-                                                            _ => "secondary"
-                                                        })">
-                                                            @project.Status
-                                                        </span>
+                                                        @{
+                                                            ViewData["AdditionalClasses"] = "badge-professional";
+                                                        }
+                                                        @await Html.PartialAsync("_ProjectStatusBadgeWithClass", project.Status)
                                                         <div class="meta">
                                                             <i class="fas fa-calendar me-1"></i>
                                                             @project.SubmissionDate.ToString("MMM dd, yyyy")

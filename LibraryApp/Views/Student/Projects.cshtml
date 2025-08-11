@@ -18,15 +18,7 @@
             <div class="col-md-6 col-lg-4 mb-4">
                 <div class="card h-100">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <span class="badge bg-@(project.Status switch {
-                            ProjectStatus.Completed => "success",
-                            ProjectStatus.Defended => "success",
-                            ProjectStatus.InProgress => "warning",
-                            ProjectStatus.Approved => "info",
-                            _ => "secondary"
-                        })">
-                            @project.Status
-                        </span>
+                        @await Html.PartialAsync("_ProjectStatusBadge", project.Status)
                         <small class="text-muted">@project.SubmissionDate.ToString("MMM dd, yyyy")</small>
                     </div>
                     <div class="card-body">
