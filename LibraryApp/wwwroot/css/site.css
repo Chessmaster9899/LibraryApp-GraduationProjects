@@ -950,12 +950,24 @@ body {
 }
 
 /* Form labels and text on background */
-label:not(.card label):not(.card-body label):not(.modal label),
-.form-label:not(.card .form-label):not(.card-body .form-label):not(.modal .form-label),
-.control-label:not(.card .control-label):not(.card-body .control-label):not(.modal .control-label) {
+label:not(.card label):not(.card-body label):not(.modal label):not(.login-card label):not(.password-card label),
+.form-label:not(.card .form-label):not(.card-body .form-label):not(.modal .form-label):not(.login-card .form-label):not(.password-card .form-label),
+.control-label:not(.card .control-label):not(.card-body .control-label):not(.modal .control-label):not(.login-card .control-label):not(.password-card .control-label) {
   color: white !important;
   font-weight: 600 !important;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+/* Ensure login card labels are always dark and not bold */
+.login-card label,
+.login-card .form-label,
+.login-card .control-label,
+.password-card label,
+.password-card .form-label,
+.password-card .control-label {
+  color: var(--gray-600) !important;
+  font-weight: 500 !important;
+  text-shadow: none !important;
 }
 
 /* Error messages visibility */
