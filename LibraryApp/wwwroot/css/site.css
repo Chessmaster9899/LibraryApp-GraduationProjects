@@ -125,7 +125,7 @@ dt, dd {
   color: #1f2937 !important;
 }
 
-/* Allow white text ONLY on explicitly dark backgrounds */
+/* Allow dark text ONLY on explicitly dark backgrounds */
 .bg-primary .text-white,
 .bg-dark .text-white,
 .bg-secondary .text-white,
@@ -148,7 +148,7 @@ dt, dd {
 /* Dark overlays and similar */
 .overlay .text-white,
 .bg-overlay .text-white {
-  color: white !important;
+  color: #f8fafc !important;
 }
 
 /* Ensure page headers have proper contrast */
@@ -176,7 +176,7 @@ dt, dd {
 .btn-outline-light:hover {
   background-color: #2563eb !important;
   border-color: #2563eb !important;
-  color: white !important;
+  color: #f8fafc !important;
 }
 
 /* Professor interface specific fixes */
@@ -442,37 +442,37 @@ body {
 /* Semantic Badge Colors */
 .badge-primary {
   background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
-  color: white;
+  color: #f8fafc;
   box-shadow: 0 2px 4px rgba(var(--primary-color-rgb), 0.2);
 }
 
 .badge-secondary {
   background: linear-gradient(135deg, var(--gray-500) 0%, var(--gray-600) 100%);
-  color: white;
+  color: #f8fafc;
   box-shadow: 0 2px 4px rgba(var(--secondary-color-rgb), 0.2);
 }
 
 .badge-success {
   background: linear-gradient(135deg, #10b981 0%, var(--success-color) 100%);
-  color: white;
+  color: #f8fafc;
   box-shadow: 0 2px 4px rgba(var(--success-color-rgb), 0.2);
 }
 
 .badge-warning {
   background: linear-gradient(135deg, #f59e0b 0%, var(--warning-color) 100%);
-  color: white;
+  color: #f8fafc;
   box-shadow: 0 2px 4px rgba(var(--warning-color-rgb), 0.2);
 }
 
 .badge-danger {
   background: linear-gradient(135deg, #ef4444 0%, var(--danger-color) 100%);
-  color: white;
+  color: #f8fafc;
   box-shadow: 0 2px 4px rgba(var(--danger-color-rgb), 0.2);
 }
 
 .badge-info {
   background: linear-gradient(135deg, #06b6d4 0%, var(--info-color) 100%);
-  color: white;
+  color: #f8fafc;
   box-shadow: 0 2px 4px rgba(var(--info-color-rgb), 0.2);
 }
 
@@ -741,7 +741,7 @@ body {
 .btn-primary {
   background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
   border-color: var(--primary-600);
-  color: white;
+  color: #f8fafc;
   box-shadow: 0 2px 4px rgba(var(--primary-color-rgb), 0.2);
 }
 
@@ -754,35 +754,35 @@ body {
 .btn-secondary {
   background: linear-gradient(135deg, var(--gray-500) 0%, var(--gray-600) 100%);
   border-color: var(--gray-600);
-  color: white;
+  color: #f8fafc;
   box-shadow: 0 2px 4px rgba(var(--secondary-color-rgb), 0.2);
 }
 
 .btn-success {
   background: linear-gradient(135deg, #10b981 0%, var(--success-color) 100%);
   border-color: var(--success-color);
-  color: white;
+  color: #f8fafc;
   box-shadow: 0 2px 4px rgba(var(--success-color-rgb), 0.2);
 }
 
 .btn-warning {
   background: linear-gradient(135deg, #f59e0b 0%, var(--warning-color) 100%);
   border-color: var(--warning-color);
-  color: white;
+  color: #f8fafc;
   box-shadow: 0 2px 4px rgba(var(--warning-color-rgb), 0.2);
 }
 
 .btn-danger {
   background: linear-gradient(135deg, #ef4444 0%, var(--danger-color) 100%);
   border-color: var(--danger-color);
-  color: white;
+  color: #f8fafc;
   box-shadow: 0 2px 4px rgba(var(--danger-color-rgb), 0.2);
 }
 
 .btn-info {
   background: linear-gradient(135deg, #06b6d4 0%, var(--info-color) 100%);
   border-color: var(--info-color);
-  color: white;
+  color: #f8fafc;
   box-shadow: 0 2px 4px rgba(var(--info-color-rgb), 0.2);
 }
 
@@ -796,7 +796,7 @@ body {
 .btn-outline-primary:hover {
   background: var(--primary-color);
   border-color: var(--primary-color);
-  color: white;
+  color: #f8fafc;
 }
 
 /* Button Sizes */
@@ -890,14 +890,14 @@ body {
 .display-4 {
   font-family: 'Poppins', sans-serif;
   font-weight: 800;
-  color: white;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  color: #1f2937;
+  text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8);
 }
 
 .lead {
-  color: white;
+  color: #374151;
   font-weight: 300;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 /* Hero Section Styling - Ensure dark background for white text */
@@ -941,21 +941,21 @@ body {
   text-shadow: none !important;
 }
 
-/* Hero sections should have white text with shadow */
+/* Hero sections should have dark text with light shadow */
 .hero-section h1, .hero-section h2, .hero-section h3, .hero-section h4, .hero-section h5, .hero-section h6,
 .hero-content h1, .hero-content h2, .hero-content h3, .hero-content h4, .hero-content h5, .hero-content h6 {
-  color: white !important;
+  color: #1f2937 !important;
   font-weight: 600 !important;
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5) !important;
+  text-shadow: 2px 2px 8px rgba(255, 255, 255, 0.8) !important;
 }
 
 /* Form labels and text on background */
 label:not(.card label):not(.card-body label):not(.modal label):not(.login-card label):not(.password-card label),
 .form-label:not(.card .form-label):not(.card-body .form-label):not(.modal .form-label):not(.login-card .form-label):not(.password-card .form-label),
 .control-label:not(.card .control-label):not(.card-body .control-label):not(.modal .control-label):not(.login-card .control-label):not(.password-card .control-label) {
-  color: white !important;
+  color: #1f2937 !important;
   font-weight: 600 !important;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+  text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.8);
 }
 
 /* Ensure login card labels are always dark and not bold */
@@ -982,21 +982,21 @@ label:not(.card label):not(.card-body label):not(.modal label):not(.login-card l
 }
 
 .text-muted:not(.card .text-muted):not(.card-body .text-muted):not(.modal .text-muted) {
-  color: #f1f5f9 !important;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+  color: #6b7280 !important;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 /* Utility classes for background visibility */
 .text-white-shadow {
-  color: white !important;
+  color: #1f2937 !important;
   font-weight: 600 !important;
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+  text-shadow: 2px 2px 8px rgba(255, 255, 255, 0.8);
 }
 
 .bg-text-white {
-  color: white !important;
+  color: #1f2937 !important;
   font-weight: 600 !important;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+  text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.8);
 }
 
 /* Override for navbar and footer to maintain proper colors */
@@ -1071,7 +1071,7 @@ label:not(.card label):not(.card-body label):not(.modal label):not(.login-card l
   border-radius: 50%;
   font-size: 14px;
   font-weight: bold;
-  color: white;
+  color: #f8fafc;
   box-shadow: var(--shadow);
 }
 
@@ -1085,7 +1085,7 @@ label:not(.card label):not(.card-body label):not(.modal label):not(.login-card l
 
 .toast-warning .toast-icon {
   background: linear-gradient(135deg, #f59e0b 0%, var(--warning-color) 100%);
-  color: white;
+  color: #f8fafc;
 }
 
 .toast-info .toast-icon {
@@ -1568,7 +1568,7 @@ label:not(.card label):not(.card-body label):not(.modal label):not(.login-card l
 .dashboard-header {
   background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
   border-radius: var(--radius-lg);
-  color: white;
+  color: #f8fafc;
   margin-bottom: 2rem;
   overflow: hidden;
   box-shadow: var(--shadow-xl);
@@ -1580,7 +1580,7 @@ label:not(.card label):not(.card-body label):not(.modal label):not(.login-card l
 .dashboard-header h4,
 .dashboard-header h5,
 .dashboard-header h6 {
-  color: white !important;
+  color: #f8fafc !important;
   font-family: 'Poppins', sans-serif;
   font-weight: 700;
   text-shadow: none;
@@ -1588,7 +1588,7 @@ label:not(.card label):not(.card-body label):not(.modal label):not(.login-card l
 
 .dashboard-header p,
 .dashboard-header .lead {
-  color: rgba(255, 255, 255, 0.9) !important;
+  color: rgba(248, 250, 252, 0.9) !important;
   font-weight: 400;
   text-shadow: none;
 }
@@ -1899,7 +1899,7 @@ label:not(.card label):not(.card-body label):not(.modal label):not(.login-card l
   font-family: 'Poppins', sans-serif;
   font-weight: 800;
   font-size: 2.25rem;
-  color: white;
+  color: #f8fafc;
   margin-bottom: 0.5rem;
   line-height: 1.2;
 }
@@ -1908,7 +1908,7 @@ label:not(.card label):not(.card-body label):not(.modal label):not(.login-card l
   font-family: 'Inter', sans-serif;
   font-weight: 400;
   font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(248, 250, 252, 0.9);
   margin: 0;
 }
 
@@ -1980,7 +1980,7 @@ label:not(.card label):not(.card-body label):not(.modal label):not(.login-card l
 
 /* Fixed Color Contrast Issues */
 .text-on-dark {
-  color: white !important;
+  color: #f8fafc !important;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
