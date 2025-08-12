@@ -2,11 +2,15 @@ using Microsoft.EntityFrameworkCore;
 using LibraryApp.Data;
 using LibraryApp.Services;
 using LibraryApp.Middleware;
+using LibraryApp.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Add SignalR
+builder.Services.AddSignalR();
 
 // Add Session support
 builder.Services.AddSession(options =>
@@ -32,6 +36,9 @@ builder.Services.AddScoped<ISessionService, SessionService>();
 
 // Add Notification Service
 builder.Services.AddScoped<LibraryApp.Controllers.INotificationService, LibraryApp.Controllers.NotificationService>();
+
+// Add Real-Time Notification Service
+builder.Services.AddScoped<IRealTimeNotificationService, RealTimeNotificationService>();
 
 // Add File Upload Service
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
@@ -89,6 +96,9 @@ app.UseRouting();
 app.UseSession();
 
 app.UseAuthorization();
+
+// Map SignalR Hub
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.MapControllerRoute(
     name: "default",
