@@ -22,7 +22,8 @@ public class AdminController : BaseController
     {
         var pendingSubmissions = await _context.ProjectSubmissions
             .Include(ps => ps.Project)
-            .ThenInclude(p => p.Student)
+                .ThenInclude(p => p.ProjectStudents)
+                    .ThenInclude(ps => ps.Student)
             .Where(ps => ps.Status == SubmissionStatus.Pending)
             .OrderBy(ps => ps.SubmissionDate)
             .ToListAsync();
@@ -48,7 +49,8 @@ public class AdminController : BaseController
             .ToDictionaryAsync(g => g.Key.ToString(), g => g.Count());
 
         var recentProjects = await _context.Projects
-            .Include(p => p.Student)
+            .Include(p => p.ProjectStudents)
+                .ThenInclude(ps => ps.Student)
             .Include(p => p.Supervisor)
             .OrderByDescending(p => p.SubmissionDate)
             .Take(5)
@@ -76,8 +78,9 @@ public class AdminController : BaseController
     {
         var submissions = await _context.ProjectSubmissions
             .Include(ps => ps.Project)
-            .ThenInclude(p => p.Student)
-            .ThenInclude(s => s.Department)
+                .ThenInclude(p => p.ProjectStudents)
+                    .ThenInclude(ps => ps.Student)
+                        .ThenInclude(s => s.Department)
             .Include(ps => ps.Project.Supervisor)
             .Where(ps => ps.Status == SubmissionStatus.Pending || ps.Status == SubmissionStatus.UnderReview)
             .OrderBy(ps => ps.SubmissionDate)
