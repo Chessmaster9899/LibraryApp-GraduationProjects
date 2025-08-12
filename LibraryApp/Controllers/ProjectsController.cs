@@ -199,13 +199,17 @@ namespace LibraryApp.Controllers
                 return NotFound();
             }
 
-            var project = await _context.Projects.FindAsync(id);
+            var project = await _context.Projects
+                .Include(p => p.ProjectStudents)
+                    .ThenInclude(ps => ps.Student)
+                .FirstOrDefaultAsync(p => p.Id == id);
+                
             if (project == null)
             {
                 return NotFound();
             }
             
-            ViewData["StudentId"] = await GetStudentsSelectListAsync(project.StudentId);
+            ViewData["StudentId"] = await GetStudentsSelectListAsync();
             ViewData["SupervisorId"] = await GetProfessorsSelectListAsync(project.SupervisorId, ProfessorRole.Supervisor);
             ViewData["EvaluatorId"] = await GetProfessorsSelectListAsync(project.EvaluatorId, ProfessorRole.Evaluator);
             return View(project);
@@ -215,7 +219,7 @@ namespace LibraryApp.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AdminOnly]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Abstract,Keywords,Status,SubmissionDate,DefenseDate,Grade,DocumentPath,PosterPath,StudentId,SupervisorId")] Project project, IFormFile? documentFile, IFormFile? posterFile)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Abstract,Keywords,Status,SubmissionDate,DocumentPath,PosterPath,SupervisorId,EvaluatorId")] Project project, IFormFile? documentFile, IFormFile? posterFile)
         {
             if (id != project.Id)
             {
@@ -297,7 +301,7 @@ namespace LibraryApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
             
-            ViewData["StudentId"] = await GetStudentsSelectListAsync(project.StudentId);
+            ViewData["StudentId"] = await GetStudentsSelectListAsync();
             ViewData["SupervisorId"] = await GetProfessorsSelectListAsync(project.SupervisorId, ProfessorRole.Supervisor);
             ViewData["EvaluatorId"] = await GetProfessorsSelectListAsync(project.EvaluatorId, ProfessorRole.Evaluator);
             return View(project);
@@ -425,14 +429,15 @@ namespace LibraryApp.Controllers
         public async Task<IActionResult> GetProjectsByStatus(ProjectStatus status)
         {
             var projects = await _context.Projects
-                .Include(p => p.Student)
+                .Include(p => p.ProjectStudents)
+                    .ThenInclude(ps => ps.Student)
                 .Include(p => p.Supervisor)
                 .Where(p => p.Status == status)
                 .OrderByDescending(p => p.SubmissionDate)
                 .Select(p => new {
                     p.Id,
                     p.Title,
-                    StudentName = p.Student.FullName,
+                    StudentNames = string.Join(", ", p.ProjectStudents.Select(ps => ps.Student.FullName)),
                     SupervisorName = p.Supervisor.DisplayName,
                     p.SubmissionDate,
                     p.Status
