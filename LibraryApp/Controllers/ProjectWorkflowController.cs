@@ -26,8 +26,9 @@ public class ProjectWorkflowController : BaseController
     public async Task<IActionResult> Index()
     {
         var projects = await _context.Projects
-            .Include(p => p.Student)
-                .ThenInclude(s => s.Department)
+            .Include(p => p.ProjectStudents)
+                .ThenInclude(ps => ps.Student)
+                    .ThenInclude(s => s.Department)
             .Include(p => p.Supervisor)
             .Include(p => p.Evaluator)
             .OrderBy(p => p.Status)
@@ -48,8 +49,9 @@ public class ProjectWorkflowController : BaseController
     public async Task<IActionResult> ProjectDetails(int id)
     {
         var project = await _context.Projects
-            .Include(p => p.Student)
-                .ThenInclude(s => s.Department)
+            .Include(p => p.ProjectStudents)
+                .ThenInclude(ps => ps.Student)
+                    .ThenInclude(s => s.Department)
             .Include(p => p.Supervisor)
                 .ThenInclude(s => s.Department)
             .Include(p => p.Evaluator)
@@ -81,7 +83,8 @@ public class ProjectWorkflowController : BaseController
         try
         {
             var project = await _context.Projects
-                .Include(p => p.Student)
+                .Include(p => p.ProjectStudents)
+                    .ThenInclude(ps => ps.Student)
                 .Include(p => p.Supervisor)
                 .FirstOrDefaultAsync(p => p.Id == projectId);
 
@@ -102,24 +105,16 @@ public class ProjectWorkflowController : BaseController
             // Set status-specific fields
             switch (newStatus)
             {
-                case ProjectStatus.SubmittedForReview:
+                case ProjectStatus.Submitted:
                     project.SubmissionForReviewDate = DateTime.Now;
                     break;
-                case ProjectStatus.ReviewApproved:
-                    project.ReviewDate = DateTime.Now;
-                    project.ReviewedBy = CurrentUserId;
-                    project.ReviewComments = comments;
+                case ProjectStatus.SupervisorApproved:
+                    project.SupervisorReviewDate = DateTime.Now;
+                    project.SupervisorComments = comments;
                     break;
-                case ProjectStatus.ReviewRejected:
-                    project.ReviewDate = DateTime.Now;
-                    project.ReviewedBy = CurrentUserId;
-                    project.ReviewComments = comments;
-                    break;
-                case ProjectStatus.Defended:
-                    if (project.DefenseDate == null)
-                    {
-                        project.DefenseDate = DateTime.Now;
-                    }
+                case ProjectStatus.EvaluatorApproved:
+                    project.EvaluatorReviewDate = DateTime.Now;
+                    project.EvaluatorComments = comments;
                     break;
                 case ProjectStatus.Published:
                     project.IsPubliclyVisible = true;
@@ -135,73 +130,6 @@ public class ProjectWorkflowController : BaseController
                 success = true, 
                 message = $"Project status updated to {newStatus}",
                 newStatus = newStatus.ToString()
-            });
-        }
-        catch (Exception ex)
-        {
-            return Json(new { success = false, message = ex.Message });
-        }
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ScheduleDefense(int projectId, DateTime defenseDate, string? location = null)
-    {
-        try
-        {
-            var project = await _context.Projects.FindAsync(projectId);
-            if (project == null)
-            {
-                return Json(new { success = false, message = "Project not found" });
-            }
-
-            project.DefenseDate = defenseDate;
-            
-            await _context.SaveChangesAsync();
-
-            await LogProjectActivity(projectId, $"Defense scheduled for {defenseDate:yyyy-MM-dd HH:mm}", location);
-
-            return Json(new { 
-                success = true, 
-                message = "Defense date scheduled successfully",
-                defenseDate = defenseDate.ToString("yyyy-MM-dd HH:mm")
-            });
-        }
-        catch (Exception ex)
-        {
-            return Json(new { success = false, message = ex.Message });
-        }
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> AssignGrade(int projectId, string grade, string? feedback = null)
-    {
-        try
-        {
-            var project = await _context.Projects.FindAsync(projectId);
-            if (project == null)
-            {
-                return Json(new { success = false, message = "Project not found" });
-            }
-
-            project.Grade = grade;
-            
-            if (project.Status == ProjectStatus.Defended && !string.IsNullOrEmpty(grade))
-            {
-                project.Status = ProjectStatus.Published;
-                project.IsPubliclyVisible = true;
-            }
-
-            await _context.SaveChangesAsync();
-
-            await LogProjectActivity(projectId, $"Grade assigned: {grade}", feedback);
-
-            return Json(new { 
-                success = true, 
-                message = "Grade assigned successfully",
-                grade = grade,
-                newStatus = project.Status.ToString()
             });
         }
         catch (Exception ex)
@@ -262,13 +190,11 @@ public class ProjectWorkflowController : BaseController
     {
         return status switch
         {
-            ProjectStatus.InProgress => new List<string> { "Mark as Completed", "Assign Evaluator" },
-            ProjectStatus.Completed => new List<string> { "Submit for Review", "Assign Evaluator" },
-            ProjectStatus.SubmittedForReview => new List<string> { "Approve Review", "Reject Review", "Assign Evaluator" },
-            ProjectStatus.ReviewApproved => new List<string> { "Schedule Defense", "Assign Evaluator" },
-            ProjectStatus.ReviewRejected => new List<string> { "Resubmit for Review" },
-            ProjectStatus.Defended => new List<string> { "Assign Grade", "Publish Project" },
-            ProjectStatus.Published => new List<string> { "Archive Project" },
+            ProjectStatus.Created => new List<string> { "Mark as Submitted" },
+            ProjectStatus.Submitted => new List<string> { "Supervisor Approve", "Supervisor Reject" },
+            ProjectStatus.SupervisorApproved => new List<string> { "Evaluator Approve", "Evaluator Reject" },
+            ProjectStatus.EvaluatorApproved => new List<string> { "Publish Project" },
+            ProjectStatus.Published => new List<string> { },
             _ => new List<string>()
         };
     }
@@ -277,12 +203,10 @@ public class ProjectWorkflowController : BaseController
     {
         return currentStatus switch
         {
-            ProjectStatus.InProgress => new List<ProjectStatus> { ProjectStatus.Completed },
-            ProjectStatus.Completed => new List<ProjectStatus> { ProjectStatus.SubmittedForReview },
-            ProjectStatus.SubmittedForReview => new List<ProjectStatus> { ProjectStatus.ReviewApproved, ProjectStatus.ReviewRejected },
-            ProjectStatus.ReviewApproved => new List<ProjectStatus> { ProjectStatus.Defended },
-            ProjectStatus.ReviewRejected => new List<ProjectStatus> { ProjectStatus.SubmittedForReview },
-            ProjectStatus.Defended => new List<ProjectStatus> { ProjectStatus.Published },
+            ProjectStatus.Created => new List<ProjectStatus> { ProjectStatus.Submitted },
+            ProjectStatus.Submitted => new List<ProjectStatus> { ProjectStatus.SupervisorApproved, ProjectStatus.Created },
+            ProjectStatus.SupervisorApproved => new List<ProjectStatus> { ProjectStatus.EvaluatorApproved, ProjectStatus.Submitted },
+            ProjectStatus.EvaluatorApproved => new List<ProjectStatus> { ProjectStatus.Published },
             _ => new List<ProjectStatus>()
         };
     }

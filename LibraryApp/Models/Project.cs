@@ -4,15 +4,11 @@ namespace LibraryApp.Models;
 
 public enum ProjectStatus
 {
-    Proposed,
-    Approved,
-    InProgress,
-    Completed,
-    SubmittedForReview,
-    ReviewApproved,
-    ReviewRejected,
-    Defended,
-    Published
+    Created,          // Admin created the project
+    Submitted,        // Students submitted their work
+    SupervisorApproved, // Supervisor approved the submission
+    EvaluatorApproved,  // Evaluator approved (final approval)
+    Published         // Admin published to gallery
 }
 
 public class Project
@@ -28,18 +24,12 @@ public class Project
     
     public string? Keywords { get; set; }
     
-    public ProjectStatus Status { get; set; } = ProjectStatus.Proposed;
+    public ProjectStatus Status { get; set; } = ProjectStatus.Created;
     
     [Display(Name = "Submission Date")]
     [Required]
     [DataType(DataType.Date)]
     public DateTime SubmissionDate { get; set; }
-    
-    [Display(Name = "Defense Date")]
-    [DataType(DataType.Date)]
-    public DateTime? DefenseDate { get; set; }
-    
-    public string? Grade { get; set; }
     
     [Display(Name = "Document Path")]
     public string? DocumentPath { get; set; } // Path to PDF or document file
@@ -56,22 +46,21 @@ public class Project
     [Display(Name = "Submission Date for Review")]
     public DateTime? SubmissionForReviewDate { get; set; }
     
-    [Display(Name = "Review Date")]
-    public DateTime? ReviewDate { get; set; }
+    [Display(Name = "Supervisor Review Date")]
+    public DateTime? SupervisorReviewDate { get; set; }
     
-    [Display(Name = "Review Comments")]
-    public string? ReviewComments { get; set; }
+    [Display(Name = "Supervisor Comments")]
+    public string? SupervisorComments { get; set; }
     
-    [Display(Name = "Reviewed By")]
-    public string? ReviewedBy { get; set; }
+    [Display(Name = "Evaluator Review Date")]
+    public DateTime? EvaluatorReviewDate { get; set; }
+    
+    [Display(Name = "Evaluator Comments")]
+    public string? EvaluatorComments { get; set; }
     
     public bool IsPubliclyVisible { get; set; } = false; // For guest viewing
     
     // Foreign keys
-    [Display(Name = "Student")]
-    [Required]
-    public int StudentId { get; set; }
-    
     [Display(Name = "Supervisor")]
     [Required]
     public int SupervisorId { get; set; }
@@ -80,7 +69,7 @@ public class Project
     public int? EvaluatorId { get; set; }
     
     // Navigation properties
-    public Student Student { get; set; } = null!;
     public Professor Supervisor { get; set; } = null!;
     public Professor? Evaluator { get; set; }
+    public ICollection<ProjectStudent> ProjectStudents { get; set; } = new List<ProjectStudent>();
 }

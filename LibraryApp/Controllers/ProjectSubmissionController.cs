@@ -22,7 +22,8 @@ public class ProjectSubmissionController : BaseController
     public async Task<IActionResult> Submit(int projectId)
     {
         var project = await _context.Projects
-            .Include(p => p.Student)
+            .Include(p => p.ProjectStudents)
+                .ThenInclude(ps => ps.Student)
             .Include(p => p.Supervisor)
             .FirstOrDefaultAsync(p => p.Id == projectId);
 
@@ -33,9 +34,9 @@ public class ProjectSubmissionController : BaseController
 
         // Check if user has permission to submit for this project
         var hasPermission = false;
-        if (CurrentUserRoleEnum == UserRole.Student && CurrentEntityId == project.StudentId)
+        if (CurrentUserRoleEnum == UserRole.Student)
         {
-            hasPermission = true;
+            hasPermission = project.ProjectStudents.Any(ps => ps.StudentId == CurrentEntityId);
         }
         else if (CurrentUserRoleEnum == UserRole.Professor && 
                 (CurrentEntityId == project.SupervisorId || CurrentEntityId == project.EvaluatorId))
@@ -49,9 +50,9 @@ public class ProjectSubmissionController : BaseController
         }
 
         // Check if project is in correct status for submission
-        if (project.Status != ProjectStatus.Completed)
+        if (project.Status != ProjectStatus.Created)
         {
-            TempData["Error"] = "Project must be marked as completed before submission for review.";
+            TempData["Error"] = "Project can only be submitted when in Created status.";
             return RedirectToAction("Details", "Projects", new { id = projectId });
         }
 
@@ -82,7 +83,8 @@ public class ProjectSubmissionController : BaseController
         if (!ModelState.IsValid)
         {
             model.Project = await _context.Projects
-                .Include(p => p.Student)
+                .Include(p => p.ProjectStudents)
+                    .ThenInclude(ps => ps.Student)
                 .Include(p => p.Supervisor)
                 .FirstAsync(p => p.Id == model.Project.Id);
             return View(model);
@@ -148,7 +150,7 @@ public class ProjectSubmissionController : BaseController
         _context.ProjectSubmissions.Add(submission);
         
         // Update project status
-        project.Status = ProjectStatus.SubmittedForReview;
+        project.Status = ProjectStatus.Submitted;
         project.SubmissionForReviewDate = DateTime.Now;
 
         // Create notification for admins
