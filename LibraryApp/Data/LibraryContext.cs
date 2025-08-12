@@ -88,6 +88,12 @@ public class LibraryContext : DbContext
             .HasForeignKey(p => p.EvaluatorId)
             .OnDelete(DeleteBehavior.SetNull);
 
+        modelBuilder.Entity<Project>()
+            .HasOne(p => p.Student)
+            .WithMany(s => s.Projects)
+            .HasForeignKey(p => p.StudentId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         // Configure ProjectStudent many-to-many relationship
         modelBuilder.Entity<ProjectStudent>()
             .HasKey(ps => new { ps.ProjectId, ps.StudentId });

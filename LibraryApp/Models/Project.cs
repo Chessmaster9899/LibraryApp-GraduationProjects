@@ -5,10 +5,18 @@ namespace LibraryApp.Models;
 public enum ProjectStatus
 {
     Created,          // Admin created the project
+    Proposed,         // Project proposed
+    InProgress,       // Project in progress
     Submitted,        // Students submitted their work
+    SubmittedForReview, // Submitted for review
     SupervisorApproved, // Supervisor approved the submission
     EvaluatorApproved,  // Evaluator approved (final approval)
-    Published         // Admin published to gallery
+    Approved,         // General approved status
+    Completed,        // Project completed
+    Defended,         // Project defended
+    Published,        // Admin published to gallery
+    ReviewApproved,   // Review approved by admin
+    ReviewRejected    // Review rejected by admin
 }
 
 public class Project
@@ -58,9 +66,28 @@ public class Project
     [Display(Name = "Evaluator Comments")]
     public string? EvaluatorComments { get; set; }
     
+    [Display(Name = "Defense Date")]
+    public DateTime? DefenseDate { get; set; }
+    
+    [Display(Name = "Grade")]
+    public string? Grade { get; set; }
+    
+    [Display(Name = "Review Date")]
+    public DateTime? ReviewDate { get; set; }
+    
+    [Display(Name = "Review Comments")]
+    public string? ReviewComments { get; set; }
+    
+    [Display(Name = "Reviewed By")]
+    public string? ReviewedBy { get; set; }
+    
     public bool IsPubliclyVisible { get; set; } = false; // For guest viewing
     
     // Foreign keys
+    [Display(Name = "Student")]
+    [Required]
+    public int StudentId { get; set; }
+    
     [Display(Name = "Supervisor")]
     [Required]
     public int SupervisorId { get; set; }
@@ -69,6 +96,7 @@ public class Project
     public int? EvaluatorId { get; set; }
     
     // Navigation properties
+    public Student Student { get; set; } = null!;
     public Professor Supervisor { get; set; } = null!;
     public Professor? Evaluator { get; set; }
     public ICollection<ProjectStudent> ProjectStudents { get; set; } = new List<ProjectStudent>();
