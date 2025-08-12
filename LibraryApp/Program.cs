@@ -18,7 +18,8 @@ builder.Services.AddSession(options =>
 
 // Add Entity Framework
 builder.Services.AddDbContext<LibraryContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
+        .ConfigureWarnings(warnings => warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning)));
 
 // Add University Settings Service
 builder.Services.AddScoped<IUniversitySettingsService, UniversitySettingsService>();

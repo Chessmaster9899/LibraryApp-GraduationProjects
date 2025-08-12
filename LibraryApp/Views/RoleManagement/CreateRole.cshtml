@@ -1,0 +1,247 @@
+@model CreateRoleViewModel
+@{
+    ViewData["Title"] = "Create Role";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-0">Create New Role</h1>
+            <p class="text-muted">Define a new role with specific permissions</p>
+        </div>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>
+            Back to Roles
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-12 col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-user-shield me-2"></i>
+                        Role Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="CreateRole" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Name" class="form-label">Role Name <span class="text-danger">*</span></label>
+                                <input asp-for="Name" class="form-control" placeholder="Enter role name" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Description" class="form-label">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="3" placeholder="Describe what this role is for..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">
+                                <i class="fas fa-key me-2"></i>
+                                Permissions
+                            </h6>
+                            <p class="text-muted small mb-3">Select the permissions this role should have. Permissions are grouped by category.</p>
+                            
+                            @if (Model.AllPermissions?.Any() == true)
+                            {
+                                var permissionGroups = Model.AllPermissions.GroupBy(p => p.Category).OrderBy(g => g.Key);
+                                
+                                <div class="row">
+                                    @foreach (var group in permissionGroups)
+                                    {
+                                        <div class="col-md-6 col-lg-4 mb-4">
+                                            <div class="card border-0 bg-light h-100">
+                                                <div class="card-header bg-primary text-white py-2">
+                                                    <h6 class="card-title mb-0 small">
+                                                        <i class="fas fa-folder me-1"></i>
+                                                        @group.Key
+                                                    </h6>
+                                                </div>
+                                                <div class="card-body py-2">
+                                                    @foreach (var permission in group.OrderBy(p => p.Name))
+                                                    {
+                                                        <div class="form-check mb-2">
+                                                            <input class="form-check-input" 
+                                                                   type="checkbox" 
+                                                                   name="SelectedPermissions" 
+                                                                   value="@permission.Type" 
+                                                                   id="permission_@permission.Id"
+                                                                   @(Model.SelectedPermissions?.Contains(permission.Type) == true ? "checked" : "") />
+                                                            <label class="form-check-label small" for="permission_@permission.Id">
+                                                                @permission.Name
+                                                            </label>
+                                                            @if (!string.IsNullOrEmpty(permission.Description))
+                                                            {
+                                                                <div class="text-muted small">@permission.Description</div>
+                                                            }
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    No permissions are available in the system.
+                                </div>
+                            }
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="form-check">
+                                <input type="checkbox" id="selectAll" class="form-check-input">
+                                <label for="selectAll" class="form-check-label">
+                                    Select/Deselect All Permissions
+                                </label>
+                            </div>
+                            
+                            <div>
+                                <a asp-action="Index" class="btn btn-secondary me-2">
+                                    <i class="fas fa-times me-1"></i>
+                                    Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>
+                                    Create Role
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Help
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="fw-bold">Role Guidelines</h6>
+                    <ul class="small mb-3">
+                        <li>Choose a descriptive name for the role</li>
+                        <li>Only assign necessary permissions</li>
+                        <li>Consider the principle of least privilege</li>
+                        <li>Test the role with a test user before deployment</li>
+                    </ul>
+                    
+                    <h6 class="fw-bold">Permission Categories</h6>
+                    <div class="small">
+                        <strong>Project Management:</strong> Control over project lifecycle<br>
+                        <strong>User Management:</strong> Student and professor administration<br>
+                        <strong>System Administration:</strong> High-level system controls<br>
+                        <strong>Content Management:</strong> Gallery and content controls
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Select/Deselect all functionality
+            const selectAllCheckbox = document.getElementById('selectAll');
+            const permissionCheckboxes = document.querySelectorAll('input[name="SelectedPermissions"]');
+            
+            selectAllCheckbox.addEventListener('change', function() {
+                permissionCheckboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+            });
+            
+            // Update select all checkbox when individual permissions change
+            permissionCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const allChecked = Array.from(permissionCheckboxes).every(cb => cb.checked);
+                    const noneChecked = Array.from(permissionCheckboxes).every(cb => !cb.checked);
+                    
+                    selectAllCheckbox.checked = allChecked;
+                    selectAllCheckbox.indeterminate = !allChecked && !noneChecked;
+                });
+            });
+            
+            // Enhanced form validation
+            const form = document.querySelector('form');
+            form.addEventListener('submit', function(e) {
+                const selectedPermissions = document.querySelectorAll('input[name="SelectedPermissions"]:checked');
+                if (selectedPermissions.length === 0) {
+                    e.preventDefault();
+                    showToast('warning', 'Validation Error', 'Please select at least one permission for this role.');
+                    return false;
+                }
+                
+                // Show loading state
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Creating Role...';
+                }
+            });
+            
+            // Initialize tooltips if available
+            if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+                const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+            }
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: 1px solid rgba(0, 0, 0, 0.125);
+        }
+        
+        .card-header {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .bg-light .card-header.bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+        
+        .permission-category {
+            transition: all 0.2s ease;
+        }
+        
+        .permission-category:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-check-label {
+            cursor: pointer;
+        }
+        
+        .text-muted.small {
+            font-size: 0.875rem;
+        }
+    </style>
+}

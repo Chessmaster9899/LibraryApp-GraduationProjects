@@ -283,25 +283,11 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-3">
-                            <button type="button" class="btn btn-primary w-100" onclick="exportReport('pdf')">
-                                <i class="fas fa-file-pdf"></i> Export PDF Report
-                            </button>
-                        </div>
-                        <div class="col-md-3">
-                            <button type="button" class="btn btn-success w-100" onclick="exportReport('excel')">
-                                <i class="fas fa-file-excel"></i> Export Excel Data
-                            </button>
-                        </div>
-                        <div class="col-md-3">
-                            <button type="button" class="btn btn-info w-100" onclick="scheduledReport()">
-                                <i class="fas fa-calendar"></i> Schedule Report
-                            </button>
-                        </div>
-                        <div class="col-md-3">
-                            <button type="button" class="btn btn-warning w-100" onclick="customAnalytics()">
-                                <i class="fas fa-filter"></i> Custom Analytics
-                            </button>
+                        <div class="col-12">
+                            <div class="alert alert-info" role="alert">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Analytics Tools:</strong> Advanced reporting and export features will be available in future updates.
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -435,19 +421,6 @@
                 }
             }
         });
-
-        // Analytics Tools Functions
-        function exportReport(format) {
-            alert('Export ' + format.toUpperCase() + ' report functionality would be implemented here.');
-        }
-
-        function scheduledReport() {
-            alert('Schedule automated reports functionality would be implemented here.');
-        }
-
-        function customAnalytics() {
-            alert('Custom analytics builder functionality would be implemented here.');
-        }
 
         // Auto-refresh data every 10 minutes
         setTimeout(function() {

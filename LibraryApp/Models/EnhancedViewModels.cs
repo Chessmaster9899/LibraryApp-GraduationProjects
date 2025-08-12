@@ -22,25 +22,6 @@ public class AdminDashboardEnhancedViewModel : DashboardViewModel
     public new List<Project> RecentProjects { get; set; } = new();
 }
 
-public class StudentDashboardEnhancedViewModel : DashboardViewModel
-{
-    public List<Project> MyProjects { get; set; } = new();
-    public List<Notification> MyNotifications { get; set; } = new();
-    public Student? StudentInfo { get; set; }
-    public Dictionary<string, object> ProgressMetrics { get; set; } = new();
-    public List<Project> AvailableProjects { get; set; } = new();
-}
-
-public class ProfessorDashboardEnhancedViewModel : DashboardViewModel
-{
-    public List<Project> SupervisedProjects { get; set; } = new();
-    public List<Project> EvaluatedProjects { get; set; } = new();
-    public List<Notification> MyNotifications { get; set; } = new();
-    public Professor? ProfessorInfo { get; set; }
-    public Dictionary<string, int> WorkloadMetrics { get; set; } = new();
-    public List<Student> MyStudents { get; set; } = new();
-}
-
 public class ProjectSubmissionViewModel
 {
     public Project Project { get; set; } = null!;

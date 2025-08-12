@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const messages = JSON.parse(serverMessages.textContent);
             messages.forEach(msg => {
-                showToast(msg.type || 'info', msg.title || 'Notification', msg.message, msg.duration);
+                showToast(msg.Type || msg.type || 'info', msg.Title || msg.title || 'Notification', msg.Message || msg.message, msg.Duration || msg.duration);
             });
         } catch (e) {
             console.warn('Failed to parse server messages for toast notifications');
@@ -202,4 +202,64 @@ function ajaxRequest(url, options = {}) {
             showError('Request Failed', error.message || 'An unexpected error occurred');
             throw error;
         });
+}
+
+// Role Management Functions
+function confirmDeleteRole(roleId, roleName) {
+    if (confirm(`Are you sure you want to delete the role "${roleName}"? This action cannot be undone.`)) {
+        deleteRole(roleId, roleName);
+    }
+}
+
+function deleteRole(roleId, roleName) {
+    if (confirm(`This will permanently delete the role "${roleName}". Continue?`)) {
+        window.location.href = `/RoleManagement/DeleteRole/${roleId}`;
+    }
+}
+
+function assignRole(userId) {
+    const roleSelect = document.querySelector(`#roleSelect${userId}`);
+    if (roleSelect && roleSelect.value) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/RoleManagement/AssignRole';
+        
+        const userIdInput = document.createElement('input');
+        userIdInput.type = 'hidden';
+        userIdInput.name = 'userId';
+        userIdInput.value = userId;
+        
+        const roleIdInput = document.createElement('input');
+        roleIdInput.type = 'hidden';
+        roleIdInput.name = 'roleId';
+        roleIdInput.value = roleSelect.value;
+        
+        form.appendChild(userIdInput);
+        form.appendChild(roleIdInput);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function removeRole(userId, roleId, roleName) {
+    if (confirm(`Remove the role "${roleName}" from this user?`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/RoleManagement/RemoveRole';
+        
+        const userIdInput = document.createElement('input');
+        userIdInput.type = 'hidden';
+        userIdInput.name = 'userId';
+        userIdInput.value = userId;
+        
+        const roleIdInput = document.createElement('input');
+        roleIdInput.type = 'hidden';
+        roleIdInput.name = 'roleId';
+        roleIdInput.value = roleId;
+        
+        form.appendChild(userIdInput);
+        form.appendChild(roleIdInput);
+        document.body.appendChild(form);
+        form.submit();
+    }
 }
