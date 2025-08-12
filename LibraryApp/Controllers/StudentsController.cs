@@ -35,8 +35,9 @@ namespace LibraryApp.Controllers
 
             var student = await _context.Students
                 .Include(s => s.Department)
-                .Include(s => s.Projects)
-                .ThenInclude(p => p.Supervisor)
+                .Include(s => s.ProjectStudents)
+                    .ThenInclude(ps => ps.Project)
+                        .ThenInclude(p => p.Supervisor)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (student == null)
             {

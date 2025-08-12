@@ -32,9 +32,11 @@ namespace LibraryApp.Controllers
             var professor = await _context.Professors
                 .Include(p => p.Department)
                 .Include(p => p.SupervisedProjects)
-                .ThenInclude(proj => proj.Student)
+                    .ThenInclude(proj => proj.ProjectStudents)
+                        .ThenInclude(ps => ps.Student)
                 .Include(p => p.EvaluatedProjects)
-                .ThenInclude(proj => proj.Student)
+                    .ThenInclude(proj => proj.ProjectStudents)
+                        .ThenInclude(ps => ps.Student)
                 .FirstOrDefaultAsync(p => p.ProfessorId == userId);
 
             if (professor == null)
@@ -47,8 +49,8 @@ namespace LibraryApp.Controllers
                 Professor = professor,
                 TotalSupervisedProjects = professor.SupervisedProjects.Count,
                 TotalEvaluatedProjects = professor.EvaluatedProjects.Count,
-                CompletedSupervisedProjects = professor.SupervisedProjects.Count(p => p.Status == ProjectStatus.Completed || p.Status == ProjectStatus.Defended),
-                CompletedEvaluatedProjects = professor.EvaluatedProjects.Count(p => p.Status == ProjectStatus.Completed || p.Status == ProjectStatus.Defended),
+                CompletedSupervisedProjects = professor.SupervisedProjects.Count(p => p.Status == ProjectStatus.EvaluatorApproved || p.Status == ProjectStatus.Published),
+                CompletedEvaluatedProjects = professor.EvaluatedProjects.Count(p => p.Status == ProjectStatus.EvaluatorApproved || p.Status == ProjectStatus.Published),
                 RecentSupervisedProjects = professor.SupervisedProjects.OrderByDescending(p => p.SubmissionDate).Take(5).ToList(),
                 RecentEvaluatedProjects = professor.EvaluatedProjects.OrderByDescending(p => p.SubmissionDate).Take(5).ToList(),
                 UniversitySettings = _universitySettings.GetSettings()

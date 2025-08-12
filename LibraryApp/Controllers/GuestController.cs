@@ -21,14 +21,14 @@ public class GuestController : BaseController
     public async Task<IActionResult> Dashboard()
     {
         var completedProjects = await _context.Projects
-            .Include(p => p.Student)
-            .ThenInclude(s => s.Department)
+            .Include(p => p.ProjectStudents)
+                .ThenInclude(ps => ps.Student)
+                    .ThenInclude(s => s.Department)
             .Include(p => p.Supervisor)
             .Where(p => p.IsPubliclyVisible && 
-                       (p.Status == ProjectStatus.ReviewApproved || 
-                        p.Status == ProjectStatus.Defended || 
+                       (p.Status == ProjectStatus.EvaluatorApproved || 
                         p.Status == ProjectStatus.Published))
-            .OrderByDescending(p => p.DefenseDate ?? p.SubmissionDate)
+            .OrderByDescending(p => p.SubmissionDate)
             .ToListAsync();
 
         var departments = await _context.Departments.ToListAsync();
@@ -40,7 +40,8 @@ public class GuestController : BaseController
             TotalCompletedProjects = completedProjects.Count,
             Departments = departments,
             ProjectsByDepartment = completedProjects
-                .GroupBy(p => p.Student.Department.Name)
+                .Where(p => p.ProjectStudents.Any()) // Only include projects that have students
+                .GroupBy(p => p.ProjectStudents.First().Student.Department.Name)
                 .ToDictionary(g => g.Key, g => g.Count())
         };
 
@@ -51,17 +52,17 @@ public class GuestController : BaseController
     public async Task<IActionResult> Projects(string? department, string? keyword, int page = 1)
     {
         var query = _context.Projects
-            .Include(p => p.Student)
-            .ThenInclude(s => s.Department)
+            .Include(p => p.ProjectStudents)
+                .ThenInclude(ps => ps.Student)
+                    .ThenInclude(s => s.Department)
             .Include(p => p.Supervisor)
             .Where(p => p.IsPubliclyVisible && 
-                       (p.Status == ProjectStatus.ReviewApproved || 
-                        p.Status == ProjectStatus.Defended || 
+                       (p.Status == ProjectStatus.EvaluatorApproved || 
                         p.Status == ProjectStatus.Published));
 
         if (!string.IsNullOrEmpty(department))
         {
-            query = query.Where(p => p.Student.Department.Name == department);
+            query = query.Where(p => p.ProjectStudents.Any(ps => ps.Student.Department.Name == department));
         }
 
         if (!string.IsNullOrEmpty(keyword))
@@ -74,7 +75,7 @@ public class GuestController : BaseController
         const int pageSize = 12;
         var totalCount = await query.CountAsync();
         var projects = await query
-            .OrderByDescending(p => p.DefenseDate ?? p.SubmissionDate)
+            .OrderByDescending(p => p.SubmissionDate)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
@@ -92,13 +93,13 @@ public class GuestController : BaseController
     public async Task<IActionResult> ProjectDetails(int id)
     {
         var project = await _context.Projects
-            .Include(p => p.Student)
-            .ThenInclude(s => s.Department)
+            .Include(p => p.ProjectStudents)
+                .ThenInclude(ps => ps.Student)
+                    .ThenInclude(s => s.Department)
             .Include(p => p.Supervisor)
             .Include(p => p.Evaluator)
             .FirstOrDefaultAsync(p => p.Id == id && p.IsPubliclyVisible && 
-                                    (p.Status == ProjectStatus.ReviewApproved || 
-                                     p.Status == ProjectStatus.Defended || 
+                                    (p.Status == ProjectStatus.EvaluatorApproved || 
                                      p.Status == ProjectStatus.Published));
 
         if (project == null)
