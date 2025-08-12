@@ -115,16 +115,16 @@ else
     <div class="col-md-3">
         <div class="card border-success">
             <div class="card-body text-center">
-                <h4 class="text-success">@Model.Count(p => p.Status == ProjectStatus.Completed || p.Status == ProjectStatus.Defended)</h4>
-                <small class="text-muted">Completed</small>
+                <h4 class="text-success">@Model.Count(p => p.Status == ProjectStatus.EvaluatorApproved || p.Status == ProjectStatus.Published)</h4>
+                <small class="text-muted">Approved/Published</small>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card border-warning">
             <div class="card-body text-center">
-                <h4 class="text-warning">@Model.Count(p => p.Status == ProjectStatus.InProgress)</h4>
-                <small class="text-muted">In Progress</small>
+                <h4 class="text-warning">@Model.Count(p => p.Status == ProjectStatus.Submitted)</h4>
+                <small class="text-muted">Submitted</small>
             </div>
         </div>
     </div>

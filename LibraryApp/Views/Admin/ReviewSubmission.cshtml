@@ -59,10 +59,23 @@
                         <div class="col-md-6">
                             <h4>@Model.Submission.Project.Title</h4>
                             <div class="mb-3">
-                                <strong>Student:</strong> @Model.Submission.Project.Student.FullName<br>
-                                <strong>Student ID:</strong> @Model.Submission.Project.Student.StudentNumber<br>
-                                <strong>Department:</strong> @Model.Submission.Project.Student.Department.Name<br>
-                                <strong>Email:</strong> @Model.Submission.Project.Student.Email
+                                <strong>Students:</strong><br>
+                                @if (Model.Submission.Project.ProjectStudents.Any())
+                                {
+                                    @foreach (var ps in Model.Submission.Project.ProjectStudents)
+                                    {
+                                        <div class="mb-2">
+                                            <strong>@ps.Student.FullName</strong><br>
+                                            <small class="text-muted">ID: @ps.Student.StudentNumber</small><br>
+                                            <small class="text-muted">Department: @ps.Student.Department.Name</small><br>
+                                            <small class="text-muted">Email: @ps.Student.Email</small>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <em class="text-muted">No students assigned</em>
+                                }
                             </div>
                         </div>
                         <div class="col-md-6">

@@ -21,9 +21,9 @@
                 <div class="col-auto">
                     <div class="btn-group" role="group" aria-label="Filter options">
                         <button type="button" class="btn btn-outline-secondary btn-sm active" onclick="filterProjects('all')">All</button>
-                        <button type="button" class="btn btn-outline-warning btn-sm" onclick="filterProjects('InProgress')">In Progress</button>
-                        <button type="button" class="btn btn-outline-info btn-sm" onclick="filterProjects('Approved')">Approved</button>
-                        <button type="button" class="btn btn-outline-success btn-sm" onclick="filterProjects('Completed')">Completed</button>
+                        <button type="button" class="btn btn-outline-warning btn-sm" onclick="filterProjects('Submitted')">Submitted</button>
+                        <button type="button" class="btn btn-outline-info btn-sm" onclick="filterProjects('SupervisorApproved')">Supervisor Approved</button>
+                        <button type="button" class="btn btn-outline-success btn-sm" onclick="filterProjects('EvaluatorApproved')">Evaluator Approved</button>
                     </div>
                 </div>
             </div>
@@ -56,18 +56,37 @@
                                     }
                                 </td>
                                 <td>
-                                    <div>
-                                        <strong>@project.Student.DisplayName</strong>
-                                        <br>
-                                        <small class="text-muted">@project.Student.StudentNumber</small>
-                                        <br>
-                                        <small class="text-muted">
-                                            <i class="fas fa-envelope me-1"></i>
-                                            <a href="mailto:@project.Student.Email">@project.Student.Email</a>
-                                        </small>
-                                    </div>
+                                    @if (project.ProjectStudents.Any())
+                                    {
+                                        @foreach (var ps in project.ProjectStudents)
+                                        {
+                                            <div class="mb-2">
+                                                <strong>@ps.Student.DisplayName</strong>
+                                                <br>
+                                                <small class="text-muted">@ps.Student.StudentNumber</small>
+                                                <br>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-envelope me-1"></i>
+                                                    <a href="mailto:@ps.Student.Email">@ps.Student.Email</a>
+                                                </small>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <em class="text-muted">No students assigned</em>
+                                    }
                                 </td>
-                                <td>@project.Student.Department.Name</td>
+                                <td>
+                                    @if (project.ProjectStudents.Any())
+                                    {
+                                        @project.ProjectStudents.First().Student.Department.Name
+                                    }
+                                    else
+                                    {
+                                        <em class="text-muted">N/A</em>
+                                    }
+                                </td>
                                 <td>
                                     @await Html.PartialAsync("_ProjectStatusBadge", project.Status)
                                 </td>
@@ -99,7 +118,7 @@
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                         }
-                                        @if (ViewBag.PageTitle.Contains("Evaluate") && (project.Status == ProjectStatus.Completed || project.Status == ProjectStatus.InProgress))
+                                        @if (ViewBag.PageTitle.Contains("Evaluate") && (project.Status == ProjectStatus.SupervisorApproved || project.Status == ProjectStatus.Submitted))
                                         {
                                             <button type="button" class="btn btn-outline-success btn-sm" 
                                                     onclick="showEvaluationModal(@project.Id, '@project.Title')" title="Evaluate">
@@ -129,16 +148,16 @@
         <div class="col-md-3">
             <div class="card border-success">
                 <div class="card-body text-center">
-                    <h4 class="text-success">@Model.Count(p => p.Status == ProjectStatus.Completed || p.Status == ProjectStatus.Defended)</h4>
-                    <small class="text-muted">Completed</small>
+                    <h4 class="text-success">@Model.Count(p => p.Status == ProjectStatus.EvaluatorApproved || p.Status == ProjectStatus.Published)</h4>
+                    <small class="text-muted">Approved/Published</small>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card border-warning">
                 <div class="card-body text-center">
-                    <h4 class="text-warning">@Model.Count(p => p.Status == ProjectStatus.InProgress)</h4>
-                    <small class="text-muted">In Progress</small>
+                    <h4 class="text-warning">@Model.Count(p => p.Status == ProjectStatus.Submitted)</h4>
+                    <small class="text-muted">Submitted</small>
                 </div>
             </div>
         </div>
@@ -223,7 +242,7 @@ else
                 const rowStatus = row.getAttribute('data-status');
                 
                 if (status === 'all' || rowStatus === status || 
-                    (status === 'Completed' && (rowStatus === 'Completed' || rowStatus === 'Defended'))) {
+                    (status === 'EvaluatorApproved' && (rowStatus === 'EvaluatorApproved' || rowStatus === 'Published'))) {
                     row.style.display = '';
                 } else {
                     row.style.display = 'none';
