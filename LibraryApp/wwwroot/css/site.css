@@ -1108,7 +1108,7 @@ label:not(.card label):not(.card-body label):not(.modal label):not(.login-card l
   max-width: 380px;
 }
 
-.toast {
+.toast-container .toast {
   background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(0, 0, 0, 0.08);
@@ -1118,14 +1118,17 @@ label:not(.card label):not(.card-body label):not(.modal label):not(.login-card l
   overflow: hidden;
   transition: var(--transition-slow);
   max-width: 100%;
+  display: block !important;
+  opacity: 0;
+  transform: translateX(100%) scale(0.95);
 }
 
-.toast.showing {
+.toast-container .toast.showing {
   opacity: 1;
   transform: translateX(0) scale(1);
 }
 
-.toast.hide {
+.toast-container .toast.hide {
   opacity: 0;
   transform: translateX(100%) scale(0.95);
 }
@@ -1160,36 +1163,36 @@ label:not(.card label):not(.card-body label):not(.modal label):not(.login-card l
   box-shadow: var(--shadow);
 }
 
-.toast-success .toast-icon {
+.toast-container .toast-success .toast-icon {
   background: linear-gradient(135deg, #10b981 0%, var(--success-color) 100%);
 }
 
-.toast-error .toast-icon {
+.toast-container .toast-error .toast-icon {
   background: linear-gradient(135deg, #ef4444 0%, var(--danger-color) 100%);
 }
 
-.toast-warning .toast-icon {
+.toast-container .toast-warning .toast-icon {
   background: linear-gradient(135deg, #f59e0b 0%, var(--warning-color) 100%);
   color: white;
 }
 
-.toast-info .toast-icon {
+.toast-container .toast-info .toast-icon {
   background: linear-gradient(135deg, #06b6d4 0%, var(--info-color) 100%);
 }
 
-.toast-success {
+.toast-container .toast-success {
   border-left: 4px solid var(--success-color);
 }
 
-.toast-error {
+.toast-container .toast-error {
   border-left: 4px solid var(--danger-color);
 }
 
-.toast-warning {
+.toast-container .toast-warning {
   border-left: 4px solid var(--warning-color);
 }
 
-.toast-info {
+.toast-container .toast-info {
   border-left: 4px solid var(--info-color);
 }
 
@@ -1234,16 +1237,16 @@ label:not(.card label):not(.card-body label):not(.modal label):not(.login-card l
     max-width: none;
   }
   
-  .toast {
+  .toast-container .toast {
     margin-bottom: 8px;
   }
   
-  .toast-header,
-  .toast-body {
+  .toast-container .toast-header,
+  .toast-container .toast-body {
     padding: 1rem;
   }
   
-  .toast-icon {
+  .toast-container .toast-icon {
     width: 24px;
     height: 24px;
     margin-right: 8px;
