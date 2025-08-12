@@ -508,16 +508,29 @@
 }
 </style>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    initializeDashboardCharts();
+    // Check if Chart.js is available
+    if (typeof Chart !== 'undefined') {
+        initializeDashboardCharts();
+    } else {
+        console.warn('Chart.js library not available. Charts will be disabled.');
+        // Hide chart containers and show fallback
+        const chartContainers = document.querySelectorAll('#projectsChart, #workloadChart, #performanceChart');
+        chartContainers.forEach(container => {
+            if (container) {
+                container.innerHTML = '<div class="text-center p-4 text-muted"><i class="fas fa-chart-pie fa-3x mb-2"></i><br>Charts temporarily unavailable</div>';
+            }
+        });
+    }
 });
 
 function initializeDashboardCharts() {
     // Projects Overview Donut Chart
-    const projectsCtx = document.getElementById('projectsChart').getContext('2d');
-    new Chart(projectsCtx, {
+    const projectsCtx = document.getElementById('projectsChart');
+    if (projectsCtx) {
+        try {
+            new Chart(projectsCtx.getContext('2d'), {
         type: 'doughnut',
         data: {
             labels: ['Supervised', 'Evaluated'],
@@ -537,12 +550,18 @@ function initializeDashboardCharts() {
             }
         }
     });
+        } catch (error) {
+            console.warn('Failed to initialize projects chart:', error);
+            projectsCtx.innerHTML = '<div class="text-center p-4 text-muted"><i class="fas fa-chart-doughnut fa-2x mb-2"></i><br>Chart temporarily unavailable</div>';
+        }
+    }
 
     // Completion Trends Chart (if analytics tab is active)
     setTimeout(() => {
         const trendsCtx = document.getElementById('completionTrendsChart');
         if (trendsCtx) {
-            new Chart(trendsCtx, {
+            try {
+                new Chart(trendsCtx, {
                 type: 'line',
                 data: {
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
@@ -559,6 +578,10 @@ function initializeDashboardCharts() {
                     maintainAspectRatio: false
                 }
             });
+            } catch (error) {
+                console.warn('Failed to initialize completion trends chart:', error);
+                trendsCtx.innerHTML = '<div class="text-center p-4 text-muted"><i class="fas fa-chart-line fa-2x mb-2"></i><br>Chart temporarily unavailable</div>';
+            }
         }
     }, 100);
 }

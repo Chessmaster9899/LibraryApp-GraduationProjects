@@ -375,6 +375,9 @@ body {
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   box-shadow: var(--shadow-sm);
   transition: var(--transition);
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1050 !important;
 }
 
 .navbar-brand {
@@ -437,6 +440,7 @@ body {
   padding: 0.75rem 0;
   margin-top: 0.5rem;
   min-width: 200px;
+  z-index: 1060 !important;
 }
 
 .dropdown-item {
