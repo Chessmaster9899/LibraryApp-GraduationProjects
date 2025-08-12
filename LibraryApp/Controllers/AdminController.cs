@@ -112,6 +112,7 @@ public class AdminController : BaseController
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> ReviewSubmission(ProjectSubmissionReviewViewModel model)
     {
         var submission = await _context.ProjectSubmissions
@@ -268,6 +269,7 @@ public class AdminController : BaseController
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> CreateAnnouncement(CommunicationViewModel model)
     {
         var announcement = new Announcement
@@ -389,6 +391,7 @@ public class AdminController : BaseController
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> GenerateReport(ReportsViewModel model)
     {
         if (!ModelState.IsValid)
@@ -437,6 +440,7 @@ public class AdminController : BaseController
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> SendAnnouncement(CommunicationViewModel model)
     {
         if (!ModelState.IsValid)
@@ -489,6 +493,7 @@ public class AdminController : BaseController
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeactivateUser(string userId, UserRole userRole)
     {
         bool success = false;
@@ -536,6 +541,7 @@ public class AdminController : BaseController
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> SendStudentMessage(string[] Recipients, string Subject, string Message, bool IsUrgent = false)
     {
         try
@@ -602,6 +608,7 @@ public class AdminController : BaseController
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> SendProfessorMessage(string[] Recipients, string Subject, string Message, bool IsUrgent = false)
     {
         try

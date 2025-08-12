@@ -1,0 +1,18 @@
+@model ProjectStatus
+@{
+    string additionalClasses = ViewData["AdditionalClasses"] as string ?? "";
+    var badgeClass = Model switch
+    {
+        ProjectStatus.Completed => "success",
+        ProjectStatus.Defended => "success",
+        ProjectStatus.Published => "dark",
+        ProjectStatus.InProgress => "warning",
+        ProjectStatus.Approved => "info",
+        ProjectStatus.Proposed => "secondary",
+        ProjectStatus.SubmittedForReview => "primary",
+        ProjectStatus.ReviewApproved => "success",
+        ProjectStatus.ReviewRejected => "danger",
+        _ => "secondary"
+    };
+}
+<span class="badge @additionalClasses bg-@badgeClass">@Model</span>

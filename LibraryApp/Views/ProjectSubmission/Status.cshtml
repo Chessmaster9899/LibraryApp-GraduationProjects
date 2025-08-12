@@ -1,4 +1,4 @@
-@model List<LibraryApp.Models.ProjectSubmission>
+@model List<ProjectSubmission>
 @{
     ViewData["Title"] = "Submission Status";
 }
@@ -44,20 +44,20 @@
                                                 @{
                                                     string statusClass = submission.Status switch
                                                     {
-                                                        LibraryApp.Models.SubmissionStatus.Pending => "warning",
-                                                        LibraryApp.Models.SubmissionStatus.UnderReview => "info",
-                                                        LibraryApp.Models.SubmissionStatus.Approved => "success",
-                                                        LibraryApp.Models.SubmissionStatus.Rejected => "danger",
-                                                        LibraryApp.Models.SubmissionStatus.NeedsRevision => "warning",
+                                                        SubmissionStatus.Pending => "warning",
+                                                        SubmissionStatus.UnderReview => "info",
+                                                        SubmissionStatus.Approved => "success",
+                                                        SubmissionStatus.Rejected => "danger",
+                                                        SubmissionStatus.NeedsRevision => "warning",
                                                         _ => "secondary"
                                                     };
                                                     string statusIcon = submission.Status switch
                                                     {
-                                                        LibraryApp.Models.SubmissionStatus.Pending => "fas fa-hourglass-half",
-                                                        LibraryApp.Models.SubmissionStatus.UnderReview => "fas fa-search",
-                                                        LibraryApp.Models.SubmissionStatus.Approved => "fas fa-check-circle",
-                                                        LibraryApp.Models.SubmissionStatus.Rejected => "fas fa-times-circle",
-                                                        LibraryApp.Models.SubmissionStatus.NeedsRevision => "fas fa-edit",
+                                                        SubmissionStatus.Pending => "fas fa-hourglass-half",
+                                                        SubmissionStatus.UnderReview => "fas fa-search",
+                                                        SubmissionStatus.Approved => "fas fa-check-circle",
+                                                        SubmissionStatus.Rejected => "fas fa-times-circle",
+                                                        SubmissionStatus.NeedsRevision => "fas fa-edit",
                                                         _ => "fas fa-question-circle"
                                                     };
                                                 }

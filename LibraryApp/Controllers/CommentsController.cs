@@ -63,6 +63,7 @@ public class CommentsController : BaseController
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     [RequireAnyPermission(PermissionType.AddComments)]
     public async Task<IActionResult> AddComment([FromBody] AddCommentViewModel model)
     {
@@ -102,6 +103,7 @@ public class CommentsController : BaseController
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateComment([FromBody] UpdateCommentModel model)
     {
         if (!ModelState.IsValid)
@@ -122,6 +124,7 @@ public class CommentsController : BaseController
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteComment(int commentId)
     {
         var success = await _commentService.DeleteCommentAsync(commentId, CurrentUserId!, CurrentUserRoleEnum!.Value);
@@ -137,6 +140,7 @@ public class CommentsController : BaseController
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> AcknowledgeComment(int commentId)
     {
         if (CurrentUserRoleEnum != UserRole.Student)

@@ -22,6 +22,7 @@ namespace LibraryApp.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(string userId, string password)
         {
             if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(password))
@@ -80,6 +81,7 @@ namespace LibraryApp.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangePassword(string newPassword, string confirmPassword)
         {
             var userId = HttpContext.Session.GetString("UserId");

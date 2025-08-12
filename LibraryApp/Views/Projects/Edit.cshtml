@@ -1,118 +1,274 @@
-@model LibraryApp.Models.Project
-
+@model Project
 @{
     ViewData["Title"] = "Edit Project";
 }
 
-<h1>Edit</h1>
-
-<h4>Project</h4>
-<hr />
-<div class="row">
-    <div class="col-md-8">
-        <form asp-action="Edit" enctype="multipart/form-data">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            
-            <div class="form-group">
-                <label asp-for="Title" class="control-label"></label>
-                <input asp-for="Title" class="form-control" />
-                <span asp-validation-for="Title" class="text-danger"></span>
-            </div>
-            
-            <div class="form-group">
-                <label asp-for="Abstract" class="control-label"></label>
-                <textarea asp-for="Abstract" class="form-control" rows="5" placeholder="Enter project abstract..."></textarea>
-                <span asp-validation-for="Abstract" class="text-danger"></span>
-            </div>
-            
-            <div class="form-group">
-                <label asp-for="Keywords" class="control-label"></label>
-                <input asp-for="Keywords" class="form-control" placeholder="Enter keywords separated by commas" />
-                <span asp-validation-for="Keywords" class="text-danger"></span>
-            </div>
-            
-            <div class="form-group">
-                <label asp-for="Status" class="control-label"></label>
-                <select asp-for="Status" class="form-control" asp-items="Html.GetEnumSelectList<LibraryApp.Models.ProjectStatus>()"></select>
-                <span asp-validation-for="Status" class="text-danger"></span>
-            </div>
-            
-            <div class="form-group">
-                <label asp-for="StudentId" class="control-label">Student</label>
-                <select asp-for="StudentId" class="form-control" asp-items="ViewBag.StudentId"></select>
-                <span asp-validation-for="StudentId" class="text-danger"></span>
-            </div>
-            
-            <div class="form-group">
-                <label asp-for="SupervisorId" class="control-label">Supervisor</label>
-                <select asp-for="SupervisorId" class="form-control" asp-items="ViewBag.SupervisorId"></select>
-                <span asp-validation-for="SupervisorId" class="text-danger"></span>
-            </div>
-            
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="SubmissionDate" class="control-label"></label>
-                        <input asp-for="SubmissionDate" class="form-control" type="date" />
-                        <span asp-validation-for="SubmissionDate" class="text-danger"></span>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="DefenseDate" class="control-label"></label>
-                        <input asp-for="DefenseDate" class="form-control" type="date" />
-                        <span asp-validation-for="DefenseDate" class="text-danger"></span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label asp-for="Grade" class="control-label"></label>
-                <input asp-for="Grade" class="form-control" placeholder="e.g., A, B+, 85%, etc." />
-                <span asp-validation-for="Grade" class="text-danger"></span>
-            </div>
-            
-            <div class="form-group">
-                <label class="control-label">Current Document</label>
-                @if (!string.IsNullOrEmpty(Model.DocumentPath))
-                {
-                    <div class="alert alert-info">
-                        <i class="fas fa-file-pdf"></i>
-                        <a href="@Model.DocumentPath" target="_blank">View Current Document</a>
-                    </div>
-                }
-                else
-                {
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        No document currently uploaded
-                    </div>
-                }
-            </div>
-            
-            <div class="form-group">
-                <label for="documentFile" class="control-label">Upload New Document</label>
-                <input type="file" name="documentFile" class="form-control" accept=".pdf,.doc,.docx,.txt" />
-                <small class="form-text text-muted">Upload a new PDF, Word document, or text file (optional - leave empty to keep current document)</small>
-            </div>
-            
-            <div class="form-group">
-                <label for="posterFile" class="control-label">Upload New Poster</label>
-                <input type="file" name="posterFile" class="form-control" accept=".jpg,.jpeg,.png,.pdf,.svg" />
-                <small class="form-text text-muted">Upload a new project poster (JPG, PNG, PDF, or SVG format, optional - leave empty to keep current poster)</small>
-            </div>
-            
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">Cancel</a>
-            </div>
-        </form>
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">Edit Project</h1>
+            <p class="text-muted mb-0">Update project details, assignments, and file uploads with administrative control</p>
+        </div>
+        <div>
+            <a asp-action="Index" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left me-1"></i>Back to Projects
+            </a>
+        </div>
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-edit me-2"></i>Project Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        <input type="hidden" asp-for="Id" />
+                        
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label">Project Title <span class="text-danger">*</span></label>
+                            <input asp-for="Title" class="form-control" placeholder="Enter project title">
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Abstract" class="form-label">Abstract</label>
+                            <textarea asp-for="Abstract" class="form-control" rows="5" placeholder="Provide a comprehensive description of the project"></textarea>
+                            <span asp-validation-for="Abstract" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Keywords" class="form-label">Keywords</label>
+                            <input asp-for="Keywords" class="form-control" placeholder="Enter keywords separated by commas">
+                            <span asp-validation-for="Keywords" class="text-danger"></span>
+                            <div class="form-text">Separate multiple keywords with commas (e.g., AI, Machine Learning, Python)</div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Status" class="form-label">Project Status</label>
+                                    <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<ProjectStatus>()">
+                                        <option value="">Select Status</option>
+                                    </select>
+                                    <span asp-validation-for="Status" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Grade" class="form-label">Grade</label>
+                                    <input asp-for="Grade" class="form-control" placeholder="A, B+, 85/100...">
+                                    <span asp-validation-for="Grade" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="StudentId" class="form-label">Assigned Student</label>
+                                    <select asp-for="StudentId" class="form-select" asp-items="ViewBag.StudentId">
+                                        <option value="">Select Student</option>
+                                    </select>
+                                    <span asp-validation-for="StudentId" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="SupervisorId" class="form-label">Supervisor</label>
+                                    <select asp-for="SupervisorId" class="form-select" asp-items="ViewBag.SupervisorId">
+                                        <option value="">Select Supervisor</option>
+                                    </select>
+                                    <span asp-validation-for="SupervisorId" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (ViewBag.EvaluatorId != null)
+                        {
+                            <div class="mb-3">
+                                <label asp-for="EvaluatorId" class="form-label">Evaluator</label>
+                                <select asp-for="EvaluatorId" class="form-select" asp-items="ViewBag.EvaluatorId">
+                                    <option value="">Select Evaluator</option>
+                                </select>
+                                <span asp-validation-for="EvaluatorId" class="text-danger"></span>
+                            </div>
+                        }
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="SubmissionDate" class="form-label">Submission Date</label>
+                                    <input asp-for="SubmissionDate" class="form-control" type="date">
+                                    <span asp-validation-for="SubmissionDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="DefenseDate" class="form-label">Defense Date</label>
+                                    <input asp-for="DefenseDate" class="form-control" type="date">
+                                    <span asp-validation-for="DefenseDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="documentFile" class="form-label">
+                                        <i class="fas fa-file-pdf me-1"></i>Project Document
+                                    </label>
+                                    <input type="file" class="form-control" id="documentFile" name="documentFile" accept=".pdf,.doc,.docx,.txt">
+                                    <div class="form-text">Allowed formats: PDF, DOC, DOCX, TXT</div>
+                                    @if (!string.IsNullOrEmpty(Model.DocumentPath))
+                                    {
+                                        <div class="mt-2">
+                                            <small class="text-success">
+                                                <i class="fas fa-check-circle me-1"></i>Current document: 
+                                                <a href="@Model.DocumentPath" target="_blank" class="text-decoration-none">View Document</a>
+                                            </small>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="posterFile" class="form-label">
+                                        <i class="fas fa-image me-1"></i>Project Poster
+                                    </label>
+                                    <input type="file" class="form-control" id="posterFile" name="posterFile" accept=".jpg,.jpeg,.png,.gif,.pdf">
+                                    <div class="form-text">Allowed formats: JPG, PNG, GIF, PDF</div>
+                                    @if (!string.IsNullOrEmpty(Model.PosterPath))
+                                    {
+                                        <div class="mt-2">
+                                            <small class="text-success">
+                                                <i class="fas fa-check-circle me-1"></i>Current poster: 
+                                                <a href="@Model.PosterPath" target="_blank" class="text-decoration-none">View Poster</a>
+                                            </small>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>Update Project
+                                </button>
+                                <a asp-action="Index" class="btn btn-secondary ms-2">
+                                    <i class="fas fa-times me-1"></i>Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Project Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label text-muted small">Student</label>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-user-graduate text-primary me-2"></i>
+                            <div>
+                                <div>@Model.Student?.FullName</div>
+                                <small class="text-muted">@Model.Student?.StudentNumber</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted small">Supervisor</label>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-chalkboard-teacher text-primary me-2"></i>
+                            <span>@Model.Supervisor?.Title @Model.Supervisor?.FirstName @Model.Supervisor?.LastName</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted small">Status</label>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-@(Model.Status == ProjectStatus.Completed ? "success" : 
+                                                      Model.Status == ProjectStatus.InProgress ? "warning" : 
+                                                      Model.Status == ProjectStatus.Approved ? "info" : "secondary") me-2">
+                                @Model.Status
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted small">Submission Date</label>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-calendar text-primary me-2"></i>
+                            <span>@Model.SubmissionDate.ToString("MMM dd, yyyy")</span>
+                        </div>
+                    </div>
+
+                    @if (Model.DefenseDate.HasValue)
+                    {
+                        <div class="mb-3">
+                            <label class="form-label text-muted small">Defense Date</label>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-presentation text-warning me-2"></i>
+                                <span>@Model.DefenseDate.Value.ToString("MMM dd, yyyy")</span>
+                            </div>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.Grade))
+                    {
+                        <div class="mb-3">
+                            <label class="form-label text-muted small">Grade</label>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-star text-warning me-2"></i>
+                                <span class="fw-bold">@Model.Grade</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="card shadow-sm mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-shield-alt me-2"></i>Admin Tools
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <small>Full administrative control over project</small>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <small>Modify assignments and status</small>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <small>Update grades and defense dates</small>
+                        </li>
+                        <li class="mb-0">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <small>Override all project settings</small>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {

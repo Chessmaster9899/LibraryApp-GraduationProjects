@@ -1,4 +1,4 @@
-@model IEnumerable<LibraryApp.Models.Project>
+@model IEnumerable<Project>
 
 @{
     ViewData["Title"] = "Project Management";
@@ -60,7 +60,7 @@
                     <label for="statusFilter" class="form-label">Filter by Status</label>
                     <select class="form-select" id="statusFilter" name="statusFilter">
                         <option value="">All Statuses</option>
-                        @foreach (var status in Enum.GetValues<LibraryApp.Models.ProjectStatus>())
+                        @foreach (var status in Enum.GetValues<ProjectStatus>())
                         {
                             <option value="@status" selected="@(ViewData["StatusFilter"]?.ToString() == status.ToString())">
                                 @status

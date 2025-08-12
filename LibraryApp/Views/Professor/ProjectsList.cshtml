@@ -1,4 +1,4 @@
-@model IEnumerable<LibraryApp.Models.Project>
+@model IEnumerable<Project>
 @{
     ViewData["Title"] = ViewBag.PageTitle ?? "Projects";
 }
@@ -69,15 +69,7 @@
                                 </td>
                                 <td>@project.Student.Department.Name</td>
                                 <td>
-                                    <span class="badge bg-@(project.Status switch {
-                                        ProjectStatus.Completed => "success",
-                                        ProjectStatus.Defended => "success",
-                                        ProjectStatus.InProgress => "warning",
-                                        ProjectStatus.Approved => "info",
-                                        _ => "secondary"
-                                    })">
-                                        @project.Status
-                                    </span>
+                                    @await Html.PartialAsync("_ProjectStatusBadge", project.Status)
                                 </td>
                                 <td>@project.SubmissionDate.ToString("MMM dd, yyyy")</td>
                                 <td>

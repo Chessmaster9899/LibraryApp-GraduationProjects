@@ -1,4 +1,4 @@
-@model LibraryApp.Models.DashboardViewModel
+@model DashboardViewModel
 
 @{
     ViewData["Title"] = "Dashboard";
@@ -148,11 +148,11 @@
                             {
                                 var badgeClass = statusGroup.Status switch
                                 {
-                                    LibraryApp.Models.ProjectStatus.Completed => "success",
-                                    LibraryApp.Models.ProjectStatus.Defended => "success",
-                                    LibraryApp.Models.ProjectStatus.Published => "success",
-                                    LibraryApp.Models.ProjectStatus.InProgress => "warning",
-                                    LibraryApp.Models.ProjectStatus.Approved => "info",
+                                    ProjectStatus.Completed => "success",
+                                    ProjectStatus.Defended => "success",
+                                    ProjectStatus.Published => "success",
+                                    ProjectStatus.InProgress => "warning",
+                                    ProjectStatus.Approved => "info",
                                     _ => "secondary"
                                 };
                                 
@@ -260,13 +260,10 @@
                                                 <div class="text-professional" style="font-weight: 600;">@project.Supervisor.Title @project.Supervisor.FirstName @project.Supervisor.LastName</div>
                                             </td>
                                             <td>
-                                                <span class="badge badge-professional bg-@(project.Status == LibraryApp.Models.ProjectStatus.Completed ? "success" : 
-                                                                          project.Status == LibraryApp.Models.ProjectStatus.InProgress ? "warning" : 
-                                                                          project.Status == LibraryApp.Models.ProjectStatus.Approved ? "info" : 
-                                                                          project.Status == LibraryApp.Models.ProjectStatus.Defended ? "success" :
-                                                                          project.Status == LibraryApp.Models.ProjectStatus.Published ? "success" : "secondary")">
-                                                    @project.Status
-                                                </span>
+                                                @{
+                                                    ViewData["AdditionalClasses"] = "badge-professional";
+                                                }
+                                                @await Html.PartialAsync("_ProjectStatusBadgeWithClass", project.Status)
                                             </td>
                                             <td class="text-professional">@project.SubmissionDate.ToString("MMM dd, yyyy")</td>
                                             <td>

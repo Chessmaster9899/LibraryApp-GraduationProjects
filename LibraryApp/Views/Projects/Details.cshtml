@@ -1,4 +1,4 @@
-@model LibraryApp.Models.Project
+@model Project
 
 @{
     ViewData["Title"] = "Project Details";
@@ -333,7 +333,7 @@ label.fw-semibold {
             <strong>@Html.DisplayFor(model => model.Student.FirstName) @Html.DisplayFor(model => model.Student.LastName)</strong><br />
             <small class="text-muted">
                 Student Number: @Html.DisplayFor(model => model.Student.StudentNumber)<br />
-                Email: <a href="mailto:@Model.Student.Email">@Html.DisplayFor(model => model.Student.Email)</a><br />
+                Email: <a href="mailto:@Model.Student?.Email">@Html.DisplayFor(model => model.Student.Email)</a><br />
                 Department: @Html.DisplayFor(model => model.Student.Department.Name)
             </small>
         </dd>
@@ -343,9 +343,9 @@ label.fw-semibold {
         <dd class="col-sm-10">
             <strong>@Html.DisplayFor(model => model.Supervisor.Title) @Html.DisplayFor(model => model.Supervisor.FirstName) @Html.DisplayFor(model => model.Supervisor.LastName)</strong><br />
             <small class="text-muted">
-                Email: <a href="mailto:@Model.Supervisor.Email">@Html.DisplayFor(model => model.Supervisor.Email)</a><br />
+                Email: <a href="mailto:@Model.Supervisor?.Email">@Html.DisplayFor(model => model.Supervisor.Email)</a><br />
                 Department: @Html.DisplayFor(model => model.Supervisor.Department.Name)<br />
-                @if (!string.IsNullOrEmpty(Model.Supervisor.Specialization))
+                @if (!string.IsNullOrEmpty(Model.Supervisor?.Specialization))
                 {
                     <span>Specialization: @Html.DisplayFor(model => model.Supervisor.Specialization)</span>
                 }

@@ -1,4 +1,4 @@
-@model LibraryApp.Models.ProfessorDashboardViewModel
+@model ProfessorDashboardViewModel
 @{
     ViewData["Title"] = "Professor Dashboard";
 }
@@ -140,20 +140,10 @@
                                         }
                                     </div>
                                     <div class="text-end">
-                                        <span class="badge badge-status bg-@(project.Status switch {
-                                            ProjectStatus.Completed => "success",
-                                            ProjectStatus.Defended => "success",
-                                            ProjectStatus.InProgress => "warning",
-                                            ProjectStatus.Approved => "info",
-                                            ProjectStatus.Proposed => "secondary",
-                                            ProjectStatus.SubmittedForReview => "primary",
-                                            ProjectStatus.ReviewApproved => "success",
-                                            ProjectStatus.ReviewRejected => "danger",
-                                            ProjectStatus.Published => "dark",
-                                            _ => "secondary"
-                                        })">
-                                            @project.Status.ToString().Replace("Status", "")
-                                        </span>
+                                        @{
+                                            ViewData["AdditionalClasses"] = "badge-status";
+                                        }
+                                        @await Html.PartialAsync("_ProjectStatusBadgeWithClass", project.Status)
                                         <div class="mt-2">
                                             @if (project.Status == ProjectStatus.Proposed)
                                             {
@@ -213,15 +203,7 @@
                                         </td>
                                         <td>@project.Student.DisplayName</td>
                                         <td>
-                                            <span class="badge bg-@(project.Status switch {
-                                                ProjectStatus.Completed => "success",
-                                                ProjectStatus.Defended => "success",
-                                                ProjectStatus.InProgress => "warning",
-                                                ProjectStatus.Approved => "info",
-                                                _ => "secondary"
-                                            })">
-                                                @project.Status
-                                            </span>
+                                            @await Html.PartialAsync("_ProjectStatusBadge", project.Status)
                                         </td>
                                         <td>@project.SubmissionDate.ToString("MMM dd, yyyy")</td>
                                     </tr>
@@ -272,15 +254,7 @@
                                             </td>
                                             <td>@project.Student.DisplayName</td>
                                             <td>
-                                                <span class="badge bg-@(project.Status switch {
-                                                    ProjectStatus.Completed => "success",
-                                                    ProjectStatus.Defended => "success",
-                                                    ProjectStatus.InProgress => "warning",
-                                                    ProjectStatus.Approved => "info",
-                                                    _ => "secondary"
-                                                })">
-                                                    @project.Status
-                                                </span>
+                                                @await Html.PartialAsync("_ProjectStatusBadge", project.Status)
                                             </td>
                                             <td>@project.SubmissionDate.ToString("MMM dd, yyyy")</td>
                                         </tr>

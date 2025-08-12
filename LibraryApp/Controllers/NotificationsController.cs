@@ -63,6 +63,7 @@ public class NotificationsController : BaseController
 
     // POST: Notifications/MarkAsRead/5
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> MarkAsRead(int id)
     {
         if (CurrentUserId == null || CurrentUserRoleEnum == null)
@@ -91,6 +92,7 @@ public class NotificationsController : BaseController
 
     // POST: Notifications/MarkAllAsRead
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> MarkAllAsRead()
     {
         if (CurrentUserId == null || CurrentUserRoleEnum == null)
@@ -115,6 +117,7 @@ public class NotificationsController : BaseController
 
     // DELETE: Notifications/Delete/5
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
     {
         if (CurrentUserId == null || CurrentUserRoleEnum == null)
