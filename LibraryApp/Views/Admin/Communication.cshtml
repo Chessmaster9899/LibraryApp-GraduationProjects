@@ -156,22 +156,19 @@
                                                 onclick="viewAnnouncement(@announcement.Id)">
                                             <i class="fas fa-eye"></i> View
                                         </button>
-                                        <button type="button" class="btn btn-outline-secondary btn-sm" 
-                                                onclick="editAnnouncement(@announcement.Id)">
-                                            <i class="fas fa-edit"></i> Edit
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" disabled>
+                                            <i class="fas fa-edit"></i> Edit (Coming Soon)
                                         </button>
                                         @if (announcement.IsActive)
                                         {
-                                            <button type="button" class="btn btn-outline-warning btn-sm" 
-                                                    onclick="deactivateAnnouncement(@announcement.Id)">
-                                                <i class="fas fa-pause"></i> Deactivate
+                                            <button type="button" class="btn btn-outline-warning btn-sm" disabled>
+                                                <i class="fas fa-pause"></i> Deactivate (Coming Soon)
                                             </button>
                                         }
                                         else
                                         {
-                                            <button type="button" class="btn btn-outline-success btn-sm" 
-                                                    onclick="activateAnnouncement(@announcement.Id)">
-                                                <i class="fas fa-play"></i> Activate
+                                            <button type="button" class="btn btn-outline-success btn-sm" disabled>
+                                                <i class="fas fa-play"></i> Activate (Coming Soon)
                                             </button>
                                         }
                                     </div>
@@ -280,30 +277,6 @@
             if (confirm('Are you sure you want to reset the form? All entered data will be lost.')) {
                 $('form')[0].reset();
                 updatePreview();
-            }
-        }
-
-        function viewAnnouncement(id) {
-            // Implementation for viewing announcement details
-            alert('View announcement ' + id + ' details would be implemented here.');
-        }
-
-        function editAnnouncement(id) {
-            // Implementation for editing announcement
-            alert('Edit announcement ' + id + ' functionality would be implemented here.');
-        }
-
-        function deactivateAnnouncement(id) {
-            if (confirm('Are you sure you want to deactivate this announcement?')) {
-                // Implementation for deactivating announcement
-                alert('Deactivate announcement ' + id + ' functionality would be implemented here.');
-            }
-        }
-
-        function activateAnnouncement(id) {
-            if (confirm('Are you sure you want to activate this announcement?')) {
-                // Implementation for activating announcement
-                alert('Activate announcement ' + id + ' functionality would be implemented here.');
             }
         }
 
