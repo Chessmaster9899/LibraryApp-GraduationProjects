@@ -117,33 +117,447 @@ function showInfo(title, message, duration = 5000) {
     return toastManager.info(title, message, duration);
 }
 
+// Enhanced Loading State Management
+class LoadingManager {
+    constructor() {
+        this.loadingStates = new Map();
+        this.initializeGlobalLoaders();
+    }
+
+    initializeGlobalLoaders() {
+        // Create global loading overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'loading-overlay';
+        overlay.innerHTML = `
+            <div class="loading-spinner">
+                <div class="spinner-ring"></div>
+                <div class="loading-text">Loading...</div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+
+        // Create page loader for navigation
+        const pageLoader = document.createElement('div');
+        pageLoader.className = 'page-loading-bar';
+        document.body.appendChild(pageLoader);
+    }
+
+    showGlobalLoading(message = 'Loading...') {
+        const overlay = document.querySelector('.loading-overlay');
+        const text = overlay.querySelector('.loading-text');
+        text.textContent = message;
+        overlay.classList.add('visible');
+        document.body.classList.add('loading');
+    }
+
+    hideGlobalLoading() {
+        const overlay = document.querySelector('.loading-overlay');
+        overlay.classList.remove('visible');
+        document.body.classList.remove('loading');
+    }
+
+    showPageProgress() {
+        const bar = document.querySelector('.page-loading-bar');
+        bar.classList.add('loading');
+        bar.style.width = '30%';
+        
+        setTimeout(() => bar.style.width = '60%', 200);
+        setTimeout(() => bar.style.width = '90%', 500);
+    }
+
+    hidePageProgress() {
+        const bar = document.querySelector('.page-loading-bar');
+        bar.style.width = '100%';
+        setTimeout(() => {
+            bar.classList.remove('loading');
+            bar.style.width = '0%';
+        }, 200);
+    }
+
+    setButtonLoading(button, isLoading, originalText = null) {
+        const btn = typeof button === 'string' ? document.querySelector(button) : button;
+        if (!btn) return;
+
+        if (isLoading) {
+            const text = originalText || btn.textContent || btn.value;
+            btn.dataset.originalText = text;
+            btn.disabled = true;
+            btn.classList.add('loading');
+            
+            // Add spinner
+            if (!btn.querySelector('.btn-spinner')) {
+                const spinner = document.createElement('span');
+                spinner.className = 'btn-spinner';
+                btn.insertBefore(spinner, btn.firstChild);
+            }
+            
+            if (btn.textContent !== undefined) {
+                btn.textContent = ' Processing...';
+            } else {
+                btn.value = 'Processing...';
+            }
+        } else {
+            btn.disabled = false;
+            btn.classList.remove('loading');
+            
+            // Remove spinner
+            const spinner = btn.querySelector('.btn-spinner');
+            if (spinner) spinner.remove();
+            
+            const originalText = btn.dataset.originalText;
+            if (originalText) {
+                if (btn.textContent !== undefined) {
+                    btn.textContent = originalText;
+                } else {
+                    btn.value = originalText;
+                }
+            }
+        }
+    }
+
+    showElementLoading(element, message = 'Loading...') {
+        const el = typeof element === 'string' ? document.querySelector(element) : element;
+        if (!el) return;
+
+        const loaderId = 'loader_' + Date.now();
+        const loader = document.createElement('div');
+        loader.className = 'element-loader';
+        loader.setAttribute('data-loader-id', loaderId);
+        loader.innerHTML = `
+            <div class="element-spinner">
+                <div class="spinner-dots">
+                    <div class="dot1"></div>
+                    <div class="dot2"></div>
+                    <div class="dot3"></div>
+                </div>
+                <div class="element-loading-text">${message}</div>
+            </div>
+        `;
+
+        el.style.position = 'relative';
+        el.appendChild(loader);
+        el.classList.add('element-loading');
+        
+        return loaderId;
+    }
+
+    hideElementLoading(element, loaderId = null) {
+        const el = typeof element === 'string' ? document.querySelector(element) : element;
+        if (!el) return;
+
+        if (loaderId) {
+            const loader = el.querySelector(`[data-loader-id="${loaderId}"]`);
+            if (loader) loader.remove();
+        } else {
+            const loaders = el.querySelectorAll('.element-loader');
+            loaders.forEach(loader => loader.remove());
+        }
+        
+        if (!el.querySelector('.element-loader')) {
+            el.classList.remove('element-loading');
+        }
+    }
+
+    showTableLoading(tableElement, rowCount = 5) {
+        const table = typeof tableElement === 'string' ? document.querySelector(tableElement) : tableElement;
+        if (!table) return;
+
+        const tbody = table.querySelector('tbody');
+        const colCount = table.querySelector('thead tr')?.children.length || 3;
+        
+        const loadingRow = document.createElement('tr');
+        loadingRow.className = 'table-loading-row';
+        loadingRow.innerHTML = `
+            <td colspan="${colCount}" class="text-center p-4">
+                <div class="table-loading-content">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                    <div class="mt-2">Loading data...</div>
+                </div>
+            </td>
+        `;
+        
+        if (tbody) {
+            tbody.innerHTML = '';
+            tbody.appendChild(loadingRow);
+        }
+    }
+
+    hideTableLoading(tableElement) {
+        const table = typeof tableElement === 'string' ? document.querySelector(tableElement) : tableElement;
+        if (!table) return;
+
+        const loadingRows = table.querySelectorAll('.table-loading-row');
+        loadingRows.forEach(row => row.remove());
+    }
+}
+
+// Initialize global loading manager
+const loadingManager = new LoadingManager();
+
 // Form validation enhancement
+// Real-Time Notification System with SignalR
+class RealTimeNotificationManager {
+    constructor() {
+        this.connection = null;
+        this.reconnectAttempts = 0;
+        this.maxReconnectAttempts = 10;
+        this.isConnected = false;
+        this.initialize();
+    }
+
+    async initialize() {
+        // Only initialize if user is logged in
+        const userId = document.querySelector('[data-user-id]')?.getAttribute('data-user-id');
+        if (!userId) return;
+
+        try {
+            this.connection = new signalR.HubConnectionBuilder()
+                .withUrl("/notificationHub")
+                .withAutomaticReconnect([0, 2000, 10000, 30000])
+                .build();
+
+            this.setupEventHandlers();
+            await this.startConnection();
+        } catch (error) {
+            console.warn('SignalR initialization failed:', error);
+        }
+    }
+
+    setupEventHandlers() {
+        // Connection events
+        this.connection.onreconnecting(() => {
+            this.isConnected = false;
+            console.log('SignalR reconnecting...');
+        });
+
+        this.connection.onreconnected(() => {
+            this.isConnected = true;
+            this.reconnectAttempts = 0;
+            console.log('SignalR reconnected');
+            showSuccess('Connection Restored', 'Real-time notifications are working again');
+        });
+
+        this.connection.onclose(() => {
+            this.isConnected = false;
+            console.log('SignalR connection closed');
+        });
+
+        // Message handlers
+        this.connection.on('Connected', (data) => {
+            this.isConnected = true;
+            console.log('SignalR connected:', data.message);
+        });
+
+        this.connection.on('ReceiveNotification', (notification) => {
+            this.handleNotification(notification);
+        });
+
+        this.connection.on('ReceiveProjectUpdate', (update) => {
+            this.handleProjectUpdate(update);
+        });
+
+        this.connection.on('UserStatusChanged', (data) => {
+            this.handleUserStatusChange(data);
+        });
+    }
+
+    async startConnection() {
+        try {
+            await this.connection.start();
+            this.isConnected = true;
+            console.log('SignalR connection established');
+        } catch (error) {
+            console.error('Failed to start SignalR connection:', error);
+            this.scheduleReconnect();
+        }
+    }
+
+    scheduleReconnect() {
+        if (this.reconnectAttempts < this.maxReconnectAttempts) {
+            const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
+            setTimeout(() => {
+                this.reconnectAttempts++;
+                this.startConnection();
+            }, delay);
+        }
+    }
+
+    handleNotification(notification) {
+        // Show toast notification
+        showToast(notification.type, notification.title, notification.message);
+
+        // Update notification badge if present
+        this.updateNotificationBadge();
+
+        // Play notification sound (optional)
+        this.playNotificationSound();
+
+        // Store notification for later viewing
+        this.storeNotification(notification);
+    }
+
+    handleProjectUpdate(update) {
+        // Handle project-specific updates
+        showToast(update.type, update.title, update.message);
+        
+        // Update project page if currently viewing this project
+        const currentProjectId = this.getCurrentProjectId();
+        if (currentProjectId && currentProjectId == update.projectId) {
+            this.refreshProjectData();
+        }
+    }
+
+    handleUserStatusChange(data) {
+        // Update user status indicators
+        const userElements = document.querySelectorAll(`[data-user-id="${data.userId}"]`);
+        userElements.forEach(element => {
+            const statusIndicator = element.querySelector('.user-status');
+            if (statusIndicator) {
+                statusIndicator.textContent = data.status;
+                statusIndicator.className = `user-status status-${data.status.toLowerCase()}`;
+            }
+        });
+    }
+
+    updateNotificationBadge() {
+        const badge = document.querySelector('.notification-badge');
+        if (badge) {
+            const currentCount = parseInt(badge.textContent) || 0;
+            badge.textContent = currentCount + 1;
+            badge.classList.add('badge-pulse');
+            setTimeout(() => badge.classList.remove('badge-pulse'), 1000);
+        }
+    }
+
+    playNotificationSound() {
+        // Optional: Play notification sound
+        try {
+            const audio = new Audio('/sounds/notification.mp3');
+            audio.volume = 0.3;
+            audio.play().catch(() => {
+                // Ignore audio play errors (autoplay policy)
+            });
+        } catch (error) {
+            // Audio not available, ignore
+        }
+    }
+
+    storeNotification(notification) {
+        // Store in local storage for offline viewing
+        try {
+            const notifications = JSON.parse(localStorage.getItem('recentNotifications') || '[]');
+            notifications.unshift(notification);
+            notifications.splice(50); // Keep only latest 50
+            localStorage.setItem('recentNotifications', JSON.stringify(notifications));
+        } catch (error) {
+            console.warn('Failed to store notification:', error);
+        }
+    }
+
+    getCurrentProjectId() {
+        // Extract project ID from current page
+        const match = window.location.pathname.match(/\/Projects\/Details\/(\d+)/);
+        return match ? parseInt(match[1]) : null;
+    }
+
+    refreshProjectData() {
+        // Refresh project data if on project details page
+        const refreshBtn = document.querySelector('.refresh-project-data');
+        if (refreshBtn) {
+            refreshBtn.click();
+        }
+    }
+
+    // Public methods for other parts of the application
+    async joinProjectGroup(projectId) {
+        if (this.isConnected) {
+            try {
+                await this.connection.invoke('JoinProjectGroup', projectId);
+            } catch (error) {
+                console.warn('Failed to join project group:', error);
+            }
+        }
+    }
+
+    async leaveProjectGroup(projectId) {
+        if (this.isConnected) {
+            try {
+                await this.connection.invoke('LeaveProjectGroup', projectId);
+            } catch (error) {
+                console.warn('Failed to leave project group:', error);
+            }
+        }
+    }
+
+    async updateUserStatus(status) {
+        if (this.isConnected) {
+            try {
+                await this.connection.invoke('UpdateUserStatus', status);
+            } catch (error) {
+                console.warn('Failed to update user status:', error);
+            }
+        }
+    }
+}
+
+// Initialize real-time notifications
+let realTimeNotifications = null;
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Enhance form submissions with toast notifications
+    // Initialize SignalR if user is logged in
+    const userId = document.querySelector('[data-user-id]')?.getAttribute('data-user-id');
+    if (userId) {
+        realTimeNotifications = new RealTimeNotificationManager();
+    }
+
+    // Enhanced form submissions with better loading states
     const forms = document.querySelectorAll('form');
     forms.forEach(form => {
         form.addEventListener('submit', function(e) {
             const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
-            if (submitBtn) {
-                const originalText = submitBtn.textContent || submitBtn.value;
-                submitBtn.disabled = true;
-                if (submitBtn.textContent !== undefined) {
-                    submitBtn.textContent = 'Processing...';
-                } else {
-                    submitBtn.value = 'Processing...';
-                }
+            if (submitBtn && !submitBtn.disabled) {
+                loadingManager.setButtonLoading(submitBtn, true);
 
-                // Re-enable after 3 seconds as fallback
+                // Re-enable after reasonable timeout as fallback
                 setTimeout(() => {
-                    submitBtn.disabled = false;
-                    if (submitBtn.textContent !== undefined) {
-                        submitBtn.textContent = originalText;
-                    } else {
-                        submitBtn.value = originalText;
-                    }
-                }, 3000);
+                    loadingManager.setButtonLoading(submitBtn, false);
+                }, 10000);
             }
         });
+    });
+
+    // Page navigation loading
+    document.addEventListener('click', function(e) {
+        const link = e.target.closest('a[href]');
+        if (link && !link.href.includes('#') && !link.href.includes('javascript:') && 
+            !link.hasAttribute('download') && !link.target === '_blank') {
+            loadingManager.showPageProgress();
+        }
+    });
+
+    // Hide page loader when page loads
+    window.addEventListener('load', function() {
+        loadingManager.hidePageProgress();
+    });
+
+    // Auto-join project group when viewing project details
+    const projectId = realTimeNotifications?.getCurrentProjectId();
+    if (projectId && realTimeNotifications) {
+        realTimeNotifications.joinProjectGroup(projectId);
+    }
+
+    // Update user status on activity
+    let statusTimeout;
+    document.addEventListener('click', function() {
+        if (realTimeNotifications) {
+            realTimeNotifications.updateUserStatus('active');
+            clearTimeout(statusTimeout);
+            statusTimeout = setTimeout(() => {
+                realTimeNotifications.updateUserStatus('idle');
+            }, 300000); // 5 minutes
+        }
     });
 
     // Check for server-side messages in TempData and show as toasts

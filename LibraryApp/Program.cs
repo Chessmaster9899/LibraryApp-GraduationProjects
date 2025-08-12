@@ -2,11 +2,15 @@ using Microsoft.EntityFrameworkCore;
 using LibraryApp.Data;
 using LibraryApp.Services;
 using LibraryApp.Middleware;
+using LibraryApp.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Add SignalR
+builder.Services.AddSignalR();
 
 // Add Session support
 builder.Services.AddSession(options =>
@@ -33,6 +37,9 @@ builder.Services.AddScoped<ISessionService, SessionService>();
 // Add Notification Service
 builder.Services.AddScoped<LibraryApp.Controllers.INotificationService, LibraryApp.Controllers.NotificationService>();
 
+// Add Real-Time Notification Service
+builder.Services.AddScoped<IRealTimeNotificationService, RealTimeNotificationService>();
+
 // Add File Upload Service
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 
@@ -41,6 +48,21 @@ builder.Services.AddScoped<IPermissionService, PermissionService>();
 
 // Add Project Comment Service
 builder.Services.AddScoped<IProjectCommentService, ProjectCommentService>();
+
+// Add Document Generation Service
+builder.Services.AddScoped<IDocumentGenerationService, DocumentGenerationService>();
+
+// Add Performance Optimization Service
+builder.Services.AddScoped<IPerformanceOptimizationService, PerformanceOptimizationService>();
+
+// Add Enhanced Audit Service
+builder.Services.AddScoped<IEnhancedAuditService, EnhancedAuditService>();
+
+// Add Memory Caching for Performance
+builder.Services.AddMemoryCache();
+
+// Add Response Caching
+builder.Services.AddResponseCaching();
 
 var app = builder.Build();
 
@@ -85,10 +107,16 @@ app.UseGlobalErrorHandling();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+// Use Response Caching for performance
+app.UseResponseCaching();
+
 app.UseRouting();
 app.UseSession();
 
 app.UseAuthorization();
+
+// Map SignalR Hub
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.MapControllerRoute(
     name: "default",

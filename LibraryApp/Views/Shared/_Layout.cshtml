@@ -88,7 +88,7 @@
         }
     </style>
 </head>
-<body>
+<body data-user-id="@Context.Session.GetString("UserId")">
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm border-bottom box-shadow mb-3">
             <div class="container-fluid">
@@ -247,6 +247,7 @@
     </header>
     <div class="container">
         <main role="main" class="pb-3">
+            @Html.Partial("_Breadcrumb")
             @RenderBody()
         </main>
     </div>
@@ -272,6 +273,8 @@
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script src="~/js/advanced-tables.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     
     @* Toast Messages from Server *@

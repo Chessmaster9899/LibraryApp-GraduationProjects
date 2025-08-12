@@ -1,0 +1,213 @@
+@{
+    var controller = ViewContext.RouteData.Values["Controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["Action"]?.ToString();
+    var area = ViewContext.RouteData.Values["Area"]?.ToString();
+    var id = ViewContext.RouteData.Values["id"]?.ToString();
+    
+    var breadcrumbs = new List<dynamic>();
+    
+    // Always start with Home
+    breadcrumbs.Add(new { Text = "Home", Url = Url.Action("Index", "Home"), Icon = "fas fa-home" });
+    
+    // Build breadcrumbs based on controller and action
+    switch (controller?.ToLower())
+    {
+        case "home":
+            if (action?.ToLower() != "index")
+            {
+                breadcrumbs.Add(new { Text = action, Url = (string)null, Icon = "fas fa-info-circle" });
+            }
+            break;
+            
+        case "students":
+            breadcrumbs.Add(new { Text = "Students", Url = Url.Action("Index", "Students"), Icon = "fas fa-user-graduate" });
+            if (action?.ToLower() == "details" && !string.IsNullOrEmpty(id))
+            {
+                breadcrumbs.Add(new { Text = "Student Details", Url = (string)null, Icon = "fas fa-eye" });
+            }
+            else if (action?.ToLower() == "create")
+            {
+                breadcrumbs.Add(new { Text = "Add Student", Url = (string)null, Icon = "fas fa-plus" });
+            }
+            else if (action?.ToLower() == "edit" && !string.IsNullOrEmpty(id))
+            {
+                breadcrumbs.Add(new { Text = "Edit Student", Url = (string)null, Icon = "fas fa-edit" });
+            }
+            else if (action?.ToLower() == "delete" && !string.IsNullOrEmpty(id))
+            {
+                breadcrumbs.Add(new { Text = "Delete Student", Url = (string)null, Icon = "fas fa-trash" });
+            }
+            break;
+            
+        case "professors":
+            breadcrumbs.Add(new { Text = "Professors", Url = Url.Action("Index", "Professors"), Icon = "fas fa-chalkboard-teacher" });
+            if (action?.ToLower() == "details" && !string.IsNullOrEmpty(id))
+            {
+                breadcrumbs.Add(new { Text = "Professor Details", Url = (string)null, Icon = "fas fa-eye" });
+            }
+            else if (action?.ToLower() == "create")
+            {
+                breadcrumbs.Add(new { Text = "Add Professor", Url = (string)null, Icon = "fas fa-plus" });
+            }
+            else if (action?.ToLower() == "edit" && !string.IsNullOrEmpty(id))
+            {
+                breadcrumbs.Add(new { Text = "Edit Professor", Url = (string)null, Icon = "fas fa-edit" });
+            }
+            else if (action?.ToLower() == "delete" && !string.IsNullOrEmpty(id))
+            {
+                breadcrumbs.Add(new { Text = "Delete Professor", Url = (string)null, Icon = "fas fa-trash" });
+            }
+            break;
+            
+        case "projects":
+            breadcrumbs.Add(new { Text = "Projects", Url = Url.Action("Index", "Projects"), Icon = "fas fa-project-diagram" });
+            if (action?.ToLower() == "details" && !string.IsNullOrEmpty(id))
+            {
+                breadcrumbs.Add(new { Text = "Project Details", Url = (string)null, Icon = "fas fa-eye" });
+            }
+            else if (action?.ToLower() == "create")
+            {
+                breadcrumbs.Add(new { Text = "Create Project", Url = (string)null, Icon = "fas fa-plus" });
+            }
+            else if (action?.ToLower() == "edit" && !string.IsNullOrEmpty(id))
+            {
+                breadcrumbs.Add(new { Text = "Edit Project", Url = (string)null, Icon = "fas fa-edit" });
+            }
+            else if (action?.ToLower() == "delete" && !string.IsNullOrEmpty(id))
+            {
+                breadcrumbs.Add(new { Text = "Delete Project", Url = (string)null, Icon = "fas fa-trash" });
+            }
+            break;
+            
+        case "departments":
+            breadcrumbs.Add(new { Text = "Departments", Url = Url.Action("Index", "Departments"), Icon = "fas fa-building" });
+            if (action?.ToLower() == "details" && !string.IsNullOrEmpty(id))
+            {
+                breadcrumbs.Add(new { Text = "Department Details", Url = (string)null, Icon = "fas fa-eye" });
+            }
+            else if (action?.ToLower() == "create")
+            {
+                breadcrumbs.Add(new { Text = "Add Department", Url = (string)null, Icon = "fas fa-plus" });
+            }
+            else if (action?.ToLower() == "edit" && !string.IsNullOrEmpty(id))
+            {
+                breadcrumbs.Add(new { Text = "Edit Department", Url = (string)null, Icon = "fas fa-edit" });
+            }
+            else if (action?.ToLower() == "delete" && !string.IsNullOrEmpty(id))
+            {
+                breadcrumbs.Add(new { Text = "Delete Department", Url = (string)null, Icon = "fas fa-trash" });
+            }
+            break;
+            
+        case "search":
+            breadcrumbs.Add(new { Text = "Search", Url = (string)null, Icon = "fas fa-search" });
+            break;
+            
+        case "gallery":
+            breadcrumbs.Add(new { Text = "Project Gallery", Url = (string)null, Icon = "fas fa-eye" });
+            break;
+            
+        case "admin":
+            breadcrumbs.Add(new { Text = "Admin Panel", Url = Url.Action("Index", "Admin"), Icon = "fas fa-cogs" });
+            if (action?.ToLower() == "analytics")
+            {
+                breadcrumbs.Add(new { Text = "Analytics", Url = (string)null, Icon = "fas fa-chart-line" });
+            }
+            else if (action?.ToLower() == "audittrail")
+            {
+                breadcrumbs.Add(new { Text = "Audit Trail", Url = (string)null, Icon = "fas fa-history" });
+            }
+            else if (action?.ToLower() == "communication")
+            {
+                breadcrumbs.Add(new { Text = "Communications", Url = (string)null, Icon = "fas fa-bullhorn" });
+            }
+            break;
+            
+        case "rolemanagement":
+            breadcrumbs.Add(new { Text = "Admin Panel", Url = Url.Action("Index", "Admin"), Icon = "fas fa-cogs" });
+            breadcrumbs.Add(new { Text = "Role Management", Url = (string)null, Icon = "fas fa-user-shield" });
+            break;
+            
+        case "student":
+            breadcrumbs.Add(new { Text = "My Dashboard", Url = Url.Action("Index", "Student"), Icon = "fas fa-tachometer-alt" });
+            if (action?.ToLower() == "projects")
+            {
+                breadcrumbs.Add(new { Text = "My Projects", Url = (string)null, Icon = "fas fa-project-diagram" });
+            }
+            else if (action?.ToLower() == "profile")
+            {
+                breadcrumbs.Add(new { Text = "My Profile", Url = (string)null, Icon = "fas fa-user" });
+            }
+            break;
+            
+        case "professor":
+            breadcrumbs.Add(new { Text = "My Dashboard", Url = Url.Action("Index", "Professor"), Icon = "fas fa-tachometer-alt" });
+            if (action?.ToLower() == "supervisedprojects")
+            {
+                breadcrumbs.Add(new { Text = "Supervised Projects", Url = (string)null, Icon = "fas fa-project-diagram" });
+            }
+            else if (action?.ToLower() == "evaluatedprojects")
+            {
+                breadcrumbs.Add(new { Text = "Evaluated Projects", Url = (string)null, Icon = "fas fa-clipboard-check" });
+            }
+            else if (action?.ToLower() == "profile")
+            {
+                breadcrumbs.Add(new { Text = "My Profile", Url = (string)null, Icon = "fas fa-user" });
+            }
+            else if (action?.ToLower() == "mystudents")
+            {
+                breadcrumbs.Add(new { Text = "My Students", Url = (string)null, Icon = "fas fa-user-graduate" });
+            }
+            break;
+            
+        case "auth":
+            if (action?.ToLower() == "login")
+            {
+                breadcrumbs.Add(new { Text = "Sign In", Url = (string)null, Icon = "fas fa-sign-in-alt" });
+            }
+            else if (action?.ToLower() == "changepassword")
+            {
+                breadcrumbs.Add(new { Text = "Change Password", Url = (string)null, Icon = "fas fa-key" });
+            }
+            break;
+            
+        case "notifications":
+            breadcrumbs.Add(new { Text = "Notifications", Url = (string)null, Icon = "fas fa-bell" });
+            break;
+            
+        default:
+            if (!string.IsNullOrEmpty(controller))
+            {
+                breadcrumbs.Add(new { Text = controller, Url = (string)null, Icon = "fas fa-folder" });
+            }
+            break;
+    }
+}
+
+@if (breadcrumbs.Count > 1)
+{
+    <nav aria-label="breadcrumb" class="breadcrumb-nav mb-3">
+        <ol class="breadcrumb breadcrumb-professional">
+            @for (int i = 0; i < breadcrumbs.Count; i++)
+            {
+                var crumb = breadcrumbs[i];
+                if (i == breadcrumbs.Count - 1)
+                {
+                    <li class="breadcrumb-item active" aria-current="page">
+                        <i class="@crumb.Icon me-1"></i>
+                        @crumb.Text
+                    </li>
+                }
+                else
+                {
+                    <li class="breadcrumb-item">
+                        <a href="@crumb.Url" class="breadcrumb-link">
+                            <i class="@crumb.Icon me-1"></i>
+                            @crumb.Text
+                        </a>
+                    </li>
+                }
+            }
+        </ol>
+    </nav>
+}

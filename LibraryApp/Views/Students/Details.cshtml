@@ -4,86 +4,206 @@
     ViewData["Title"] = "Student Details";
 }
 
-<h1>Details</h1>
-
-<div>
-    <h4>Student</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.StudentNumber)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.StudentNumber)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FirstName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FirstName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LastName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LastName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Email)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Email)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Phone)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Phone)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Department)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Department.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.EnrollmentDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.EnrollmentDate)
-        </dd>
-    </dl>
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>Student Details</h2>
+            <div>
+                <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 
-@if (Model.ProjectStudents.Any())
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-user-graduate me-2"></i>@(Model?.FirstName ?? "") @(Model?.LastName ?? "")
+                </h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.StudentNumber)</dt>
+                    <dd class="col-sm-9">
+                        <strong>@Html.DisplayFor(model => model.StudentNumber)</strong>
+                    </dd>
+                    
+                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.FirstName)</dt>
+                    <dd class="col-sm-9">@Html.DisplayFor(model => model.FirstName)</dd>
+                    
+                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.LastName)</dt>
+                    <dd class="col-sm-9">@Html.DisplayFor(model => model.LastName)</dd>
+                    
+                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Email)</dt>
+                    <dd class="col-sm-9">
+                        @if (!string.IsNullOrEmpty(Model?.Email))
+                        {
+                            <a href="mailto:@Model.Email">
+                                <i class="fas fa-envelope me-1"></i>@Html.DisplayFor(model => model.Email)
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">No email provided</span>
+                        }
+                    </dd>
+                    
+                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Phone)</dt>
+                    <dd class="col-sm-9">
+                        @if (!string.IsNullOrEmpty(Model?.Phone))
+                        {
+                            <a href="tel:@Model.Phone">
+                                <i class="fas fa-phone me-1"></i>@Html.DisplayFor(model => model.Phone)
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">No phone provided</span>
+                        }
+                    </dd>
+                    
+                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Department)</dt>
+                    <dd class="col-sm-9">
+                        <span class="badge bg-info">
+                            <i class="fas fa-building me-1"></i>@Html.DisplayFor(model => model.Department.Name)
+                        </span>
+                    </dd>
+                    
+                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.EnrollmentDate)</dt>
+                    <dd class="col-sm-9">
+                        <i class="fas fa-calendar me-1"></i>@Html.DisplayFor(model => model.EnrollmentDate)
+                    </dd>
+                    
+                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.LastLogin)</dt>
+                    <dd class="col-sm-9">
+                        @if (Model?.LastLogin.HasValue == true)
+                        {
+                            <i class="fas fa-clock me-1"></i>@Model.LastLogin.Value.ToString("yyyy-MM-dd HH:mm")
+                        }
+                        else
+                        {
+                            <span class="text-muted">
+                                <i class="fas fa-clock me-1"></i>Never logged in
+                            </span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-chart-bar me-1"></i>Quick Stats
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-12 mb-2">
+                        <h4 class="text-primary">@(Model?.ProjectStudents?.Count ?? 0)</h4>
+                        <small class="text-muted">Total Projects</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-tools me-1"></i>Quick Actions
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-outline-warning btn-sm">
+                        <i class="fas fa-edit me-1"></i>Edit Student
+                    </a>
+                    <a asp-action="Delete" asp-route-id="@Model?.Id" class="btn btn-outline-danger btn-sm">
+                        <i class="fas fa-trash me-1"></i>Delete Student
+                    </a>
+                    @if (!string.IsNullOrEmpty(Model?.Email))
+                    {
+                        <a href="mailto:@Model.Email" class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-envelope me-1"></i>Send Email
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model?.ProjectStudents?.Any() == true)
 {
-    <div class="mt-4">
-        <h5>Projects</h5>
-        <table class="table table-sm">
-            <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Status</th>
-                    <th>Supervisor</th>
-                    <th>Submission Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var projectStudent in Model.ProjectStudents)
-                {
-                    <tr>
-                        <td>@projectStudent.Project.Title</td>
-                        <td>@projectStudent.Project.Status</td>
-                        <td>@projectStudent.Project.Supervisor.FirstName @projectStudent.Project.Supervisor.LastName</td>
-                        <td>@projectStudent.Project.SubmissionDate.ToShortDateString()</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-project-diagram me-2"></i>Projects
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Status</th>
+                                    <th>Supervisor</th>
+                                    <th>Submission Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var projectStudent in Model.ProjectStudents)
+                                {
+                                    <tr>
+                                        <td>
+                                            <strong>@projectStudent.Project.Title</strong>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary">@projectStudent.Project.Status</span>
+                                        </td>
+                                        <td>
+                                            @projectStudent.Project.Supervisor.Title @projectStudent.Project.Supervisor.FirstName @projectStudent.Project.Supervisor.LastName
+                                        </td>
+                                        <td>@projectStudent.Project.SubmissionDate.ToString("MMM dd, yyyy")</td>
+                                        <td>
+                                            <a asp-controller="Projects" asp-action="Details" asp-route-id="@projectStudent.Project.Id" class="btn btn-sm btn-outline-info">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 }
-
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+else
+{
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-project-diagram fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No Projects Found</h5>
+                    <p class="text-muted">This student has not been assigned to any projects yet.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
