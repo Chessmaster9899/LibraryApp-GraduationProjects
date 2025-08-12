@@ -258,24 +258,32 @@ public class NotificationService : INotificationService
 
     public async Task NotifyProjectStatusChangeAsync(Project project, string action)
     {
-        var student = await _context.Students.FindAsync(project.StudentId);
-        var supervisor = await _context.Professors.FindAsync(project.SupervisorId);
+        // Load project with students and supervisor
+        var projectWithStudents = await _context.Projects
+            .Include(p => p.ProjectStudents)
+                .ThenInclude(ps => ps.Student)
+            .Include(p => p.Supervisor)
+            .FirstOrDefaultAsync(p => p.Id == project.Id);
 
-        if (student != null)
+        if (projectWithStudents?.ProjectStudents?.Any() == true)
         {
-            await CreateNotificationAsync(
-                student.StudentNumber,
-                UserRole.Student,
-                $"Project {action}",
-                $"Your project '{project.Title}' has been {action.ToLower()}.",
-                $"/Student/Projects"
-            );
+            // Notify all students assigned to the project
+            foreach (var projectStudent in projectWithStudents.ProjectStudents)
+            {
+                await CreateNotificationAsync(
+                    projectStudent.Student.StudentNumber,
+                    UserRole.Student,
+                    $"Project {action}",
+                    $"Your project '{project.Title}' has been {action.ToLower()}.",
+                    $"/Student/Projects"
+                );
+            }
         }
 
-        if (supervisor != null)
+        if (projectWithStudents?.Supervisor != null)
         {
             await CreateNotificationAsync(
-                supervisor.ProfessorId,
+                projectWithStudents.Supervisor.ProfessorId,
                 UserRole.Professor,
                 $"Project {action}",
                 $"Project '{project.Title}' has been {action.ToLower()}.",
@@ -287,12 +295,17 @@ public class NotificationService : INotificationService
     public async Task NotifyNewProjectSubmissionAsync(ProjectSubmission submission)
     {
         var project = await _context.Projects
-            .Include(p => p.Student)
+            .Include(p => p.ProjectStudents)
+                .ThenInclude(ps => ps.Student)
             .FirstAsync(p => p.Id == submission.ProjectId);
+
+        var studentNames = project.ProjectStudents.Any() 
+            ? string.Join(", ", project.ProjectStudents.Select(ps => ps.Student.FullName))
+            : "No students assigned";
 
         await NotifyAdminsAsync(
             "New Project Submission",
-            $"Project '{project.Title}' by {project.Student.FullName} has been submitted for review.",
+            $"Project '{project.Title}' by {studentNames} has been submitted for review.",
             $"/Admin/ReviewSubmission/{submission.Id}"
         );
     }

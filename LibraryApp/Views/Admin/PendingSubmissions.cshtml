@@ -85,10 +85,33 @@
                                                 }
                                             </td>
                                             <td>
-                                                <strong>@submission.Project.Student.FullName</strong><br>
-                                                <small class="text-muted">@submission.Project.Student.StudentNumber</small>
+                                                @if (submission.Project.ProjectStudents.Any())
+                                                {
+                                                    @foreach (var ps in submission.Project.ProjectStudents)
+                                                    {
+                                                        <strong>@ps.Student.FullName</strong><br>
+                                                        <small class="text-muted">@ps.Student.StudentNumber</small>
+                                                        @if (!submission.Project.ProjectStudents.Last().Equals(ps))
+                                                        {
+                                                            <br />
+                                                        }
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <em class="text-muted">No students assigned</em>
+                                                }
                                             </td>
-                                            <td>@submission.Project.Student.Department.Name</td>
+                                            <td>
+                                                @if (submission.Project.ProjectStudents.Any())
+                                                {
+                                                    @submission.Project.ProjectStudents.First().Student.Department.Name
+                                                }
+                                                else
+                                                {
+                                                    <em class="text-muted">N/A</em>
+                                                }
+                                            </td>
                                             <td>@submission.Project.Supervisor.DisplayName</td>
                                             <td>
                                                 @submission.SubmissionDate.ToString("MMM dd, yyyy")<br>

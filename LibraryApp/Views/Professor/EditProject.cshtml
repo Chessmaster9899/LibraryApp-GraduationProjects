@@ -112,10 +112,24 @@
                     <div class="mb-3">
                         <label class="form-label text-muted small">Student</label>
                         <div class="d-flex align-items-center">
-                            <i class="fas fa-user-graduate text-primary me-2"></i>
+                            <i class="fas fa-users text-primary me-2"></i>
                             <div>
-                                <div>@Model.Student?.FullName</div>
-                                <small class="text-muted">@Model.Student?.StudentNumber</small>
+                                @if (Model.ProjectStudents.Any())
+                                {
+                                    @foreach (var ps in Model.ProjectStudents)
+                                    {
+                                        <div>@ps.Student.FullName</div>
+                                        <small class="text-muted">@ps.Student.StudentNumber</small>
+                                        @if (!Model.ProjectStudents.Last().Equals(ps))
+                                        {
+                                            <hr class="my-1" />
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    <em class="text-muted">No students assigned</em>
+                                }
                             </div>
                         </div>
                     </div>
@@ -123,9 +137,10 @@
                     <div class="mb-3">
                         <label class="form-label text-muted small">Status</label>
                         <div class="d-flex align-items-center">
-                            <span class="badge bg-@(Model.Status == ProjectStatus.Completed ? "success" : 
-                                                      Model.Status == ProjectStatus.InProgress ? "warning" : 
-                                                      Model.Status == ProjectStatus.Approved ? "info" : "secondary") me-2">
+                            <span class="badge bg-@(Model.Status == ProjectStatus.EvaluatorApproved ? "success" : 
+                                                      Model.Status == ProjectStatus.SupervisorApproved ? "info" : 
+                                                      Model.Status == ProjectStatus.Submitted ? "warning" : 
+                                                      Model.Status == ProjectStatus.Published ? "primary" : "secondary") me-2">
                                 @Model.Status
                             </span>
                         </div>
@@ -138,17 +153,6 @@
                             <span>@Model.SubmissionDate.ToString("MMM dd, yyyy")</span>
                         </div>
                     </div>
-
-                    @if (Model.DefenseDate.HasValue)
-                    {
-                        <div class="mb-3">
-                            <label class="form-label text-muted small">Defense Date</label>
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-presentation text-warning me-2"></i>
-                                <span>@Model.DefenseDate.Value.ToString("MMM dd, yyyy")</span>
-                            </div>
-                        </div>
-                    }
                 </div>
             </div>
 

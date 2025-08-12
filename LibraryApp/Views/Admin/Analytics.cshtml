@@ -167,17 +167,27 @@
                                             </td>
                                             <td>
                                                 <strong>@project.Title</strong>
-                                                @if (!string.IsNullOrEmpty(project.Grade))
+                                            </td>
+                                            <td>
+                                                @if (project.ProjectStudents.Any())
                                                 {
-                                                    <br><small class="text-success">Grade: @project.Grade</small>
+                                                    @string.Join(", ", project.ProjectStudents.Select(ps => ps.Student.FullName))
+                                                }
+                                                else
+                                                {
+                                                    <em>No students assigned</em>
                                                 }
                                             </td>
-                                            <td>@project.Student.FullName</td>
                                             <td>@project.Supervisor.DisplayName</td>
-                                            <td>@project.Student.Department.Name</td>
-                                            <td>@(project.DefenseDate?.ToString("MMM yyyy") ?? project.SubmissionDate.ToString("MMM yyyy"))</td>
                                             <td>
-                                                <span class="badge bg-@(project.Status == ProjectStatus.ReviewApproved ? "success" : "info")">
+                                                @if (project.ProjectStudents.Any())
+                                                {
+                                                    @project.ProjectStudents.First().Student.Department.Name
+                                                }
+                                            </td>
+                                            <td>@project.SubmissionDate.ToString("MMM yyyy")</td>
+                                            <td>
+                                                <span class="badge bg-@(project.Status == ProjectStatus.EvaluatorApproved ? "success" : project.Status == ProjectStatus.Published ? "primary" : "info")">
                                                     @project.Status
                                                 </span>
                                             </td>

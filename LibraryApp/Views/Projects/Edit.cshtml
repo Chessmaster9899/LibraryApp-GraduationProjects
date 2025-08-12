@@ -58,23 +58,26 @@
                                     <span asp-validation-for="Status" class="text-danger"></span>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label asp-for="Grade" class="form-label">Grade</label>
-                                    <input asp-for="Grade" class="form-control" placeholder="A, B+, 85/100...">
-                                    <span asp-validation-for="Grade" class="text-danger"></span>
-                                </div>
-                            </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label asp-for="StudentId" class="form-label">Assigned Student</label>
-                                    <select asp-for="StudentId" class="form-select" asp-items="ViewBag.StudentId">
-                                        <option value="">Select Student</option>
-                                    </select>
-                                    <span asp-validation-for="StudentId" class="text-danger"></span>
+                                    <label class="form-label">Assigned Students</label>
+                                    <div class="border rounded p-2 bg-light">
+                                        @if (Model.ProjectStudents.Any())
+                                        {
+                                            @foreach (var ps in Model.ProjectStudents)
+                                            {
+                                                <span class="badge bg-primary me-1">@ps.Student.FullName</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <em class="text-muted">No students assigned</em>
+                                        }
+                                    </div>
+                                    <div class="form-text">Student assignments can only be changed by administrators</div>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -105,13 +108,6 @@
                                     <label asp-for="SubmissionDate" class="form-label">Submission Date</label>
                                     <input asp-for="SubmissionDate" class="form-control" type="date">
                                     <span asp-validation-for="SubmissionDate" class="text-danger"></span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label asp-for="DefenseDate" class="form-label">Defense Date</label>
-                                    <input asp-for="DefenseDate" class="form-control" type="date">
-                                    <span asp-validation-for="DefenseDate" class="text-danger"></span>
                                 </div>
                             </div>
                         </div>
@@ -216,27 +212,6 @@
                         </div>
                     </div>
 
-                    @if (Model.DefenseDate.HasValue)
-                    {
-                        <div class="mb-3">
-                            <label class="form-label text-muted small">Defense Date</label>
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-presentation text-warning me-2"></i>
-                                <span>@Model.DefenseDate.Value.ToString("MMM dd, yyyy")</span>
-                            </div>
-                        </div>
-                    }
-
-                    @if (!string.IsNullOrEmpty(Model.Grade))
-                    {
-                        <div class="mb-3">
-                            <label class="form-label text-muted small">Grade</label>
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-star text-warning me-2"></i>
-                                <span class="fw-bold">@Model.Grade</span>
-                            </div>
-                        </div>
-                    }
                 </div>
             </div>
 

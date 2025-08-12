@@ -94,8 +94,9 @@ public class AdminController : BaseController
     {
         var submission = await _context.ProjectSubmissions
             .Include(ps => ps.Project)
-            .ThenInclude(p => p.Student)
-            .ThenInclude(s => s.Department)
+                .ThenInclude(p => p.ProjectStudents)
+                    .ThenInclude(pstud => pstud.Student)
+                        .ThenInclude(s => s.Department)
             .Include(ps => ps.Project.Supervisor)
             .Include(ps => ps.Project.Evaluator)
             .FirstOrDefaultAsync(ps => ps.Id == id);

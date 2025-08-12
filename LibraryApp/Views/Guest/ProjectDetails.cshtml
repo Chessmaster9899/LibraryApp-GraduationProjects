@@ -29,9 +29,22 @@
                             
                             <div class="row mb-3">
                                 <div class="col-md-6">
-                                    <strong>Student:</strong> @Model.Student.FullName<br>
-                                    <strong>Student ID:</strong> @Model.Student.StudentNumber<br>
-                                    <strong>Department:</strong> @Model.Student.Department.Name
+                                    <strong>Students:</strong><br>
+                                    @if (Model.ProjectStudents.Any())
+                                    {
+                                        @foreach (var ps in Model.ProjectStudents)
+                                        {
+                                            <div class="mb-1">
+                                                @ps.Student.FullName<br>
+                                                <small class="text-muted">ID: @ps.Student.StudentNumber</small><br>
+                                                <small class="text-muted">@ps.Student.Department.Name</small>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <em class="text-muted">No students assigned</em>
+                                    }
                                 </div>
                                 <div class="col-md-6">
                                     <strong>Supervisor:</strong> @Model.Supervisor.DisplayName<br>
