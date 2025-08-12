@@ -80,7 +80,6 @@
                             </button>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" asp-controller="Projects" asp-action="Index">View All Projects</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="exportData('projects')">Export Data</a></li>
                             </ul>
                         </div>
                     </div>
@@ -108,7 +107,6 @@
                             </button>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" asp-action="UserManagement">Manage Students</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="exportData('students')">Export List</a></li>
                             </ul>
                         </div>
                     </div>
@@ -136,7 +134,6 @@
                             </button>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" asp-controller="Professors" asp-action="Index">View Professors</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="exportData('professors')">Export List</a></li>
                             </ul>
                         </div>
                     </div>
@@ -164,7 +161,6 @@
                             </button>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" asp-action="PendingSubmissions">Review Submissions</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="exportData('pending')">Export Report</a></li>
                             </ul>
                         </div>
                     </div>
@@ -267,16 +263,6 @@
                                     <i class="fas fa-eye"></i>
                                     <h6>Public Gallery</h6>
                                     <p>View public project gallery</p>
-                                </div>
-                                <div class="quick-action-card" onclick="exportSystemData()">
-                                    <i class="fas fa-file-export"></i>
-                                    <h6>Export Reports</h6>
-                                    <p>Generate comprehensive reports</p>
-                                </div>
-                                <div class="quick-action-card" onclick="systemBackup()">
-                                    <i class="fas fa-shield-alt"></i>
-                                    <h6>System Backup</h6>
-                                    <p>Create system backup</p>
                                 </div>
                             </div>
                         </div>
@@ -542,27 +528,6 @@
                     });
                 }
             }, 100);
-        }
-
-        function exportData(type) {
-            showToast('info', 'Export', `Exporting ${type} data...`);
-            // Implementation for data export
-        }
-
-        function exportSystemData() {
-            showToast('info', 'Export', 'Generating comprehensive system report...');
-            // Implementation for system data export
-        }
-
-        function systemBackup() {
-            showToast('info', 'Backup', 'Creating system backup...');
-            // Implementation for system backup
-        }
-
-        // Utility function for toast notifications
-        function showToast(type, title, message) {
-            // Toast implementation would go here
-            console.log(`${type}: ${title} - ${message}`);
         }
     </script>
 }

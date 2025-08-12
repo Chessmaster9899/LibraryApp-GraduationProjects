@@ -203,3 +203,63 @@ function ajaxRequest(url, options = {}) {
             throw error;
         });
 }
+
+// Role Management Functions
+function confirmDeleteRole(roleId, roleName) {
+    if (confirm(`Are you sure you want to delete the role "${roleName}"? This action cannot be undone.`)) {
+        deleteRole(roleId, roleName);
+    }
+}
+
+function deleteRole(roleId, roleName) {
+    if (confirm(`This will permanently delete the role "${roleName}". Continue?`)) {
+        window.location.href = `/RoleManagement/DeleteRole/${roleId}`;
+    }
+}
+
+function assignRole(userId) {
+    const roleSelect = document.querySelector(`#roleSelect${userId}`);
+    if (roleSelect && roleSelect.value) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/RoleManagement/AssignRole';
+        
+        const userIdInput = document.createElement('input');
+        userIdInput.type = 'hidden';
+        userIdInput.name = 'userId';
+        userIdInput.value = userId;
+        
+        const roleIdInput = document.createElement('input');
+        roleIdInput.type = 'hidden';
+        roleIdInput.name = 'roleId';
+        roleIdInput.value = roleSelect.value;
+        
+        form.appendChild(userIdInput);
+        form.appendChild(roleIdInput);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function removeRole(userId, roleId, roleName) {
+    if (confirm(`Remove the role "${roleName}" from this user?`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/RoleManagement/RemoveRole';
+        
+        const userIdInput = document.createElement('input');
+        userIdInput.type = 'hidden';
+        userIdInput.name = 'userId';
+        userIdInput.value = userId;
+        
+        const roleIdInput = document.createElement('input');
+        roleIdInput.type = 'hidden';
+        roleIdInput.name = 'roleId';
+        roleIdInput.value = roleId;
+        
+        form.appendChild(userIdInput);
+        form.appendChild(roleIdInput);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}

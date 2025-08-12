@@ -77,7 +77,6 @@
                             </button>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="@Url.Action("SupervisedProjects")">View All</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="exportData('supervised')">Export Data</a></li>
                             </ul>
                         </div>
                     </div>
@@ -110,7 +109,6 @@
                             </button>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="@Url.Action("EvaluatedProjects")">View All</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="exportData('evaluated')">Export Data</a></li>
                             </ul>
                         </div>
                     </div>
@@ -143,7 +141,6 @@
                             </button>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="@Url.Action("MyStudents")">View All Students</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="exportData('students')">Export List</a></li>
                             </ul>
                         </div>
                     </div>
@@ -173,8 +170,7 @@
                                 <i class="fas fa-ellipsis-h"></i>
                             </button>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#" onclick="showWorkloadAnalysis()">Detailed Analysis</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="exportData('workload')">Export Report</a></li>
+                                <li><span class="dropdown-item-text text-muted">No additional options</span></li>
                             </ul>
                         </div>
                     </div>
@@ -357,7 +353,7 @@
                                         <i class="fas fa-file-export text-success fa-2x mb-3"></i>
                                         <h6>Export Reports</h6>
                                         <p class="text-muted small">Generate comprehensive reports</p>
-                                        <button class="btn btn-success btn-sm" onclick="exportDashboardData()">Export All</button>
+                                        <p class="text-muted small"><em>Feature coming soon</em></p>
                                     </div>
                                 </div>
                                 <div class="col-lg-6 mb-3">
@@ -584,20 +580,5 @@ function initializeDashboardCharts() {
             }
         }
     }, 100);
-}
-
-function exportData(type) {
-    showToast('info', 'Export', `Exporting ${type} data...`);
-    // Implementation for data export
-}
-
-function exportDashboardData() {
-    window.location.href = '@Url.Action("ExportDashboardData", "Professor")';
-    showToast('success', 'Export', 'Dashboard report downloaded successfully!');
-}
-
-function showWorkloadAnalysis() {
-    showToast('info', 'Analysis', 'Loading detailed workload analysis...');
-    // Implementation for workload analysis modal
 }
 </script>
