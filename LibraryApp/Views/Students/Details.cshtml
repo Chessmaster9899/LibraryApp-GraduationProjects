@@ -55,7 +55,7 @@
     </dl>
 </div>
 
-@if (Model.Projects.Any())
+@if (Model.ProjectStudents.Any())
 {
     <div class="mt-4">
         <h5>Projects</h5>
@@ -69,13 +69,13 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var project in Model.Projects)
+                @foreach (var projectStudent in Model.ProjectStudents)
                 {
                     <tr>
-                        <td>@project.Title</td>
-                        <td>@project.Status</td>
-                        <td>@project.Supervisor.FirstName @project.Supervisor.LastName</td>
-                        <td>@project.SubmissionDate.ToShortDateString()</td>
+                        <td>@projectStudent.Project.Title</td>
+                        <td>@projectStudent.Project.Status</td>
+                        <td>@projectStudent.Project.Supervisor.FirstName @projectStudent.Project.Supervisor.LastName</td>
+                        <td>@projectStudent.Project.SubmissionDate.ToShortDateString()</td>
                     </tr>
                 }
             </tbody>

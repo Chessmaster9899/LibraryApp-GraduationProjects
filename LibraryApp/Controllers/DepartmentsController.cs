@@ -22,7 +22,8 @@ namespace LibraryApp.Controllers
         {
             var departments = await _context.Departments
                 .Include(d => d.Students)
-                    .ThenInclude(s => s.Projects)
+                    .ThenInclude(s => s.ProjectStudents)
+                        .ThenInclude(ps => ps.Project)
                 .Include(d => d.Professors)
                 .ToListAsync();
             return View(departments);

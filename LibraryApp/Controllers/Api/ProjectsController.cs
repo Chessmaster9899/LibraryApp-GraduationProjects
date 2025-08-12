@@ -33,9 +33,10 @@ public class ProjectsController : ControllerBase
         try
         {
             var query = _context.Projects
-                .Include(p => p.Student)
+                .Include(p => p.ProjectStudents)
+                    .ThenInclude(ps => ps.Student)
+                        .ThenInclude(s => s.Department)
                 .Include(p => p.Supervisor)
-                .Include(p => p.Student.Department)
                 .AsQueryable();
 
             // Apply public visibility filter
@@ -51,14 +52,13 @@ public class ProjectsController : ControllerBase
                     p.Title.Contains(search) || 
                     (p.Abstract ?? string.Empty).Contains(search) || 
                     (p.Keywords ?? string.Empty).Contains(search) ||
-                    p.Student.FirstName.Contains(search) ||
-                    p.Student.LastName.Contains(search));
+                    p.ProjectStudents.Any(ps => ps.Student.FirstName.Contains(search) || ps.Student.LastName.Contains(search)));
             }
 
             // Apply department filter
             if (!string.IsNullOrWhiteSpace(department))
             {
-                query = query.Where(p => p.Student.Department.Name == department);
+                query = query.Where(p => p.ProjectStudents.Any(ps => ps.Student.Department.Name == department));
             }
 
             // Apply status filter
@@ -80,15 +80,17 @@ public class ProjectsController : ControllerBase
                     Keywords = p.Keywords,
                     Status = p.Status.ToString(),
                     SubmissionDate = p.SubmissionDate,
-                    DefenseDate = p.DefenseDate,
-                    Grade = p.Grade,
-                    Student = new StudentDto
+                    SupervisorReviewDate = p.SupervisorReviewDate,
+                    EvaluatorReviewDate = p.EvaluatorReviewDate,
+                    SupervisorComments = p.SupervisorComments,
+                    EvaluatorComments = p.EvaluatorComments,
+                    Students = p.ProjectStudents.Select(ps => new StudentDto
                     {
-                        Id = p.Student.Id,
-                        FullName = p.Student.FullName,
-                        StudentNumber = p.Student.StudentNumber,
-                        Department = p.Student.Department.Name
-                    },
+                        Id = ps.Student.Id,
+                        FullName = ps.Student.FullName,
+                        StudentNumber = ps.Student.StudentNumber,
+                        Department = ps.Student.Department.Name
+                    }).ToList(),
                     Supervisor = new ProfessorDto
                     {
                         Id = p.Supervisor.Id,
@@ -133,11 +135,12 @@ public class ProjectsController : ControllerBase
         try
         {
             var project = await _context.Projects
-                .Include(p => p.Student)
+                .Include(p => p.ProjectStudents)
+                    .ThenInclude(ps => ps.Student)
+                        .ThenInclude(s => s.Department)
                 .Include(p => p.Supervisor)
+                    .ThenInclude(s => s.Department)
                 .Include(p => p.Evaluator)
-                .Include(p => p.Student.Department)
-                .Include(p => p.Supervisor.Department)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (project == null)
@@ -157,17 +160,18 @@ public class ProjectsController : ControllerBase
                 Keywords = project.Keywords,
                 Status = project.Status.ToString(),
                 SubmissionDate = project.SubmissionDate,
-                DefenseDate = project.DefenseDate,
-                Grade = project.Grade,
-                ReviewComments = project.ReviewComments,
-                Student = new StudentDto
+                SupervisorReviewDate = project.SupervisorReviewDate,
+                EvaluatorReviewDate = project.EvaluatorReviewDate,
+                SupervisorComments = project.SupervisorComments,
+                EvaluatorComments = project.EvaluatorComments,
+                Students = project.ProjectStudents.Select(ps => new StudentDto
                 {
-                    Id = project.Student.Id,
-                    FullName = project.Student.FullName,
-                    StudentNumber = project.Student.StudentNumber,
-                    Department = project.Student.Department.Name,
-                    Email = project.Student.Email
-                },
+                    Id = ps.Student.Id,
+                    FullName = ps.Student.FullName,
+                    StudentNumber = ps.Student.StudentNumber,
+                    Department = ps.Student.Department.Name,
+                    Email = ps.Student.Email
+                }).ToList(),
                 Supervisor = new ProfessorDto
                 {
                     Id = project.Supervisor.Id,
@@ -213,10 +217,13 @@ public class ProjectsController : ControllerBase
                 TotalProjects = await _context.Projects.CountAsync(),
                 PublishedProjects = await _context.Projects.CountAsync(p => p.IsPubliclyVisible),
                 CompletedProjects = await _context.Projects.CountAsync(p => 
-                    p.Status == ProjectStatus.Completed || p.Status == ProjectStatus.Defended),
+                    p.Status == ProjectStatus.EvaluatorApproved || p.Status == ProjectStatus.Published),
                 ProjectsByDepartment = await _context.Projects
-                    .Include(p => p.Student.Department)
-                    .GroupBy(p => p.Student.Department.Name)
+                    .Include(p => p.ProjectStudents)
+                        .ThenInclude(ps => ps.Student)
+                            .ThenInclude(s => s.Department)
+                    .Where(p => p.ProjectStudents.Any())
+                    .GroupBy(p => p.ProjectStudents.First().Student.Department.Name)
                     .ToDictionaryAsync(g => g.Key, g => g.Count()),
                 ProjectsByStatus = await _context.Projects
                     .GroupBy(p => p.Status)
@@ -283,10 +290,11 @@ public class ProjectDto
     public string? Keywords { get; set; }
     public string Status { get; set; } = string.Empty;
     public DateTime SubmissionDate { get; set; }
-    public DateTime? DefenseDate { get; set; }
-    public string? Grade { get; set; }
-    public string? ReviewComments { get; set; }
-    public StudentDto Student { get; set; } = null!;
+    public DateTime? SupervisorReviewDate { get; set; }
+    public DateTime? EvaluatorReviewDate { get; set; }
+    public string? SupervisorComments { get; set; }
+    public string? EvaluatorComments { get; set; }
+    public List<StudentDto> Students { get; set; } = new();
     public ProfessorDto Supervisor { get; set; } = null!;
     public ProfessorDto? Evaluator { get; set; }
 }

@@ -393,16 +393,29 @@
 </div>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            initializeStudentCharts();
+            // Check if Chart.js is available
+            if (typeof Chart !== 'undefined') {
+                initializeStudentCharts();
+            } else {
+                console.warn('Chart.js library not available. Charts will be disabled.');
+                // Hide chart containers and show fallback
+                const chartContainers = document.querySelectorAll('.dashboard-chart-container, #progressChart');
+                chartContainers.forEach(container => {
+                    if (container) {
+                        container.innerHTML = '<div class="text-center p-4 text-muted"><i class="fas fa-chart-pie fa-3x mb-2"></i><br>Charts temporarily unavailable</div>';
+                    }
+                });
+            }
         });
 
         function initializeStudentCharts() {
             // Student Progress Donut Chart
-            const studentCtx = document.getElementById('studentChart').getContext('2d');
-            new Chart(studentCtx, {
+            const studentCtx = document.getElementById('studentChart');
+            if (studentCtx) {
+                try {
+                    new Chart(studentCtx.getContext('2d'), {
                 type: 'doughnut',
                 data: {
                     labels: ['Completed', 'In Progress', 'Remaining'],
@@ -422,12 +435,18 @@
                     }
                 }
             });
+                } catch (error) {
+                    console.warn('Failed to initialize student chart:', error);
+                    studentCtx.innerHTML = '<div class="text-center p-4 text-muted"><i class="fas fa-chart-pie fa-2x mb-2"></i><br>Chart temporarily unavailable</div>';
+                }
+            }
 
             // Progress Trends Chart (if performance tab is active)
             setTimeout(() => {
                 const progressCtx = document.getElementById('progressChart');
                 if (progressCtx) {
-                    new Chart(progressCtx, {
+                    try {
+                        new Chart(progressCtx, {
                         type: 'line',
                         data: {
                             labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Current'],
@@ -456,6 +475,10 @@
                             }
                         }
                     });
+                    } catch (error) {
+                        console.warn('Failed to initialize progress chart:', error);
+                        progressCtx.innerHTML = '<div class="text-center p-4 text-muted"><i class="fas fa-chart-line fa-2x mb-2"></i><br>Chart temporarily unavailable</div>';
+                    }
                 }
             }, 100);
         }

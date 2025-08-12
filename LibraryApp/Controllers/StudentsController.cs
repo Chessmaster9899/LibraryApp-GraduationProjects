@@ -35,8 +35,9 @@ namespace LibraryApp.Controllers
 
             var student = await _context.Students
                 .Include(s => s.Department)
-                .Include(s => s.Projects)
-                .ThenInclude(p => p.Supervisor)
+                .Include(s => s.ProjectStudents)
+                    .ThenInclude(ps => ps.Project)
+                        .ThenInclude(p => p.Supervisor)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (student == null)
             {
@@ -176,7 +177,7 @@ namespace LibraryApp.Controllers
         {
             var students = await _context.Students
                 .Include(s => s.Department)
-                .Include(s => s.Projects)
+                .Include(s => s.ProjectStudents)
                 .OrderBy(s => s.LastName)
                 .ToListAsync();
 
@@ -185,7 +186,7 @@ namespace LibraryApp.Controllers
 
             foreach (var student in students)
             {
-                csv.AppendLine($"{student.StudentNumber},{student.FirstName},{student.LastName},{student.Email},{student.Phone},{student.Department?.Name},{student.EnrollmentDate:yyyy-MM-dd},{student.LastLogin:yyyy-MM-dd},{student.Projects?.Count ?? 0}");
+                csv.AppendLine($"{student.StudentNumber},{student.FirstName},{student.LastName},{student.Email},{student.Phone},{student.Department?.Name},{student.EnrollmentDate:yyyy-MM-dd},{student.LastLogin:yyyy-MM-dd},{student.ProjectStudents?.Count ?? 0}");
             }
 
             var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());

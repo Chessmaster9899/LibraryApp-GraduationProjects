@@ -165,12 +165,13 @@ public class ProjectCommentService : IProjectCommentService
             return false;
         }
 
-        // Verify the student is the project owner
+        // Verify the student is assigned to the project
         var project = await _context.Projects
-            .Include(p => p.Student)
+            .Include(p => p.ProjectStudents)
+                .ThenInclude(ps => ps.Student)
             .FirstOrDefaultAsync(p => p.Id == comment.ProjectId);
 
-        if (project == null || project.Student.StudentNumber != studentId)
+        if (project == null || !project.ProjectStudents.Any(ps => ps.Student.StudentNumber == studentId))
         {
             return false;
         }
@@ -183,7 +184,8 @@ public class ProjectCommentService : IProjectCommentService
     public async Task<bool> CanUserCommentOnProjectAsync(int projectId, string userId, UserRole userRole)
     {
         var project = await _context.Projects
-            .Include(p => p.Student)
+            .Include(p => p.ProjectStudents)
+                .ThenInclude(ps => ps.Student)
             .Include(p => p.Supervisor)
             .Include(p => p.Evaluator)
             .FirstOrDefaultAsync(p => p.Id == projectId);
@@ -196,7 +198,7 @@ public class ProjectCommentService : IProjectCommentService
         return userRole switch
         {
             UserRole.Admin => true,
-            UserRole.Student => project.Student.StudentNumber == userId,
+            UserRole.Student => project.ProjectStudents.Any(ps => ps.Student.StudentNumber == userId),
             UserRole.Professor => project.Supervisor.ProfessorId == userId || 
                                  (project.Evaluator != null && project.Evaluator.ProfessorId == userId),
             _ => false

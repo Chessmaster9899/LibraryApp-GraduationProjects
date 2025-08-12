@@ -89,17 +89,12 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <label asp-for="DefenseDate" class="form-label fw-semibold">Defense Date</label>
-                                    <input asp-for="DefenseDate" class="form-control" type="date" />
-                                    <span asp-validation-for="DefenseDate" class="text-danger"></span>
-                                    <div class="form-text">Optional - can be set later</div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label asp-for="Grade" class="form-label fw-semibold">Grade</label>
-                                    <input asp-for="Grade" class="form-control" placeholder="A, B+, 85/100..." />
-                                    <span asp-validation-for="Grade" class="text-danger"></span>
-                                    <div class="form-text">Optional - can be assigned later</div>
+                                    <label asp-for="Status" class="form-label fw-semibold">Status</label>
+                                    <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<ProjectStatus>()">
+                                        <option value="">Select Status</option>
+                                    </select>
+                                    <span asp-validation-for="Status" class="text-danger"></span>
+                                    <div class="form-text">Project workflow status</div>
                                 </div>
                             </div>
                         </div>
@@ -113,13 +108,21 @@
                                     <i class="fas fa-users me-2"></i>Project Participants
                                 </h6>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label asp-for="StudentId" class="form-label fw-semibold">Student <span class="text-danger">*</span></label>
-                                    <select asp-for="StudentId" class="form-select" asp-items="ViewBag.StudentId" required>
-                                        <option value="">Select Student</option>
+                                    <label class="form-label fw-semibold">Students <span class="text-danger">*</span></label>
+                                    <div class="form-text mb-2">Select 1-3 students for this project</div>
+                                    <select id="studentSelect" class="form-select" multiple style="height: 120px;">
+                                        @if (ViewBag.StudentId != null)
+                                        {
+                                            @foreach (var student in (SelectList)ViewBag.StudentId)
+                                            {
+                                                <option value="@student.Value">@student.Text</option>
+                                            }
+                                        }
                                     </select>
-                                    <span asp-validation-for="StudentId" class="text-danger"></span>
+                                    <div class="form-text">Hold Ctrl/Cmd to select multiple students</div>
+                                    <input type="hidden" id="selectedStudents" name="SelectedStudentIds" />
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -246,4 +249,23 @@ h6.text-muted {
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Handle multiple student selection
+        document.getElementById('studentSelect').addEventListener('change', function() {
+            const selectedOptions = Array.from(this.selectedOptions);
+            const selectedIds = selectedOptions.map(option => option.value);
+            
+            // Limit to 3 students maximum
+            if (selectedIds.length > 3) {
+                // Deselect the last selected option
+                this.selectedOptions[this.selectedOptions.length - 1].selected = false;
+                selectedIds.pop();
+                alert('Maximum 3 students allowed per project');
+            }
+            
+            // Update hidden field
+            document.getElementById('selectedStudents').value = selectedIds.join(',');
+        });
+    </script>
 }

@@ -151,9 +151,10 @@ public class SearchController : BaseController
     private async Task<List<Project>> SearchProjects(string query, string department, string status, int page, int pageSize)
     {
         var projectsQuery = _context.Projects
-            .Include(p => p.Student)
+            .Include(p => p.ProjectStudents)
+                .ThenInclude(ps => ps.Student)
+                    .ThenInclude(s => s.Department)
             .Include(p => p.Supervisor)
-            .Include(p => p.Student.Department)
             .AsQueryable();
 
         // Apply visibility filter
@@ -195,7 +196,8 @@ public class SearchController : BaseController
     {
         var studentsQuery = _context.Students
             .Include(s => s.Department)
-            .Include(s => s.Projects)
+            .Include(s => s.ProjectStudents)
+                .ThenInclude(ps => ps.Project)
             .AsQueryable();
 
         studentsQuery = studentsQuery.Where(s => 
@@ -247,7 +249,12 @@ public class SearchController : BaseController
 
     private async Task<int> CountProjects(string query, string department, string status)
     {
-        var projectsQuery = _context.Projects.AsQueryable();
+        var projectsQuery = _context.Projects
+            .Include(p => p.ProjectStudents)
+                .ThenInclude(ps => ps.Student)
+                    .ThenInclude(s => s.Department)
+            .Include(p => p.Supervisor)
+            .AsQueryable();
 
         if (CurrentUserRoleEnum == UserRole.Guest)
         {
@@ -258,14 +265,13 @@ public class SearchController : BaseController
             p.Title.Contains(query) || 
             (p.Abstract ?? string.Empty).Contains(query) || 
             (p.Keywords ?? string.Empty).Contains(query) ||
-            p.Student.FirstName.Contains(query) ||
-            p.Student.LastName.Contains(query) ||
+            p.ProjectStudents.Any(ps => ps.Student.FirstName.Contains(query) || ps.Student.LastName.Contains(query)) ||
             p.Supervisor.FirstName.Contains(query) ||
             p.Supervisor.LastName.Contains(query));
 
         if (!string.IsNullOrEmpty(department))
         {
-            projectsQuery = projectsQuery.Where(p => p.Student.Department.Name == department);
+            projectsQuery = projectsQuery.Where(p => p.ProjectStudents.Any(ps => ps.Student.Department.Name == department));
         }
 
         if (!string.IsNullOrEmpty(status) && Enum.TryParse<ProjectStatus>(status, out var statusEnum))

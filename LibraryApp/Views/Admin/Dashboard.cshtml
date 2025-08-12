@@ -293,7 +293,16 @@
                                             {
                                                 <div class="timeline-item-professional">
                                                     <h6>@submission.Project.Title</h6>
-                                                    <p class="text-professional">By: @submission.Project.Student.FullName</p>
+                                                    <p class="text-professional">By: 
+                                                        @if (submission.Project.ProjectStudents.Any())
+                                                        {
+                                                            @string.Join(", ", submission.Project.ProjectStudents.Select(ps => ps.Student.FullName))
+                                                        }
+                                                        else
+                                                        {
+                                                            <em>No students assigned</em>
+                                                        }
+                                                    </p>
                                                     <div class="d-flex align-items-center justify-content-between">
                                                         <span class="badge badge-professional bg-@(submission.Status == SubmissionStatus.Pending ? "warning" : "info")">
                                                             @submission.Status

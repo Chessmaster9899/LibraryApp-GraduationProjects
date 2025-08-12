@@ -148,11 +148,11 @@
                             {
                                 var badgeClass = statusGroup.Status switch
                                 {
-                                    ProjectStatus.Completed => "success",
-                                    ProjectStatus.Defended => "success",
+                                    ProjectStatus.EvaluatorApproved => "success",
                                     ProjectStatus.Published => "success",
-                                    ProjectStatus.InProgress => "warning",
-                                    ProjectStatus.Approved => "info",
+                                    ProjectStatus.SupervisorApproved => "info",
+                                    ProjectStatus.Submitted => "warning",
+                                    ProjectStatus.Created => "secondary",
                                     _ => "secondary"
                                 };
                                 
@@ -253,8 +253,22 @@
                                                 }
                                             </td>
                                             <td>
-                                                <div class="text-professional" style="font-weight: 600;">@project.Student.FirstName @project.Student.LastName</div>
-                                                <small class="text-muted-professional">@project.Student.StudentNumber</small>
+                                                @if (project.ProjectStudents.Any())
+                                                {
+                                                    @foreach (var ps in project.ProjectStudents)
+                                                    {
+                                                        <div class="text-professional" style="font-weight: 600;">@ps.Student.FirstName @ps.Student.LastName</div>
+                                                        <small class="text-muted-professional">@ps.Student.StudentNumber</small>
+                                                        @if (!project.ProjectStudents.Last().Equals(ps))
+                                                        {
+                                                            <br />
+                                                        }
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <em class="text-muted">No students assigned</em>
+                                                }
                                             </td>
                                             <td>
                                                 <div class="text-professional" style="font-weight: 600;">@project.Supervisor.Title @project.Supervisor.FirstName @project.Supervisor.LastName</div>

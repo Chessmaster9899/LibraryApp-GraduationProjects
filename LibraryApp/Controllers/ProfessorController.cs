@@ -32,9 +32,11 @@ namespace LibraryApp.Controllers
             var professor = await _context.Professors
                 .Include(p => p.Department)
                 .Include(p => p.SupervisedProjects)
-                .ThenInclude(proj => proj.Student)
+                    .ThenInclude(proj => proj.ProjectStudents)
+                        .ThenInclude(ps => ps.Student)
                 .Include(p => p.EvaluatedProjects)
-                .ThenInclude(proj => proj.Student)
+                    .ThenInclude(proj => proj.ProjectStudents)
+                        .ThenInclude(ps => ps.Student)
                 .FirstOrDefaultAsync(p => p.ProfessorId == userId);
 
             if (professor == null)
@@ -47,8 +49,8 @@ namespace LibraryApp.Controllers
                 Professor = professor,
                 TotalSupervisedProjects = professor.SupervisedProjects.Count,
                 TotalEvaluatedProjects = professor.EvaluatedProjects.Count,
-                CompletedSupervisedProjects = professor.SupervisedProjects.Count(p => p.Status == ProjectStatus.Completed || p.Status == ProjectStatus.Defended),
-                CompletedEvaluatedProjects = professor.EvaluatedProjects.Count(p => p.Status == ProjectStatus.Completed || p.Status == ProjectStatus.Defended),
+                CompletedSupervisedProjects = professor.SupervisedProjects.Count(p => p.Status == ProjectStatus.EvaluatorApproved || p.Status == ProjectStatus.Published),
+                CompletedEvaluatedProjects = professor.EvaluatedProjects.Count(p => p.Status == ProjectStatus.EvaluatorApproved || p.Status == ProjectStatus.Published),
                 RecentSupervisedProjects = professor.SupervisedProjects.OrderByDescending(p => p.SubmissionDate).Take(5).ToList(),
                 RecentEvaluatedProjects = professor.EvaluatedProjects.OrderByDescending(p => p.SubmissionDate).Take(5).ToList(),
                 UniversitySettings = _universitySettings.GetSettings()
@@ -69,8 +71,9 @@ namespace LibraryApp.Controllers
 
             var professor = await _context.Professors
                 .Include(p => p.SupervisedProjects)
-                .ThenInclude(proj => proj.Student)
-                .ThenInclude(s => s.Department)
+                    .ThenInclude(proj => proj.ProjectStudents)
+                        .ThenInclude(ps => ps.Student)
+                            .ThenInclude(s => s.Department)
                 .FirstOrDefaultAsync(p => p.ProfessorId == userId);
 
             if (professor == null)
@@ -94,8 +97,9 @@ namespace LibraryApp.Controllers
 
             var professor = await _context.Professors
                 .Include(p => p.EvaluatedProjects)
-                .ThenInclude(proj => proj.Student)
-                .ThenInclude(s => s.Department)
+                    .ThenInclude(proj => proj.ProjectStudents)
+                        .ThenInclude(ps => ps.Student)
+                            .ThenInclude(s => s.Department)
                 .FirstOrDefaultAsync(p => p.ProfessorId == userId);
 
             if (professor == null)
@@ -143,11 +147,13 @@ namespace LibraryApp.Controllers
 
             var professor = await _context.Professors
                 .Include(p => p.SupervisedProjects)
-                .ThenInclude(proj => proj.Student)
-                .ThenInclude(s => s.Department)
+                    .ThenInclude(proj => proj.ProjectStudents)
+                        .ThenInclude(ps => ps.Student)
+                            .ThenInclude(s => s.Department)
                 .Include(p => p.EvaluatedProjects)
-                .ThenInclude(proj => proj.Student)
-                .ThenInclude(s => s.Department)
+                    .ThenInclude(proj => proj.ProjectStudents)
+                        .ThenInclude(ps => ps.Student)
+                            .ThenInclude(s => s.Department)
                 .FirstOrDefaultAsync(p => p.ProfessorId == userId);
 
             if (professor == null)
@@ -156,8 +162,12 @@ namespace LibraryApp.Controllers
             }
 
             // Get unique students from both supervised and evaluated projects
-            var supervisedStudents = professor.SupervisedProjects.Select(p => p.Student).ToList();
-            var evaluatedStudents = professor.EvaluatedProjects.Select(p => p.Student).ToList();
+            var supervisedStudents = professor.SupervisedProjects
+                .SelectMany(p => p.ProjectStudents.Select(ps => ps.Student))
+                .ToList();
+            var evaluatedStudents = professor.EvaluatedProjects
+                .SelectMany(p => p.ProjectStudents.Select(ps => ps.Student))
+                .ToList();
             
             var allStudents = supervisedStudents.Union(evaluatedStudents, new StudentEqualityComparer()).ToList();
 
@@ -233,11 +243,11 @@ namespace LibraryApp.Controllers
                 return RedirectToAction("Index");
             }
 
-            if (project.Status == ProjectStatus.Proposed)
+            if (project.Status == ProjectStatus.Submitted)
             {
-                project.Status = ProjectStatus.Approved;
-                project.ReviewComments = comments;
-                project.ReviewDate = DateTime.Now;
+                project.Status = ProjectStatus.SupervisorApproved;
+                project.SupervisorComments = comments;
+                project.SupervisorReviewDate = DateTime.Now;
                 project.ReviewedBy = CurrentUser?.UserId;
 
                 await _context.SaveChangesAsync();
@@ -280,12 +290,11 @@ namespace LibraryApp.Controllers
                 return RedirectToAction("Index");
             }
 
-            if (project.Status == ProjectStatus.Proposed)
+            if (project.Status == ProjectStatus.Submitted)
             {
-                project.Status = ProjectStatus.ReviewRejected;
-                project.ReviewComments = comments;
-                project.ReviewDate = DateTime.Now;
-                project.ReviewedBy = CurrentUser?.UserId;
+                project.Status = ProjectStatus.Created; // Reject back to Created for resubmission
+                project.SupervisorComments = comments;
+                project.SupervisorReviewDate = DateTime.Now;
 
                 await _context.SaveChangesAsync();
                 this.AddInfo("Project Rejected", $"Project '{project.Title}' has been rejected");
@@ -321,20 +330,9 @@ namespace LibraryApp.Controllers
                 return RedirectToAction("Index");
             }
 
-            if (project.Status == ProjectStatus.InProgress)
-            {
-                project.Status = ProjectStatus.Completed;
-                project.ReviewComments = comments;
-                project.ReviewDate = DateTime.Now;
-                project.ReviewedBy = CurrentUser?.UserId;
-
-                await _context.SaveChangesAsync();
-                this.AddSuccess("Project Completed", $"Project '{project.Title}' has been marked as completed");
-            }
-            else
-            {
-                this.AddWarning("Invalid Status", "Only in-progress projects can be marked as completed");
-            }
+            // In the simplified workflow, students submit directly when ready
+            // This method is no longer needed but kept for compatibility
+            this.AddWarning("Feature Disabled", "In the new workflow, students submit projects directly when ready");
 
             return RedirectToAction("Index");
         }
@@ -362,20 +360,8 @@ namespace LibraryApp.Controllers
                 return RedirectToAction("Index");
             }
 
-            if (project.Status == ProjectStatus.Completed || project.Status == ProjectStatus.ReviewApproved)
-            {
-                project.DefenseDate = defenseDate;
-                project.ReviewComments = comments;
-                project.ReviewDate = DateTime.Now;
-                project.ReviewedBy = CurrentUser?.UserId;
-
-                await _context.SaveChangesAsync();
-                this.AddSuccess("Defense Scheduled", $"Defense for '{project.Title}' scheduled for {defenseDate:MMM dd, yyyy}");
-            }
-            else
-            {
-                this.AddWarning("Invalid Status", "Only completed or review-approved projects can have defense scheduled");
-            }
+            // Defense scheduling is not part of the simplified workflow
+            this.AddWarning("Feature Disabled", "Defense scheduling is not part of the simplified workflow");
 
             return RedirectToAction("Index");
         }
@@ -540,8 +526,9 @@ namespace LibraryApp.Controllers
 
             var professor = await _context.Professors
                 .Include(p => p.EvaluatedProjects)
-                    .ThenInclude(p => p.Student)
-                        .ThenInclude(s => s.Department)
+                    .ThenInclude(p => p.ProjectStudents)
+                        .ThenInclude(ps => ps.Student)
+                            .ThenInclude(s => s.Department)
                 .Include(p => p.EvaluatedProjects)
                     .ThenInclude(p => p.Supervisor)
                 .FirstOrDefaultAsync(p => p.ProfessorId == userId);
@@ -551,10 +538,10 @@ namespace LibraryApp.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
-            // Get projects that need evaluation
+            // Get projects that need evaluation (approved by supervisor)
             var pendingEvaluations = professor.EvaluatedProjects
-                .Where(p => p.Status == ProjectStatus.SubmittedForReview || p.Status == ProjectStatus.ReviewApproved)
-                .OrderBy(p => p.SubmissionForReviewDate)
+                .Where(p => p.Status == ProjectStatus.SupervisorApproved)
+                .OrderBy(p => p.SupervisorReviewDate)
                 .ToList();
 
             ViewBag.PageTitle = "Evaluation Tasks";
@@ -623,19 +610,17 @@ namespace LibraryApp.Controllers
                 return Json(new { success = false, message = "Access denied" });
             }
 
-            project.ReviewComments = evaluationComments;
-            project.Grade = grade;
-            project.ReviewDate = DateTime.Now;
-            project.ReviewedBy = userId;
-            project.Status = approve ? ProjectStatus.ReviewApproved : ProjectStatus.ReviewRejected;
+            project.EvaluatorComments = evaluationComments;
+            project.EvaluatorReviewDate = DateTime.Now;
+            project.Status = approve ? ProjectStatus.EvaluatorApproved : ProjectStatus.Submitted; // Reject back to submitted status
 
             try
             {
                 await _context.SaveChangesAsync();
                 
                 string message = approve ? 
-                    $"Project '{project.Title}' has been approved with grade {grade}" :
-                    $"Project '{project.Title}' has been rejected";
+                    $"Project '{project.Title}' has been approved by evaluator" :
+                    $"Project '{project.Title}' has been rejected and sent back for resubmission";
                     
                 return Json(new { success = true, message = message });
             }
@@ -740,9 +725,11 @@ namespace LibraryApp.Controllers
             var professor = await _context.Professors
                 .Include(p => p.Department)
                 .Include(p => p.SupervisedProjects)
-                .ThenInclude(proj => proj.Student)
+                    .ThenInclude(proj => proj.ProjectStudents)
+                        .ThenInclude(ps => ps.Student)
                 .Include(p => p.EvaluatedProjects)
-                .ThenInclude(proj => proj.Student)
+                    .ThenInclude(proj => proj.ProjectStudents)
+                        .ThenInclude(ps => ps.Student)
                 .FirstOrDefaultAsync(p => p.ProfessorId == userId);
 
             if (professor == null)

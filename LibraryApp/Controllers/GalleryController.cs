@@ -40,7 +40,8 @@ public class GalleryController : BaseController
             query = query.Where(p => p.Title.Contains(search) || 
                                    (p.Abstract ?? string.Empty).Contains(search) || 
                                    (p.Keywords ?? string.Empty).Contains(search) ||
-                                   p.Student.FullName.Contains(search));
+                                   p.Student.FirstName.Contains(search) ||
+                                   p.Student.LastName.Contains(search));
         }
 
         // Apply sorting

@@ -31,8 +31,9 @@ namespace LibraryApp.Controllers
             // Get student data
             var student = await _context.Students
                 .Include(s => s.Department)
-                .Include(s => s.Projects)
-                .ThenInclude(p => p.Supervisor)
+                .Include(s => s.ProjectStudents)
+                    .ThenInclude(ps => ps.Project)
+                        .ThenInclude(p => p.Supervisor)
                 .FirstOrDefaultAsync(s => s.StudentNumber == userId);
 
             if (student == null)
@@ -43,10 +44,10 @@ namespace LibraryApp.Controllers
             var dashboardData = new StudentDashboardViewModel
             {
                 Student = student,
-                TotalProjects = student.Projects.Count,
-                CompletedProjects = student.Projects.Count(p => p.Status == ProjectStatus.Completed || p.Status == ProjectStatus.Defended),
-                InProgressProjects = student.Projects.Count(p => p.Status == ProjectStatus.InProgress || p.Status == ProjectStatus.Approved),
-                RecentProjects = student.Projects.OrderByDescending(p => p.SubmissionDate).Take(5).ToList(),
+                TotalProjects = student.ProjectStudents.Count,
+                CompletedProjects = student.ProjectStudents.Count(ps => ps.Project.Status == ProjectStatus.EvaluatorApproved || ps.Project.Status == ProjectStatus.Published),
+                InProgressProjects = student.ProjectStudents.Count(ps => ps.Project.Status == ProjectStatus.Submitted || ps.Project.Status == ProjectStatus.SupervisorApproved),
+                RecentProjects = student.ProjectStudents.OrderByDescending(ps => ps.Project.SubmissionDate).Take(5).Select(ps => ps.Project).ToList(),
                 UniversitySettings = _universitySettings.GetSettings()
             };
 
@@ -64,9 +65,10 @@ namespace LibraryApp.Controllers
             }
 
             var student = await _context.Students
-                .Include(s => s.Projects)
-                .ThenInclude(p => p.Supervisor)
-                .ThenInclude(s => s.Department)
+                .Include(s => s.ProjectStudents)
+                    .ThenInclude(ps => ps.Project)
+                        .ThenInclude(p => p.Supervisor)
+                            .ThenInclude(s => s.Department)
                 .FirstOrDefaultAsync(s => s.StudentNumber == userId);
 
             if (student == null)

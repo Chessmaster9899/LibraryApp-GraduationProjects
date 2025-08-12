@@ -13,6 +13,7 @@ public class LibraryContext : DbContext
     public DbSet<Student> Students { get; set; }
     public DbSet<Professor> Professors { get; set; }
     public DbSet<Project> Projects { get; set; }
+    public DbSet<ProjectStudent> ProjectStudents { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Admin> Admins { get; set; }
     public DbSet<ProjectSubmission> ProjectSubmissions { get; set; }
@@ -76,12 +77,6 @@ public class LibraryContext : DbContext
             .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Project>()
-            .HasOne(p => p.Student)
-            .WithMany(s => s.Projects)
-            .HasForeignKey(p => p.StudentId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        modelBuilder.Entity<Project>()
             .HasOne(p => p.Supervisor)
             .WithMany(s => s.SupervisedProjects)
             .HasForeignKey(p => p.SupervisorId)
@@ -92,6 +87,22 @@ public class LibraryContext : DbContext
             .WithMany(s => s.EvaluatedProjects)
             .HasForeignKey(p => p.EvaluatorId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        // Configure ProjectStudent many-to-many relationship
+        modelBuilder.Entity<ProjectStudent>()
+            .HasKey(ps => new { ps.ProjectId, ps.StudentId });
+
+        modelBuilder.Entity<ProjectStudent>()
+            .HasOne(ps => ps.Project)
+            .WithMany(p => p.ProjectStudents)
+            .HasForeignKey(ps => ps.ProjectId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ProjectStudent>()
+            .HasOne(ps => ps.Student)
+            .WithMany(s => s.ProjectStudents)
+            .HasForeignKey(ps => ps.StudentId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         // Configure User relationships
         modelBuilder.Entity<User>()

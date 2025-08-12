@@ -45,7 +45,7 @@ public class Student
     
     // Navigation properties
     public Department Department { get; set; } = null!;
-    public ICollection<Project> Projects { get; set; } = new List<Project>();
+    public ICollection<ProjectStudent> ProjectStudents { get; set; } = new List<ProjectStudent>();
     
     // Computed properties
     public string FullName => $"{FirstName} {LastName}";

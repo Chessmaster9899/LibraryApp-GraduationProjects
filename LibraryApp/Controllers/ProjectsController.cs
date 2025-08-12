@@ -23,7 +23,8 @@ namespace LibraryApp.Controllers
         public async Task<IActionResult> Index(string searchTitle, string statusFilter, string supervisorFilter)
         {
             var projectsQuery = _context.Projects
-                .Include(p => p.Student)
+                .Include(p => p.ProjectStudents)
+                    .ThenInclude(ps => ps.Student)
                 .Include(p => p.Supervisor)
                 .AsQueryable();
 
@@ -102,7 +103,7 @@ namespace LibraryApp.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AdminOnly]
-        public async Task<IActionResult> Create([Bind("Id,Title,Abstract,Keywords,Status,SubmissionDate,DefenseDate,Grade,StudentId,SupervisorId")] Project project, IFormFile? documentFile, IFormFile? posterFile)
+        public async Task<IActionResult> Create([Bind("Id,Title,Abstract,Keywords,Status,SubmissionDate,SupervisorId,EvaluatorId")] Project project, IFormFile? documentFile, IFormFile? posterFile, string? SelectedStudentIds)
         {
             // Handle document file upload
             if (documentFile != null && documentFile.Length > 0)
@@ -138,14 +139,52 @@ namespace LibraryApp.Controllers
                 project.PosterPath = "/posters/" + uniqueFileName;
             }
             
+            // Validate and parse selected students
+            List<int> studentIds = new List<int>();
+            if (!string.IsNullOrEmpty(SelectedStudentIds))
+            {
+                var studentIdStrings = SelectedStudentIds.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                foreach (var idString in studentIdStrings)
+                {
+                    if (int.TryParse(idString.Trim(), out int studentId))
+                    {
+                        studentIds.Add(studentId);
+                    }
+                }
+            }
+            
+            // Validate student count (1-3 students required)
+            if (studentIds.Count == 0)
+            {
+                ModelState.AddModelError("SelectedStudentIds", "At least 1 student is required.");
+            }
+            else if (studentIds.Count > 3)
+            {
+                ModelState.AddModelError("SelectedStudentIds", "Maximum 3 students allowed per project.");
+            }
+            
             if (ModelState.IsValid)
             {
+                // Create the project first
                 _context.Add(project);
+                await _context.SaveChangesAsync();
+                
+                // Add student assignments
+                foreach (var studentId in studentIds)
+                {
+                    var projectStudent = new ProjectStudent
+                    {
+                        ProjectId = project.Id,
+                        StudentId = studentId
+                    };
+                    _context.ProjectStudents.Add(projectStudent);
+                }
+                
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             
-            ViewData["StudentId"] = await GetStudentsSelectListAsync(project.StudentId);
+            ViewData["StudentId"] = await GetStudentsSelectListAsync();
             ViewData["SupervisorId"] = await GetProfessorsSelectListAsync(project.SupervisorId, ProfessorRole.Supervisor);
             ViewData["EvaluatorId"] = await GetProfessorsSelectListAsync(project.EvaluatorId, ProfessorRole.Evaluator);
             return View(project);
@@ -160,13 +199,17 @@ namespace LibraryApp.Controllers
                 return NotFound();
             }
 
-            var project = await _context.Projects.FindAsync(id);
+            var project = await _context.Projects
+                .Include(p => p.ProjectStudents)
+                    .ThenInclude(ps => ps.Student)
+                .FirstOrDefaultAsync(p => p.Id == id);
+                
             if (project == null)
             {
                 return NotFound();
             }
             
-            ViewData["StudentId"] = await GetStudentsSelectListAsync(project.StudentId);
+            ViewData["StudentId"] = await GetStudentsSelectListAsync();
             ViewData["SupervisorId"] = await GetProfessorsSelectListAsync(project.SupervisorId, ProfessorRole.Supervisor);
             ViewData["EvaluatorId"] = await GetProfessorsSelectListAsync(project.EvaluatorId, ProfessorRole.Evaluator);
             return View(project);
@@ -176,7 +219,7 @@ namespace LibraryApp.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AdminOnly]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Abstract,Keywords,Status,SubmissionDate,DefenseDate,Grade,DocumentPath,PosterPath,StudentId,SupervisorId")] Project project, IFormFile? documentFile, IFormFile? posterFile)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Abstract,Keywords,Status,SubmissionDate,DocumentPath,PosterPath,SupervisorId,EvaluatorId")] Project project, IFormFile? documentFile, IFormFile? posterFile)
         {
             if (id != project.Id)
             {
@@ -258,7 +301,7 @@ namespace LibraryApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
             
-            ViewData["StudentId"] = await GetStudentsSelectListAsync(project.StudentId);
+            ViewData["StudentId"] = await GetStudentsSelectListAsync();
             ViewData["SupervisorId"] = await GetProfessorsSelectListAsync(project.SupervisorId, ProfessorRole.Supervisor);
             ViewData["EvaluatorId"] = await GetProfessorsSelectListAsync(project.EvaluatorId, ProfessorRole.Evaluator);
             return View(project);
@@ -386,14 +429,15 @@ namespace LibraryApp.Controllers
         public async Task<IActionResult> GetProjectsByStatus(ProjectStatus status)
         {
             var projects = await _context.Projects
-                .Include(p => p.Student)
+                .Include(p => p.ProjectStudents)
+                    .ThenInclude(ps => ps.Student)
                 .Include(p => p.Supervisor)
                 .Where(p => p.Status == status)
                 .OrderByDescending(p => p.SubmissionDate)
                 .Select(p => new {
                     p.Id,
                     p.Title,
-                    StudentName = p.Student.FullName,
+                    StudentNames = string.Join(", ", p.ProjectStudents.Select(ps => ps.Student.FullName)),
                     SupervisorName = p.Supervisor.DisplayName,
                     p.SubmissionDate,
                     p.Status
