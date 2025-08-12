@@ -49,6 +49,21 @@ builder.Services.AddScoped<IPermissionService, PermissionService>();
 // Add Project Comment Service
 builder.Services.AddScoped<IProjectCommentService, ProjectCommentService>();
 
+// Add Document Generation Service
+builder.Services.AddScoped<IDocumentGenerationService, DocumentGenerationService>();
+
+// Add Performance Optimization Service
+builder.Services.AddScoped<IPerformanceOptimizationService, PerformanceOptimizationService>();
+
+// Add Enhanced Audit Service
+builder.Services.AddScoped<IEnhancedAuditService, EnhancedAuditService>();
+
+// Add Memory Caching for Performance
+builder.Services.AddMemoryCache();
+
+// Add Response Caching
+builder.Services.AddResponseCaching();
+
 var app = builder.Build();
 
 // Migrate database and seed sample data
@@ -91,6 +106,9 @@ app.UseGlobalErrorHandling();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+// Use Response Caching for performance
+app.UseResponseCaching();
 
 app.UseRouting();
 app.UseSession();
