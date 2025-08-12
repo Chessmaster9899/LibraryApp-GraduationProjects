@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const messages = JSON.parse(serverMessages.textContent);
             messages.forEach(msg => {
-                showToast(msg.type || 'info', msg.title || 'Notification', msg.message, msg.duration);
+                showToast(msg.Type || msg.type || 'info', msg.Title || msg.title || 'Notification', msg.Message || msg.message, msg.Duration || msg.duration);
             });
         } catch (e) {
             console.warn('Failed to parse server messages for toast notifications');

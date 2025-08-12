@@ -1,0 +1,441 @@
+@model EditRoleViewModel
+@{
+    ViewData["Title"] = "Edit Role";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-0">Edit Role: @Model.Name</h1>
+            <p class="text-muted">
+                Modify role permissions and settings
+                @if (Model.IsSystemRole)
+                {
+                    <span class="badge bg-warning text-dark ms-2">
+                        <i class="fas fa-shield-alt me-1"></i>
+                        System Role
+                    </span>
+                }
+            </p>
+        </div>
+        <div>
+            <a asp-action="Index" class="btn btn-secondary me-2">
+                <i class="fas fa-arrow-left me-1"></i>
+                Back to Roles
+            </a>
+            @if (!Model.IsSystemRole)
+            {
+                <button type="button" class="btn btn-danger" onclick="confirmDeleteRole(@Model.Id, '@Model.Name')">
+                    <i class="fas fa-trash me-1"></i>
+                    Delete Role
+                </button>
+            }
+        </div>
+    </div>
+
+    @if (Model.IsSystemRole)
+    {
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>System Role:</strong> This is a built-in system role. You can modify permissions but cannot change the name or delete the role.
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-12 col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-user-shield me-2"></i>
+                        Role Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="EditRole" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="IsSystemRole" />
+                        
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Name" class="form-label">Role Name <span class="text-danger">*</span></label>
+                                @if (Model.IsSystemRole)
+                                {
+                                    <input asp-for="Name" class="form-control" readonly />
+                                    <div class="form-text">System role names cannot be changed.</div>
+                                }
+                                else
+                                {
+                                    <input asp-for="Name" class="form-control" placeholder="Enter role name" />
+                                }
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Description" class="form-label">Description</label>
+                            @if (Model.IsSystemRole)
+                            {
+                                <textarea asp-for="Description" class="form-control" rows="3" readonly></textarea>
+                                <div class="form-text">System role descriptions cannot be changed.</div>
+                            }
+                            else
+                            {
+                                <textarea asp-for="Description" class="form-control" rows="3" placeholder="Describe what this role is for..."></textarea>
+                            }
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">
+                                <i class="fas fa-key me-2"></i>
+                                Permissions
+                                <span class="badge bg-primary ms-2" id="selectedCount">
+                                    @(Model.SelectedPermissions?.Count ?? 0) selected
+                                </span>
+                            </h6>
+                            <p class="text-muted small mb-3">Select the permissions this role should have. Permissions are grouped by category.</p>
+                            
+                            @if (Model.AllPermissions?.Any() == true)
+                            {
+                                var permissionGroups = Model.AllPermissions.GroupBy(p => p.Category).OrderBy(g => g.Key);
+                                
+                                <div class="row">
+                                    @foreach (var group in permissionGroups)
+                                    {
+                                        <div class="col-md-6 col-lg-4 mb-4">
+                                            <div class="card border-0 bg-light h-100">
+                                                <div class="card-header bg-primary text-white py-2">
+                                                    <h6 class="card-title mb-0 small">
+                                                        <i class="fas fa-folder me-1"></i>
+                                                        @group.Key
+                                                        <span class="badge bg-light text-dark ms-2">
+                                                            @group.Count(p => Model.SelectedPermissions?.Contains(p.Type) == true)/@group.Count()
+                                                        </span>
+                                                    </h6>
+                                                </div>
+                                                <div class="card-body py-2">
+                                                    @foreach (var permission in group.OrderBy(p => p.Name))
+                                                    {
+                                                        <div class="form-check mb-2">
+                                                            <input class="form-check-input permission-checkbox" 
+                                                                   type="checkbox" 
+                                                                   name="SelectedPermissions" 
+                                                                   value="@permission.Type" 
+                                                                   id="permission_@permission.Id"
+                                                                   @(Model.SelectedPermissions?.Contains(permission.Type) == true ? "checked" : "") />
+                                                            <label class="form-check-label small" for="permission_@permission.Id">
+                                                                @permission.Name
+                                                            </label>
+                                                            @if (!string.IsNullOrEmpty(permission.Description))
+                                                            {
+                                                                <div class="text-muted small">@permission.Description</div>
+                                                            }
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    No permissions are available in the system.
+                                </div>
+                            }
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="form-check">
+                                <input type="checkbox" id="selectAll" class="form-check-input">
+                                <label for="selectAll" class="form-check-label">
+                                    Select/Deselect All Permissions
+                                </label>
+                            </div>
+                            
+                            <div>
+                                <a asp-action="Index" class="btn btn-secondary me-2">
+                                    <i class="fas fa-times me-1"></i>
+                                    Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>
+                                    Update Role
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Role Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="fw-bold">Current Settings</h6>
+                    <div class="small mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Role Type:</span>
+                            <span class="fw-bold">@(Model.IsSystemRole ? "System Role" : "Custom Role")</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Total Permissions:</span>
+                            <span class="fw-bold">@(Model.SelectedPermissions?.Count ?? 0)</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Available Permissions:</span>
+                            <span class="fw-bold">@(Model.AllPermissions?.Count ?? 0)</span>
+                        </div>
+                    </div>
+                    
+                    <h6 class="fw-bold">Security Guidelines</h6>
+                    <ul class="small mb-3">
+                        <li>Only assign necessary permissions</li>
+                        <li>Review permissions regularly</li>
+                        <li>Test changes with a test user first</li>
+                        <li>Document permission changes</li>
+                    </ul>
+                    
+                    @if (!Model.IsSystemRole)
+                    {
+                        <h6 class="fw-bold text-danger">Danger Zone</h6>
+                        <div class="small text-muted">
+                            Deleting this role will remove it from all assigned users. This action cannot be undone.
+                        </div>
+                    }
+                </div>
+            </div>
+            
+            <!-- Change Log (Future Enhancement) -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-history me-2"></i>
+                        Recent Changes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-muted small text-center py-3">
+                        <i class="fas fa-clock me-1"></i>
+                        Change history will be displayed here
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteRoleModal" tabindex="-1" aria-labelledby="deleteRoleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteRoleModalLabel">
+                    <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                    Confirm Role Deletion
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the role <strong id="roleNameToDelete"></strong>?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Warning:</strong> This action cannot be undone. The role will be removed from all users who currently have it assigned.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fas fa-trash me-1"></i>
+                    Delete Role
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Permission counting and UI updates
+            const permissionCheckboxes = document.querySelectorAll('.permission-checkbox');
+            const selectedCountBadge = document.getElementById('selectedCount');
+            const selectAllCheckbox = document.getElementById('selectAll');
+            
+            function updateSelectedCount() {
+                const selectedCount = document.querySelectorAll('.permission-checkbox:checked').length;
+                selectedCountBadge.textContent = selectedCount + ' selected';
+                
+                // Update category badges
+                document.querySelectorAll('.card-header .badge').forEach(badge => {
+                    const categoryCard = badge.closest('.card');
+                    const categoryCheckboxes = categoryCard.querySelectorAll('.permission-checkbox');
+                    const categorySelected = categoryCard.querySelectorAll('.permission-checkbox:checked').length;
+                    const categoryTotal = categoryCheckboxes.length;
+                    badge.textContent = categorySelected + '/' + categoryTotal;
+                });
+            }
+            
+            // Select/Deselect all functionality
+            selectAllCheckbox.addEventListener('change', function() {
+                permissionCheckboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+                updateSelectedCount();
+            });
+            
+            // Update select all checkbox and counts when individual permissions change
+            permissionCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const allChecked = Array.from(permissionCheckboxes).every(cb => cb.checked);
+                    const noneChecked = Array.from(permissionCheckboxes).every(cb => !cb.checked);
+                    
+                    selectAllCheckbox.checked = allChecked;
+                    selectAllCheckbox.indeterminate = !allChecked && !noneChecked;
+                    
+                    updateSelectedCount();
+                });
+            });
+            
+            // Initialize counts
+            updateSelectedCount();
+            
+            // Update select all state on load
+            const checkedCount = document.querySelectorAll('.permission-checkbox:checked').length;
+            const totalCount = permissionCheckboxes.length;
+            if (checkedCount === totalCount && totalCount > 0) {
+                selectAllCheckbox.checked = true;
+            } else if (checkedCount > 0) {
+                selectAllCheckbox.indeterminate = true;
+            }
+            
+            // Enhanced form validation
+            const form = document.querySelector('form');
+            form.addEventListener('submit', function(e) {
+                const selectedPermissions = document.querySelectorAll('.permission-checkbox:checked');
+                if (selectedPermissions.length === 0) {
+                    e.preventDefault();
+                    showToast('warning', 'Validation Error', 'Please select at least one permission for this role.');
+                    return false;
+                }
+                
+                // Show loading state
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Updating Role...';
+                }
+            });
+        });
+        
+        // Delete role functionality
+        function confirmDeleteRole(roleId, roleName) {
+            document.getElementById('roleNameToDelete').textContent = roleName;
+            const modal = new bootstrap.Modal(document.getElementById('deleteRoleModal'));
+            
+            document.getElementById('confirmDeleteBtn').onclick = function() {
+                deleteRole(roleId);
+            };
+            
+            modal.show();
+        }
+        
+        function deleteRole(roleId) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '@Url.Action("DeleteRole")';
+            
+            const tokenInput = document.createElement('input');
+            tokenInput.type = 'hidden';
+            tokenInput.name = '__RequestVerificationToken';
+            tokenInput.value = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            
+            const idInput = document.createElement('input');
+            idInput.type = 'hidden';
+            idInput.name = 'id';
+            idInput.value = roleId;
+            
+            form.appendChild(tokenInput);
+            form.appendChild(idInput);
+            document.body.appendChild(form);
+            
+            // Show loading
+            const deleteBtn = document.getElementById('confirmDeleteBtn');
+            deleteBtn.disabled = true;
+            deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Deleting...';
+            
+            form.submit();
+        }
+    </script>
+}
+
+@section Styles {
+    <style>
+        .card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: 1px solid rgba(0, 0, 0, 0.125);
+        }
+        
+        .card-header {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .bg-light .card-header.bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+        
+        .permission-category {
+            transition: all 0.2s ease;
+        }
+        
+        .permission-category:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-check-label {
+            cursor: pointer;
+        }
+        
+        .text-muted.small {
+            font-size: 0.875rem;
+        }
+        
+        .badge {
+            font-size: 0.75rem;
+        }
+        
+        .modal-content {
+            border-radius: 0.5rem;
+        }
+        
+        .alert {
+            border-radius: 0.375rem;
+        }
+        
+        #selectedCount {
+            transition: all 0.3s ease;
+        }
+        
+        .card-header .badge {
+            font-size: 0.6rem;
+        }
+    </style>
+}
