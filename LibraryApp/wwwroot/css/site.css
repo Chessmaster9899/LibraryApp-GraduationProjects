@@ -136,6 +136,18 @@ dt, dd {
   color: #1f2937 !important;
 }
 
+/* Fix specific elements that should have dark text on light backgrounds */
+.badge.bg-secondary {
+  color: #1f2937 !important;
+}
+
+/* Fix student dashboard text color issues */
+.stat-label, 
+.opacity-75,
+.text-on-dark {
+  color: #1f2937 !important;
+}
+
 /* Ensure buttons and badges use dark text on light backgrounds */
 .bg-white .btn-primary,
 .bg-light .btn-primary,
@@ -214,10 +226,17 @@ dt, dd {
   color: white !important;
 }
 
-/* Ensure page headers have proper contrast */
-.container h1, .container-fluid h1 {
+/* Ensure page headers have proper contrast - but allow white text on dark backgrounds */
+.container h1:not(.text-white), .container-fluid h1:not(.text-white) {
   color: #1f2937 !important;
   text-shadow: none !important;
+}
+
+/* Allow white text for management page headers */
+h1.text-white,
+.management-header h1 {
+  color: white !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;
 }
 
 /* Ensure card headers on light backgrounds use dark text */
