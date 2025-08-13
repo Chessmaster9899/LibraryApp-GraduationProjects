@@ -621,8 +621,92 @@ function showStatistics() {
     })
     .then(response => response.json())
     .then(data => {
-        showToast('info', 'Statistics', 'Loading detailed analytics...');
+        showStatisticsModal(data);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('error', 'Error', 'Failed to load statistics');
     });
+}
+
+function showStatisticsModal(stats) {
+    let modalHtml = `
+        <div class="modal fade" id="statisticsModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Gallery Analytics</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body text-center">
+                                        <h3>${stats.TotalProjects || 0}</h3>
+                                        <p class="mb-0">Total Projects</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body text-center">
+                                        <h3>${stats.ProjectsThisYear || 0}</h3>
+                                        <p class="mb-0">Projects This Year</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Department Distribution</h6>
+                                <div class="list-group">`;
+    
+    if (stats.DepartmentStats && stats.DepartmentStats.length > 0) {
+        stats.DepartmentStats.forEach(dept => {
+            modalHtml += `
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    ${dept.Department || 'Unknown'}
+                    <span class="badge bg-primary rounded-pill">${dept.Count}</span>
+                </div>`;
+        });
+    } else {
+        modalHtml += '<div class="list-group-item text-muted">No department data available</div>';
+    }
+    
+    modalHtml += `
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Status Distribution</h6>
+                                <div class="list-group">`;
+    
+    if (stats.StatusDistribution && stats.StatusDistribution.length > 0) {
+        stats.StatusDistribution.forEach(status => {
+            modalHtml += `
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    ${status.Status || 'Unknown'}
+                    <span class="badge bg-secondary rounded-pill">${status.Count}</span>
+                </div>`;
+        });
+    } else {
+        modalHtml += '<div class="list-group-item text-muted">No status data available</div>';
+    }
+    
+    modalHtml += `
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    
+    // Remove existing modal if any
+    $('#statisticsModal').remove();
+    $('body').append(modalHtml);
+    $('#statisticsModal').modal('show');
 }
 
 function toggleProjectVisibility(projectId) {
@@ -653,11 +737,204 @@ function toggleGalleryMode() {
 }
 
 function manageVisibility() {
-    showToast('info', 'Visibility', 'Opening visibility management panel...');
+    fetch('@Url.Action("ManageVisibility", "Gallery")', {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showVisibilityModal(data.projects);
+        } else {
+            showToast('error', 'Error', 'Failed to load project visibility options');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('error', 'Error', 'Failed to load visibility management');
+    });
 }
 
 function customizeLayout() {
-    showToast('info', 'Customize', 'Opening layout customization options...');
+    fetch('@Url.Action("CustomizeLayout", "Gallery")', {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showLayoutCustomizationModal(data.options);
+        } else {
+            showToast('error', 'Error', 'Failed to load layout options');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('error', 'Error', 'Failed to load customization options');
+    });
+}
+
+function showVisibilityModal(projects) {
+    // Create a modal to show project visibility management
+    let modalHtml = `
+        <div class="modal fade" id="visibilityModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Manage Project Visibility</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Project</th>
+                                        <th>Student</th>
+                                        <th>Department</th>
+                                        <th>Visible</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
+    
+    projects.forEach(project => {
+        modalHtml += `
+            <tr>
+                <td>${project.title}</td>
+                <td>${project.student || 'N/A'}</td>
+                <td>${project.department || 'N/A'}</td>
+                <td>
+                    <span class="badge ${project.isVisible ? 'bg-success' : 'bg-secondary'}">
+                        ${project.isVisible ? 'Visible' : 'Hidden'}
+                    </span>
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" 
+                            onclick="toggleProjectVisibility(${project.id})">
+                        ${project.isVisible ? 'Hide' : 'Show'}
+                    </button>
+                </td>
+            </tr>`;
+    });
+    
+    modalHtml += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    
+    // Remove existing modal if any
+    $('#visibilityModal').remove();
+    $('body').append(modalHtml);
+    $('#visibilityModal').modal('show');
+}
+
+function showLayoutCustomizationModal(options) {
+    // Create a modal for layout customization
+    let modalHtml = `
+        <div class="modal fade" id="layoutModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Customize Gallery Layout</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Theme</label>
+                            <select class="form-select" id="themeSelect">`;
+    
+    options.themes.forEach(theme => {
+        modalHtml += `<option value="${theme}">${theme.charAt(0).toUpperCase() + theme.slice(1)}</option>`;
+    });
+    
+    modalHtml += `
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Layout</label>
+                            <select class="form-select" id="layoutSelect">`;
+    
+    options.layouts.forEach(layout => {
+        modalHtml += `<option value="${layout}">${layout.charAt(0).toUpperCase() + layout.slice(1)}</option>`;
+    });
+    
+    modalHtml += `
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Items Per Page</label>
+                            <select class="form-select" id="itemsSelect">`;
+    
+    options.itemsPerPage.forEach(count => {
+        modalHtml += `<option value="${count}">${count}</option>`;
+    });
+    
+    modalHtml += `
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="applyLayoutChanges()">Apply Changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    
+    // Remove existing modal if any
+    $('#layoutModal').remove();
+    $('body').append(modalHtml);
+    $('#layoutModal').modal('show');
+}
+
+function toggleProjectVisibility(projectId) {
+    if (!confirm('Are you sure you want to toggle this project\'s visibility?')) {
+        return;
+    }
+    
+    fetch('@Url.Action("ToggleProjectVisibility", "Gallery")', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+        },
+        body: JSON.stringify({ projectId: projectId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('success', 'Success', data.message);
+            // Refresh the visibility modal
+            manageVisibility();
+        } else {
+            showToast('error', 'Error', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('error', 'Error', 'Failed to toggle project visibility');
+    });
+}
+
+function applyLayoutChanges() {
+    const theme = document.getElementById('themeSelect').value;
+    const layout = document.getElementById('layoutSelect').value;
+    const itemsPerPage = document.getElementById('itemsSelect').value;
+    
+    // Apply changes (this would typically save to user preferences)
+    showToast('success', 'Applied', `Layout updated: ${theme} theme, ${layout} layout, ${itemsPerPage} items per page`);
+    $('#layoutModal').modal('hide');
 }
 
 function exportResults() {

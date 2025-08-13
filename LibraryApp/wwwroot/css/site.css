@@ -976,6 +976,13 @@ body {
   font-size: 0.875rem;
 }
 
+.footer .container {
+  width: auto !important;
+  max-width: fit-content !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+}
+
 .footer a {
   color: var(--primary-color);
   text-decoration: none;
