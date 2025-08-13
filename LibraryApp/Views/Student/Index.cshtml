@@ -522,8 +522,7 @@
         }
 
         function exportStudentData() {
-            showToast('info', 'Export', 'Generating comprehensive student report...');
-            // Implementation for student data export
+            window.location.href = '@Url.Action("ExportData", "Student")';
         }
 
         function showPerformanceAnalysis() {
