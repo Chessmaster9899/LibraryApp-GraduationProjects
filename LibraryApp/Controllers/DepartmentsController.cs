@@ -186,5 +186,112 @@ namespace LibraryApp.Controllers
             var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
             return File(bytes, "text/csv", $"departments_export_{DateTime.Now:yyyyMMdd}.csv");
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GenerateSummary()
+        {
+            var departments = await _context.Departments
+                .Include(d => d.Students)
+                    .ThenInclude(s => s.Projects)
+                .Include(d => d.Professors)
+                    .ThenInclude(p => p.SupervisedProjects)
+                .ToListAsync();
+
+            var summary = new {
+                success = true,
+                message = "Department summary generated successfully",
+                data = new {
+                    totalDepartments = departments.Count,
+                    totalStudents = departments.Sum(d => d.Students.Count),
+                    totalProfessors = departments.Sum(d => d.Professors.Count),
+                    totalProjects = departments.Sum(d => d.Students.SelectMany(s => s.Projects).Count()),
+                    departmentStats = departments.Select(d => new {
+                        name = d.Name,
+                        studentCount = d.Students.Count,
+                        professorCount = d.Professors.Count,
+                        projectCount = d.Students.SelectMany(s => s.Projects).Count(),
+                        ratio = d.Professors.Count > 0 ? (double)d.Students.Count / d.Professors.Count : 0
+                    }).OrderByDescending(d => d.studentCount).ToList()
+                }
+            };
+
+            return Json(summary);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ValidateStructure()
+        {
+            var departments = await _context.Departments
+                .Include(d => d.Students)
+                .Include(d => d.Professors)
+                .ToListAsync();
+
+            var validationIssues = new List<object>();
+
+            foreach (var dept in departments)
+            {
+                // Check for departments with no professors
+                if (dept.Professors.Count == 0)
+                {
+                    validationIssues.Add(new {
+                        type = "warning",
+                        department = dept.Name,
+                        issue = "No professors assigned",
+                        description = "Department has no professors assigned to supervise students"
+                    });
+                }
+
+                // Check for departments with too many students per professor
+                if (dept.Professors.Count > 0)
+                {
+                    var ratio = (double)dept.Students.Count / dept.Professors.Count;
+                    if (ratio > 20) // Arbitrary threshold
+                    {
+                        validationIssues.Add(new {
+                            type = "error",
+                            department = dept.Name,
+                            issue = "High student-to-professor ratio",
+                            description = $"Ratio of {ratio:F1} students per professor exceeds recommended threshold"
+                        });
+                    }
+                }
+
+                // Check for departments with no students
+                if (dept.Students.Count == 0)
+                {
+                    validationIssues.Add(new {
+                        type = "info",
+                        department = dept.Name,
+                        issue = "No students enrolled",
+                        description = "Department has no students currently enrolled"
+                    });
+                }
+
+                // Check for missing department description
+                if (string.IsNullOrWhiteSpace(dept.Description))
+                {
+                    validationIssues.Add(new {
+                        type = "warning",
+                        department = dept.Name,
+                        issue = "Missing description",
+                        description = "Department description is empty or missing"
+                    });
+                }
+            }
+
+            var validation = new {
+                success = true,
+                message = "Department structure validation completed",
+                data = new {
+                    totalIssues = validationIssues.Count,
+                    errorCount = validationIssues.Count(i => i.GetType().GetProperty("type")?.GetValue(i)?.ToString() == "error"),
+                    warningCount = validationIssues.Count(i => i.GetType().GetProperty("type")?.GetValue(i)?.ToString() == "warning"),
+                    infoCount = validationIssues.Count(i => i.GetType().GetProperty("type")?.GetValue(i)?.ToString() == "info"),
+                    issues = validationIssues
+                }
+            };
+
+            return Json(validation);
+        }
     }
 }

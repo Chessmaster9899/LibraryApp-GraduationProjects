@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.AspNetCore.Authorization;
 using LibraryApp.Services;
 
 namespace LibraryApp.Hubs
 {
-    [Authorize]
     public class NotificationHub : Hub
     {
         private readonly ISessionService _sessionService;
@@ -16,8 +14,16 @@ namespace LibraryApp.Hubs
 
         public override async Task OnConnectedAsync()
         {
-            var userId = _sessionService.GetUserId(Context.GetHttpContext());
-            var userRole = _sessionService.GetUserRole(Context.GetHttpContext());
+            var httpContext = Context.GetHttpContext();
+            if (httpContext == null || !_sessionService.IsAuthenticated(httpContext))
+            {
+                // Disconnect if not authenticated
+                Context.Abort();
+                return;
+            }
+
+            var userId = _sessionService.GetUserId(httpContext);
+            var userRole = _sessionService.GetUserRole(httpContext);
 
             if (!string.IsNullOrEmpty(userId))
             {
@@ -41,18 +47,22 @@ namespace LibraryApp.Hubs
             await base.OnConnectedAsync();
         }
 
-        public override async Task OnDisconnectedAsync(Exception exception)
+        public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            var userId = _sessionService.GetUserId(Context.GetHttpContext());
-            var userRole = _sessionService.GetUserRole(Context.GetHttpContext());
-
-            if (!string.IsNullOrEmpty(userId))
+            var httpContext = Context.GetHttpContext();
+            if (httpContext != null)
             {
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"User_{userId}");
-                
-                if (!string.IsNullOrEmpty(userRole))
+                var userId = _sessionService.GetUserId(httpContext);
+                var userRole = _sessionService.GetUserRole(httpContext);
+
+                if (!string.IsNullOrEmpty(userId))
                 {
-                    await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"Role_{userRole}");
+                    await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"User_{userId}");
+                    
+                    if (!string.IsNullOrEmpty(userRole))
+                    {
+                        await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"Role_{userRole}");
+                    }
                 }
             }
 
@@ -62,18 +72,36 @@ namespace LibraryApp.Hubs
         // Method for users to join specific project groups
         public async Task JoinProjectGroup(int projectId)
         {
+            var httpContext = Context.GetHttpContext();
+            if (httpContext == null || !_sessionService.IsAuthenticated(httpContext))
+            {
+                return;
+            }
+
             await Groups.AddToGroupAsync(Context.ConnectionId, $"Project_{projectId}");
         }
 
         public async Task LeaveProjectGroup(int projectId)
         {
+            var httpContext = Context.GetHttpContext();
+            if (httpContext == null || !_sessionService.IsAuthenticated(httpContext))
+            {
+                return;
+            }
+
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"Project_{projectId}");
         }
 
         // Method for real-time status updates
         public async Task UpdateUserStatus(string status)
         {
-            var userId = _sessionService.GetUserId(Context.GetHttpContext());
+            var httpContext = Context.GetHttpContext();
+            if (httpContext == null || !_sessionService.IsAuthenticated(httpContext))
+            {
+                return;
+            }
+
+            var userId = _sessionService.GetUserId(httpContext);
             if (!string.IsNullOrEmpty(userId))
             {
                 await Clients.Others.SendAsync("UserStatusChanged", new

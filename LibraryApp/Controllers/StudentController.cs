@@ -476,6 +476,57 @@ namespace LibraryApp.Controllers
             return File(fileBytes, contentType, fileName);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> ExportData()
+        {
+            var userId = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var student = await _context.Students
+                .Include(s => s.Department)
+                .Include(s => s.Projects)
+                    .ThenInclude(p => p.Supervisor)
+                .FirstOrDefaultAsync(s => s.StudentNumber == userId);
+
+            if (student == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            // Generate CSV content
+            var csv = new System.Text.StringBuilder();
+            csv.AppendLine("Student Data Export Report");
+            csv.AppendLine($"Generated on: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+            csv.AppendLine($"Student: {student.FullName}");
+            csv.AppendLine($"Student Number: {student.StudentNumber}");
+            csv.AppendLine($"Email: {student.Email}");
+            csv.AppendLine($"Department: {student.Department?.Name}");
+            csv.AppendLine($"Enrollment Date: {student.EnrollmentDate:yyyy-MM-dd}");
+            csv.AppendLine($"Last Login: {student.LastLogin?.ToString("yyyy-MM-dd HH:mm:ss") ?? "Never"}");
+            csv.AppendLine();
+            
+            csv.AppendLine("Project History");
+            csv.AppendLine("Title,Supervisor,Status,Submission Date,Grade");
+            
+            foreach (var project in student.Projects.OrderByDescending(p => p.SubmissionDate))
+            {
+                csv.AppendLine($"\"{project.Title}\",\"{project.Supervisor?.DisplayName ?? "N/A"}\",{project.Status},{project.SubmissionDate:yyyy-MM-dd},\"{project.Grade ?? "N/A"}\"");
+            }
+
+            csv.AppendLine();
+            csv.AppendLine("Summary Statistics");
+            csv.AppendLine($"Total Projects: {student.Projects.Count}");
+            csv.AppendLine($"Completed Projects: {student.Projects.Count(p => p.Status == ProjectStatus.Completed || p.Status == ProjectStatus.Defended)}");
+            csv.AppendLine($"In Progress Projects: {student.Projects.Count(p => p.Status == ProjectStatus.InProgress)}");
+            csv.AppendLine($"Average Grade: {(student.Projects.Where(p => !string.IsNullOrEmpty(p.Grade)).Any() ? student.Projects.Where(p => !string.IsNullOrEmpty(p.Grade)).Average(p => double.TryParse(p.Grade, out var grade) ? grade : 0).ToString("F2") : "N/A")}");
+
+            var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
+            return File(bytes, "text/csv", $"student_data_export_{student.StudentNumber}_{DateTime.Now:yyyyMMdd}.csv");
+        }
+
         private string GetContentType(string filePath)
         {
             var extension = Path.GetExtension(filePath).ToLowerInvariant();

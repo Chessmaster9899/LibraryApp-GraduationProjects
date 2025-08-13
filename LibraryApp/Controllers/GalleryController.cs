@@ -251,4 +251,45 @@ public class GalleryController : BaseController
                 .ToListAsync()
         };
     }
+
+    [HttpGet]
+    [RequirePermission(PermissionType.CustomizeGallery)]
+    public async Task<IActionResult> ManageVisibility()
+    {
+        var projects = await _context.Projects
+            .Include(p => p.Student)
+                .ThenInclude(s => s.Department)
+            .Include(p => p.Supervisor)
+            .OrderByDescending(p => p.SubmissionDate)
+            .ToListAsync();
+
+        return Json(new { 
+            success = true, 
+            projects = projects.Select(p => new {
+                id = p.Id,
+                title = p.Title,
+                student = p.Student?.FullName,
+                isVisible = p.IsPubliclyVisible,
+                department = p.Student?.Department?.Name
+            })
+        });
+    }
+
+    [HttpGet] 
+    [RequirePermission(PermissionType.CustomizeGallery)]
+    public IActionResult CustomizeLayout()
+    {
+        // Return layout customization options
+        var layoutOptions = new {
+            success = true,
+            message = "Layout customization options loaded",
+            options = new {
+                themes = new[] { "default", "dark", "modern", "academic" },
+                layouts = new[] { "grid", "list", "card", "masonry" },
+                itemsPerPage = new[] { 6, 9, 12, 18, 24 }
+            }
+        };
+
+        return Json(layoutOptions);
+    }
 }
